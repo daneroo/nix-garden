@@ -6,8 +6,15 @@
   };
 
   outputs = { self, nixpkgs }: {
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
-
+    nixosConfigurations.nix-full = nixpkgs.lib.nixosSystem {
+      system = "aarch64-linux";
+      modules = [
+        ./nixos/configuration.nix
+        ./nixos/hardware-configuration.nix
+        # Any other modules you might have
+      ];
+    };
   };
 }
+
+
