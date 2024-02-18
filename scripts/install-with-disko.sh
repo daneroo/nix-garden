@@ -19,10 +19,6 @@ if [[ -z "$TARGET_HOST" ]]; then
     exit 1
 fi
 
-# if [ ! -e "host/${TARGET_HOST}/disks.nix" ]; then
-#   echo "ERROR! $(basename "${0}") could not find the required host/${TARGET_HOST}/disks.nix"
-#   exit 1
-# fi
 if [ ! -e "${DISKO_NIX}" ]; then
   echo "ERROR! $(basename "${0}") could not find the required ${DISKO_NIX}"
   exit 1
@@ -39,12 +35,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo true
 
     # run disko
-    sudo nix run github:nix-community/disko \
-        --extra-experimental-features "nix-command flakes" \
-        --no-write-lock-file \
-        -- \
-        --mode zap_create_mount \
-        "host/${TARGET_HOST}/disks.nix"
+    sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
+    # sudo nix run github:nix-community/disko \
+    #     --extra-experimental-features "nix-command flakes" \
+    #     --no-write-lock-file \
+    #     -- \
+    #     --mode zap_create_mount \
+    #     "host/${TARGET_HOST}/disks.nix"
 
     # Install NixOS
     echo "NOT Installing NixOS"
