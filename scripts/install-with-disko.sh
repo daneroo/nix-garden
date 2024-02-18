@@ -3,20 +3,19 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-TARGET_HOST="${1:-}"
-TARGET_USER="${2:-daniel}"
-DISKO_NIX="${3:-disks.nix}"
+TARGET_USER="${1:-daniel}"
+DISKO_NIX="${2:-../disks/simple-efi.nix}"
 EXEC_NAME=$(basename "${0}")
-echo "Running $(basename "${0}") user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
+echo "Running ${EXEC_NAME} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
 
 if [ "$(id -u)" -eq 0 ]; then
-  echo "ERROR! $(basename "${0}") should be run as a regular user"
+  echo "ERROR! ${EXEC_NAME} should be run as a regular user"
   exit 1
 fi
 
 
 if [ ! -e "${DISKO_NIX}" ]; then
-  echo "ERROR! $(basename "${0}") could not find the required ${DISKO_NIX}"
+  echo "ERROR! ${EXEC_NAME} could not find the required ${DISKO_NIX}"
   exit 1
 fi
 
@@ -37,6 +36,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # Install NixOS
     echo "NOT Installing NixOS"
     # sudo nixos-install --flake ".#${TARGET_HOST}"
+    sudo nixos-install --flake ".#nix-full"
 
     # Rsync my nix-config to the target install
     echo "NOT Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
