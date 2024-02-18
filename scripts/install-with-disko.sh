@@ -32,7 +32,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # run disko
     sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
-    sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
+    # sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
 
     # Install NixOS
     echo "NOT Installing NixOS"

@@ -1,9 +1,12 @@
+{ disks ? [ "/dev/sda" ], ... }:
 {
+  # from https://github.com/nix-community/disko/blob/master/example/simple-efi.nix
   disko.devices = {
     disk = {
       vdb = {
-        # device = "/dev/disk/by-id/some-disk-id";
+        device = builtins.elemAt disks 0;
         device = "/dev/sda";
+        # device = "/dev/disk/by-id/some-disk-id";
         type = "disk";
         content = {
           type = "gpt";
