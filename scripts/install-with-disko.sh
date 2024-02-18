@@ -34,9 +34,9 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
 
     # Install NixOS
-    echo "NOT Installing NixOS"
+    echo "Installing NixOS"
     # sudo nixos-install --flake ".#${TARGET_HOST}"
-    # sudo nixos-install --flake ".#nix-full"
+    sudo nixos-install --flake ".#nix-full"
 
     # Rsync my nix-config to the target install
     echo "NOT Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
