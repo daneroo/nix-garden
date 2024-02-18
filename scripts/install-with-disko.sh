@@ -6,18 +6,14 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 TARGET_HOST="${1:-}"
 TARGET_USER="${2:-daniel}"
 DISKO_NIX="${3:-disks.nix}"
-
-echo "Running $(basename "${0}") host: ${TARGET_HOST} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
+EXEC_NAME=$(basename "${0}")
+echo "Running $(basename "${0}") user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "ERROR! $(basename "${0}") should be run as a regular user"
   exit 1
 fi
 
-if [[ -z "$TARGET_HOST" ]]; then
-    echo "ERROR! $(basename "${0}") requires a hostname as the first argument"
-    exit 1
-fi
 
 if [ ! -e "${DISKO_NIX}" ]; then
   echo "ERROR! $(basename "${0}") could not find the required ${DISKO_NIX}"
@@ -25,7 +21,7 @@ if [ ! -e "${DISKO_NIX}" ]; then
 fi
 
 
-echo "WARNING! The disks in ${TARGET_HOST} are about to get wiped"
+echo "WARNING! The disks are about to get wiped"
 echo "         NixOS will be re-installed"
 echo "         This is a destructive operation"
 echo
@@ -36,12 +32,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # run disko
     sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
-    # sudo nix run github:nix-community/disko \
-    #     --extra-experimental-features "nix-command flakes" \
-    #     --no-write-lock-file \
-    #     -- \
-    #     --mode zap_create_mount \
-    #     "host/${TARGET_HOST}/disks.nix"
+    sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
 
     # Install NixOS
     echo "NOT Installing NixOS"
