@@ -36,9 +36,9 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-
 ```bash
 nix-shell -p curl wget emacs-nox git
 # clone this repo : NOT working!!!
-git clone https://github.com/daneroo/nix-garden.git
+git clone https://github.com/daneroo/nix-garden
 
-sudo nixos-generate-config --root /path/to/your/directory
+# sudo nixos-generate-config --root /path/to/your/directory
 
 ```
 
