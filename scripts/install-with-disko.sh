@@ -4,7 +4,9 @@ set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 TARGET_HOST="${1:-}"
-TARGET_USER="${2:-jon}"
+TARGET_USER="${2:-daniel}"
+
+echo "Running $(basename "${0}") for ${TARGET_HOST} as ${TARGET_USER}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "ERROR! $(basename "${0}") should be run as a regular user"
@@ -21,11 +23,6 @@ if [ ! -e "host/${TARGET_HOST}/disks.nix" ]; then
   exit 1
 fi
 
-# Check if the machine we're provisioning expects a keyfile to unlock a disk.
-# If it does, generate a new key, and write to a known location.
-if grep -q "data.keyfile" "host/${TARGET_HOST}/disks.nix"; then
-  echo -n "$(head -c32 /dev/random | base64)" > /tmp/data.keyfile
-fi
 
 echo "WARNING! The disks in ${TARGET_HOST} are about to get wiped"
 echo "         NixOS will be re-installed"
@@ -36,6 +33,7 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo true
 
+    # run disko
     sudo nix run github:nix-community/disko \
         --extra-experimental-features "nix-command flakes" \
         --no-write-lock-file \
@@ -43,17 +41,13 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
         --mode zap_create_mount \
         "host/${TARGET_HOST}/disks.nix"
 
-    sudo nixos-install --flake ".#${TARGET_HOST}"
+    # Install NixOS
+    echo "NOT Installing NixOS"
+    # sudo nixos-install --flake ".#${TARGET_HOST}"
 
     # Rsync my nix-config to the target install
-    mkdir -p "/mnt/home/${TARGET_USER}/nixos-config"
-    rsync -a --delete "${DIR}/.." "/mnt/home/${TARGET_USER}/nixos-config"
-
-    # If there is a keyfile for a data disk, put copy it to the root partition and
-    # ensure the permissions are set appropriately.
-    if [[ -f "/tmp/data.keyfile" ]]; then
-      sudo cp /tmp/data.keyfile /mnt/etc/data.keyfile
-      sudo chmod 0400 /mnt/etc/data.keyfile
-    fi
+    echo "NOT Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
+    # mkdir -p "/mnt/home/${TARGET_USER}/nixos-config"
+    # rsync -a --delete "${DIR}/.." "/mnt/home/${TARGET_USER}/nixos-config"
 fi
 

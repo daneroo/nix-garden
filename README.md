@@ -31,7 +31,13 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-
 ### Minimal iso
 
 - Boot with `nixos-minimal-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
-- .. pull a config with disko>
+- .. pull a config with disko
+
+```bash
+nix-shell -p git
+# clone this repo : NOT working!!!
+git clone https://github.com/daneroo/nix-garden.git
+```
 
 ## References
 
@@ -40,6 +46,7 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-
     - disko
     - Borg backup
     - Hyprland Window Manager
+- [disko](https://github.com/nix-community/disko)
 - NixOS Anywhere
   - [nixos-anywhere docs](https://nix-community.github.io/nixos-anywhere/)
   - [nixos-anywhere GitHub](https://github.com/nix-community/nixos-anywhere)
