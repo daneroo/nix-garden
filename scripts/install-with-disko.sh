@@ -5,7 +5,7 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 TARGET_HOST="${1:-}"
 TARGET_USER="${2:-daniel}"
-DISKO_NIX="${3:-./disks.nix}"
+DISKO_NIX="${3:-disks.nix}"
 
 echo "Running $(basename "${0}") host: ${TARGET_HOST} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
 
