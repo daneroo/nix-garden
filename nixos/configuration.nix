@@ -11,6 +11,7 @@
     ];
 
   # Bootloader.
+  # TODO(daneroo): I think I want systemd-boot and EFI only ??
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
   # From the full installer
