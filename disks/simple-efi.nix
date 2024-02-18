@@ -4,8 +4,8 @@
   disko.devices = {
     disk = {
       vdb = {
-        device = builtins.elemAt disks 0;
-        # device = "/dev/sda";
+        device = "/dev/sda";
+        # device = builtins.elemAt disks 0;
         # device = "/dev/disk/by-id/some-disk-id";
         type = "disk";
         content = {
