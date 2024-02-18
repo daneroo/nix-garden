@@ -7,7 +7,7 @@
 
   outputs = { self, nixpkgs }: {
     nixosConfigurations.nix-full = nixpkgs.lib.nixosSystem {
-      system = "aarch64-linux";
+      system = "x86_64-linux";
       modules = [
         ./nixos/configuration.nix
         ./nixos/hardware-configuration.nix
