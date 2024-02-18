@@ -25,7 +25,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 - Run the installation (formats disks, etc)
 
 ```bash
-sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimalhost --extra-experimental-features 'nix-command flakes'
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-lock-file
 ```
 
 ### Minimal iso
