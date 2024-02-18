@@ -4,7 +4,7 @@ set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 TARGET_USER="${1:-daniel}"
-DISKO_NIX="${2:-../disks/simple-efi.nix}"
+DISKO_NIX="${2:-./disks/simple-efi.nix}"
 EXEC_NAME=$(basename "${0}")
 echo "Running ${EXEC_NAME} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
 
