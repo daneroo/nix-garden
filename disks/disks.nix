@@ -1,4 +1,4 @@
-{ disks ? [ "/dev/disk-to-be-replaced" ], ... }: {
+{ disks ? [ "/dev/sda" ], ... }: {
   disko.devices = {
     disk = {
       "disk-to-be-replaced" = {

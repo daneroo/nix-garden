@@ -5,8 +5,9 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 TARGET_HOST="${1:-}"
 TARGET_USER="${2:-daniel}"
+DISKO_NIX="${3:-./disks.nix}"
 
-echo "Running $(basename "${0}") for ${TARGET_HOST} as ${TARGET_USER}"
+echo "Running $(basename "${0}") host: ${TARGET_HOST} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "ERROR! $(basename "${0}") should be run as a regular user"
@@ -18,8 +19,12 @@ if [[ -z "$TARGET_HOST" ]]; then
     exit 1
 fi
 
-if [ ! -e "host/${TARGET_HOST}/disks.nix" ]; then
-  echo "ERROR! $(basename "${0}") could not find the required host/${TARGET_HOST}/disks.nix"
+# if [ ! -e "host/${TARGET_HOST}/disks.nix" ]; then
+#   echo "ERROR! $(basename "${0}") could not find the required host/${TARGET_HOST}/disks.nix"
+#   exit 1
+# fi
+if [ ! -e "${DISKO_NIX}" ]; then
+  echo "ERROR! $(basename "${0}") could not find the required ${DISKO_NIX}"
   exit 1
 fi
 
