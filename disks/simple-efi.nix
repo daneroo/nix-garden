@@ -1,4 +1,4 @@
-{ disks ? [ "/dev/sda" ], ... }:
+# { disks ? [ "/dev/sda" ], ... }:
 {
   # from https://github.com/nix-community/disko/blob/master/example/simple-efi.nix
   disko.devices = {
