@@ -15,7 +15,12 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo true
 
     # run disko
-    echo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
     sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
+
+    # Install NixOS
+    echo "Installing NixOS"
+    # sudo nixos-install --flake ".#${TARGET_HOST}"
+    sudo nixos-install --flake ".#hetzner-cloud"
+
 fi
 
