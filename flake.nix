@@ -7,7 +7,7 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs }: {
+  outputs = { self, nixpkgs, disko }: {
     nixosConfigurations = {
       proxmox = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
