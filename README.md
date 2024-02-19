@@ -34,8 +34,12 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 - Run the installation (formats disks, etc)
 
 ```bash
-
+nix-shell -p emacs-nox
+# edit
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
+
+git clone https://github.com/daneroo/nix-garden
+
 ```
 
 ### Minimal iso
