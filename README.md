@@ -35,7 +35,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 
 ```bash
 
-sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-lock-file
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
 ```
 
 ### Minimal iso
