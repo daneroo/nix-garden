@@ -6,6 +6,14 @@
   };
 
   outputs = { self, nixpkgs }: {
+    nixosConfigurations.post = nixpkgs.lib.nixosSystem {
+      system = "x86_64-linux";
+      modules = [
+        ./post-install/configuration.nix
+        ./post-install/hardware-configuration.nix
+        # Any other modules you might have
+      ];
+    };
     nixosConfigurations.nix-full = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [

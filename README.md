@@ -14,10 +14,19 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 
 ## TODO
 
+2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
+
+- [ ] nixos-anywhere perhaps I will get ideas from there
+  - Need a nix enabled source host
+  - Need an ssh-able target host (unix w/kexec)
 - [ ] bootstrap from minimal/full iso
 - [ ] VSCode / remote development / Extensions
 
 ## Bootstrapping NixOS
+
+### NixOS Anywhere
+
+- Start from a nix enabled source host (Full Install)
 
 ### Full Install
 
@@ -25,6 +34,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 - Run the installation (formats disks, etc)
 
 ```bash
+
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#nix-full --no-write-lock-file
 ```
 
@@ -43,11 +53,14 @@ git clone https://github.com/daneroo/nix-garden
 
 ## References
 
+- [Talk: disko and nixos-anywhere](https://www.youtube.com/watch?v=U_UwzMhixr8)
 - [Youtube: Nerding out about Nix and NixOS with Jon Seager, Canonical](https://www.youtube.com/watch?v=9l-U2NwbKOc&t=1s)
   - [Jon Seager's nixos-config](https://github.com/jnsgruk/nixos-config)
     - disko
     - Borg backup
     - Hyprland Window Manager
+- [Zaney's Install Video](https://www.youtube.com/watch?v=ay0OcWWOm5k)
+  - [Zaney's NixOS Config](https://gitlab.com/Zaney/zaneyos)
 - [disko](https://github.com/nix-community/disko)
 - NixOS Anywhere
   - [nixos-anywhere docs](https://nix-community.github.io/nixos-anywhere/)
