@@ -29,6 +29,12 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 - Start from a nix enabled source host (Full Install)
   - needs flake support
 
+````bash
+cd nixos-anywhere
+nix flake lock
+# nix run github:nix-community/nixos-anywhere -- --flake <path to configuration>#<configuration name> --vm-test
+nix run github:nix-community/nixos-anywhere -- --flake .#hetzner-cloud --vm-test
+
 ### Full Install
 
 - Boot with `nixos-gnome-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
@@ -43,7 +49,7 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock
 # or
 git clone https://github.com/daneroo/nix-garden
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
-```
+````
 
 ### Minimal iso
 
