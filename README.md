@@ -20,6 +20,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
   - [ ] follow jnsgruk directory structure - host/proxmox
     - [ ] refactor install-with-disko.sh
     - [ ] confirm working
+  - [ ] needs a root passwd for root@proxmox
   - [ ] remove `nixos-anywhere/` from this repo
   - [ ] rebuild configuration back up to post-install content
 - [ ] bootstrap from minimal/full iso

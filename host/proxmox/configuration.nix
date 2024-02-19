@@ -17,6 +17,9 @@
     pkgs.gitMinimal
   ];
 
+  # set a passwd with `mkpasswd -m sha-512`
+  users.users.root.hashedPassword = "$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80";
+
   users.users.root.openssh.authorizedKeys.keys = [
     # change this to your ssh key
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p"
