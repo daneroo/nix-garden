@@ -6,6 +6,14 @@
   };
 
   outputs = { self, nixpkgs }: {
+    nixosConfigurations = {
+      proxmox = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./host/proxmox/configuration.nix
+        ];
+      };
+    };
     nixosConfigurations.post = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [

@@ -3,16 +3,17 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-TARGET_USER="${1:-daniel}"
-DISKO_NIX="${2:-./disks/simple-efi.nix}"
+TARGET_HOST="${1:-proxmox}"
+# TARGET_USER="${2:-daniel}"
+DISKO_NIX="host/${TARGET_HOST}/disks.nix"
+
 EXEC_NAME=$(basename "${0}")
-echo "Running ${EXEC_NAME} user: ${TARGET_USER} diskonix: ${DISKO_NIX}"
+echo "Running ${EXEC_NAME} host: ${TARGET_HOST} disko: ${DISKO_NIX}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "ERROR! ${EXEC_NAME} should be run as a regular user"
   exit 1
 fi
-
 
 if [ ! -e "${DISKO_NIX}" ]; then
   echo "ERROR! ${EXEC_NAME} could not find the required ${DISKO_NIX}"
@@ -34,12 +35,11 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
 
     # Install NixOS
-    echo "Installing NixOS"
-    # sudo nixos-install --flake ".#${TARGET_HOST}"
-    sudo nixos-install --flake ".#nix-full"
+    echo "Installing NixOS (${TARGET_HOST})"
+    sudo nixos-install --flake ".#${TARGET_HOST}"
 
     # Rsync my nix-config to the target install
-    echo "NOT Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
+    # echo "Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
     # mkdir -p "/mnt/home/${TARGET_USER}/nixos-config"
     # rsync -a --delete "${DIR}/.." "/mnt/home/${TARGET_USER}/nixos-config"
 fi

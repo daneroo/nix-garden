@@ -16,13 +16,22 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
-- [ ] nixos-anywhere perhaps I will get ideas from there
-  - Need a nix enabled source host
-  - Need an ssh-able target host (unix w/kexec)
+- [ ] refactor nixos-anywhere into a new target (#proxmox)
+  - [ ] follow jnsgruk directory structure - host/proxmox
+    - [ ] refactor install-with-disko.sh
+    - [ ] confirm working
+  - [ ] remove `nixos-anywhere/` from this repo
+  - [ ] rebuild configuration back up to post-install content
 - [ ] bootstrap from minimal/full iso
 - [ ] VSCode / remote development / Extensions
 
 ## Bootstrapping NixOS
+
+Using the configuration example from [nixos-anywhere-examples](https://github.com/nix-community/nixos-anywhere-examples/),
+I managed to get a minimal install working.
+
+- This decouples the disko config from what usually appears in `hardware-configuration.nix`, because
+  disko will add all devices that have a EF02 partition to the list already
 
 ### NixOS Anywhere
 
