@@ -61,6 +61,12 @@
     description = "daniel";
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [];
+    # set a passwd with `mkpasswd -m sha-512`
+    hashedPassword = "$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80";
+    # add an ssh authorized key
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p"
+    ];
   };
 
   # Allow unfree packages

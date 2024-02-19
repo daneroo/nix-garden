@@ -27,6 +27,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 ### NixOS Anywhere
 
 - Start from a nix enabled source host (Full Install)
+  - needs flake support
 
 ### Full Install
 
@@ -35,11 +36,13 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 
 ```bash
 nix-shell -p emacs-nox
-# edit
+emacs /etc/nixos/configuration.nix
+# enable sshd, flakes, add emacs-nox and git
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
 
+# or
 git clone https://github.com/daneroo/nix-garden
-
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
 ```
 
 ### Minimal iso
