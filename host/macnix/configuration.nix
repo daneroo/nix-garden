@@ -18,6 +18,7 @@
     # devices = [ ];
   };
 
+  # TODO(daneroo) regenerate in UTM for macnix
   # These are usually in hardware-configuration.nix
   # They were generateed from nixos-generate-config on proxmox
   # boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];

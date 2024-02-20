@@ -13,14 +13,14 @@
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
-          ./host/proxmox/configuration.nix
+          ./host/proxnix/configuration.nix
         ];
       };
       macnix = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
           disko.nixosModules.disko
-          ./host/proxmox/configuration.nix
+          ./host/macnix/configuration.nix
         ];
       };
     };
