@@ -56,6 +56,8 @@
 
   # Enable the OpenSSH server.
   services.openssh.enable = true;
+  # Enable the QEMU Guest Agent
+  services.qemuGuest.enable = true;
 
   # List packages installed in system profile. To search, run:
   # $ nix search wget
