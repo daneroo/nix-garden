@@ -46,7 +46,14 @@ git clone https://github.com/daneroo/nix-garden
 # sudo nixos-generate-config --root /path/to/your/directory
 ```
 
-## Updating Configuration
+### Custom iso
+
+```bash
+cd minimal-iso
+nix build .#nixosConfigurations.exampleIso.config.system.build.isoImage
+```
+
+## Updating Configuration (WIP)
 
 ```bash
 git clone https://github.com/daneroo/nix-garden
