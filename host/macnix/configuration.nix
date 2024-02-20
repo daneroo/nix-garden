@@ -1,3 +1,4 @@
+# see https://search.nixos.org/options
 { modulesPath, config, lib, pkgs, ... }: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
