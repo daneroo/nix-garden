@@ -3,7 +3,7 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-TARGET_HOST="${1:-proxnix}"
+TARGET_HOST="${1:-proxmox}"
 # TARGET_USER="${2:-daniel}"
 DISKO_NIX="host/${TARGET_HOST}/disks.nix"
 
