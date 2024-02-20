@@ -1,6 +1,8 @@
 {
   description = "Minimal NixOS installation media";
-  inputs.nixos.url = "nixpkgs/23.11-beta";
+  # See https://nixos.wiki/wiki/Creating_a_NixOS_live_CD
+  # inputs.nixos.url = "nixpkgs/23.11-beta";
+  inputs.nixos.url = "nixpkgs/23.11";
   outputs = { self, nixos }: {
     nixosConfigurations = {
       exampleIso = nixos.lib.nixosSystem {
