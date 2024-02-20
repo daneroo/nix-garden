@@ -18,10 +18,10 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 
 - [ ] bootstrap from minimal/full iso
   - [ ] refactor shared config between proxnix and macnix
-- [ ] confirm qemu agent is running
+- [ ] custom iso: <https://nixos.wiki/wiki/Creating_a_NixOS_live_CD>
 - [ ] copy/paste from terminals
 - [ ] alternative disk layouts
-- [ ] describe nix config hierachy (jsngruk)
+- [ ] describe nix config hierarchy (jsngruk)
 - [ ] VSCode / remote development / Extensions
 
 ## Bootstrapping NixOS
@@ -71,6 +71,7 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock
 - [Zaney's Install Video](https://www.youtube.com/watch?v=ay0OcWWOm5k)
   - [Zaney's NixOS Config](https://gitlab.com/Zaney/zaneyos)
 - [disko](https://github.com/nix-community/disko)
+- [Custom installer iso](https://nixos.wiki/wiki/Creating_a_NixOS_live_CD)
 - NixOS Anywhere
   - [nixos-anywhere docs](https://nix-community.github.io/nixos-anywhere/)
   - [nixos-anywhere GitHub](https://github.com/nix-community/nixos-anywhere)
