@@ -36,7 +36,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
 
     # Install NixOS
     echo "Installing NixOS (${TARGET_HOST})"
-    sudo nixos-install --flake ".#${TARGET_HOST}"
+    # make sure  you set passwd/authorizedKeys in configuration.nix if you use --no-root-passwd
+    sudo nixos-install --flake ".#${TARGET_HOST}" --no-root-passwd
 
     # Rsync my nix-config to the target install
     # echo "Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
