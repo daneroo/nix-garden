@@ -48,6 +48,12 @@ git clone https://github.com/daneroo/nix-garden
 
 ### Custom iso
 
+Build our own custom iso
+
+- enable flakes
+- enable ssh
+- show ip on console
+
 ```bash
 cd minimal-iso
 nix build .#nixosConfigurations.exampleIso.config.system.build.isoImage
