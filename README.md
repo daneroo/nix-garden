@@ -20,6 +20,7 @@ This is a testing ground for a repo that will host NixOS flake based configs.
   - [ ] refactor shared config between proxnix and macnix
 - [ ] confirm qemu agent is running
 - [ ] copy/paste from terminals
+- [ ] alternative disk layouts
 - [ ] describe nix config hierachy (jsngruk)
 - [ ] VSCode / remote development / Extensions
 
