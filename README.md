@@ -17,7 +17,9 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
 - [ ] bootstrap from minimal/full iso
-  - [ ] shared config between proxnix and macnix
+  - [ ] refactor shared config between proxnix and macnix
+- [ ] confirm qemu agent is running
+- [ ] copy/paste from terminals
 - [ ] describe nix config hierachy (jsngruk)
 - [ ] VSCode / remote development / Extensions
 
