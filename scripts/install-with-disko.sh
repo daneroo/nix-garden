@@ -3,9 +3,10 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-TARGET_HOST="${1:-proxmox}"
+TARGET_HOST="${1:-proxnix}"
 # TARGET_USER="${2:-daniel}"
-DISKO_NIX="host/${TARGET_HOST}/disks.nix"
+# DISKO_NIX="host/${TARGET_HOST}/disks.nix"
+DISKO_NIX="host/proxmox/disks.nix"
 
 EXEC_NAME=$(basename "${0}")
 echo "Running ${EXEC_NAME} host: ${TARGET_HOST} disko: ${DISKO_NIX}"
