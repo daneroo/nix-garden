@@ -10,6 +10,11 @@
         modules = [
           "${nixos}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
           ({ pkgs, ... }: {
+              # enable flakes
+              nix.settings = {
+                experimental-features = "nix-command flakes";
+              };
+
               environment.systemPackages = with pkgs; [
                 wget
                 curl
