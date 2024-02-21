@@ -19,6 +19,8 @@ This is a testing ground for a repo that will host NixOS flake based configs.
 - [ ] bootstrap from minimal/full iso
   - [ ] refactor shared config between proxnix and macnix
 - [ ] custom iso: <https://nixos.wiki/wiki/Creating_a_NixOS_live_CD>
+  - [ ] make aarch64 minimal iso
+  - [ ] rename isos for clarity
 - [ ] copy/paste from terminals
 - [ ] alternative disk layouts
 - [ ] describe nix config hierarchy (jsngruk)
@@ -56,7 +58,9 @@ Build our own custom iso
 
 ```bash
 cd minimal-iso
-nix build .#nixosConfigurations.exampleIso.config.system.build.isoImage
+nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
+# or
+nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
 ```
 
 ## Updating Configuration (WIP)
