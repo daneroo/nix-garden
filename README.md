@@ -1,12 +1,17 @@
 # NixOS First Steps
 
-These are experiments with NixOS and NixPkgs on MacOS
+These are experiments with Nix; on NixOS, Ubuntu and on MacOS
 
-This is a testing ground for a repo that will host NixOS flake based configs.
+This should eventually replace my dotfiles repo.
 
 ## Objectives
 
+- [ ] Consolidate `nixvana` and `fleek-garden` repos.
+- [ ] TODO alejandra for VSCode
 - Minimal Flake based config
+  - Home Manager
+  - NoxOS config
+  - nix-darwin config
 - Associated bootstrap from fresh NixOS install - one liner!
 - Stretch goals:
   - Injecting secrets (age?)
@@ -61,6 +66,11 @@ cd minimal-iso
 nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
 # or
 nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
+
+# Actually I can even build without cloning
+nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.aarch64Iso.config.system.build.isoImage'
+
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69.5
 ```
 
 ## Updating Configuration (WIP)
