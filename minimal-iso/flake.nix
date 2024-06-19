@@ -1,7 +1,8 @@
 {
-  description = "Minimal NixOS installation media";
+  description = "My Customized Minimal NixOS installation media";
 
-  inputs.nixos.url = "nixpkgs/23.11";
+  # inputs.nixos.url = "nixpkgs/23.11";
+  inputs.nixos.url = "nixpkgs/24.05";
 
   outputs = { self, nixos }:
     let
