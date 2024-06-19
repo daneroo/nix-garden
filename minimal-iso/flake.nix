@@ -44,7 +44,7 @@
                   echo "IPv4 is not yet assigned; Just exit this shell to try again"
                 else
                   echo "Connect with SSH:"
-                  echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@${MYIP}"
+                  echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@$MYIP"
                 fi
               '';
             })
