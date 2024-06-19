@@ -40,8 +40,12 @@
                 fastfetch
                 # show my ip!
                 MYIP=$(ip -4 addr | grep -oP 'inet \K[\d.]+' | grep -v '^127\.0\.0\.1$')
-                echo "Connect with SSH"
-                echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@$MYIP"
+                if [ -z "$MYIP" ]; then
+                  echo "IPv4 is not yet assigned; Just exit this shell to try again"
+                else
+                  echo "Connect with SSH:"
+                  echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@${MYIP}"
+                fi
               '';
             })
           ];

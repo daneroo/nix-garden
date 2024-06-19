@@ -49,6 +49,7 @@ disko will add all devices that have a EF02 partition to the list already
 nix-shell -p git
 # clone this repo : NOT working!!!
 git clone https://github.com/daneroo/nix-garden
+cd nix-garden
 ./scripts/install-with-disko.sh
 # sudo nixos-generate-config --root /path/to/your/directory
 ```
