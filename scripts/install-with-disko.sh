@@ -39,9 +39,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     # make sure  you set passwd/authorizedKeys in configuration.nix if you use --no-root-passwd
     sudo nixos-install --flake ".#${TARGET_HOST}" --no-root-passwd
 
-    # Rsync my nix-config to the target install
-    # echo "Rsyncing nixos-config to /mnt/home/${TARGET_USER}/nixos-config"
-    # mkdir -p "/mnt/home/${TARGET_USER}/nixos-config"
-    # rsync -a --delete "${DIR}/.." "/mnt/home/${TARGET_USER}/nixos-config"
+    # Reboot
+    echo "Remove the installation media (or adjust boot priority) and reboot"
 fi
 

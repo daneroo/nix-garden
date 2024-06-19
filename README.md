@@ -68,7 +68,8 @@ nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
 # or
 nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
 
-# Actually I can even build without cloning
+# Actually I can even build without cloning (if the VM has enough memory i.e. 8GB (aarch64) / 16GB (x86_64))
+nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.x86_64Iso.config.system.build.isoImage'
 nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.aarch64Iso.config.system.build.isoImage'
 
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69.5
