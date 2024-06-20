@@ -72,6 +72,7 @@ nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
 nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.x86_64Iso.config.system.build.isoImage'
 nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.aarch64Iso.config.system.build.isoImage'
 
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.2.92
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69.5
 ```
 
