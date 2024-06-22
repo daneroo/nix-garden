@@ -1,19 +1,24 @@
-# { disks ? [ "/dev/sda" ], ... }:
+# USAGE in your configuration.nix.
+# Update devices to match your hardware.
+# {
+#  imports = [ ./disko-config.nix ];
+#  disko.devices.disk.main.device = "/dev/sda";
+# }
 {
-  # from https://github.com/nix-community/disko/blob/master/example/simple-efi.nix
-  disko.devices = {
+  config.disko.devices = {
     disk = {
-      vdb = {
-        device = "/dev/sda";
-        # device = builtins.elemAt disks 0;
-        # device = "/dev/disk/by-id/some-disk-id";
+      main = {
         type = "disk";
         content = {
           type = "gpt";
           partitions = {
+            boot = {
+              size = "1M";
+              type = "EF02"; # for grub MBR
+            };
             ESP = {
+              size = "512M";
               type = "EF00";
-              size = "500M";
               content = {
                 type = "filesystem";
                 format = "vfat";

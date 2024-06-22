@@ -1,5 +1,5 @@
 {
-  description = "nix-garden exeperiments NixOS flake";
+  description = "nix-garden experiments NixOS flake";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
@@ -7,24 +7,24 @@
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko }: {
+  outputs = { self, nixpkgs, disko, ... }: {
     nixosConfigurations = {
-      proxnix = nixpkgs.lib.nixosSystem {
+      minimal-x86_64 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./host/proxnix/configuration.nix
-        ];
+        specialArgs = {
+          diskDevice = "/dev/sda"; # Provide the disk device as parameter
+          hostName = "x86_64-minimal"; # Provide the hostname as parameter
+        };
+        modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
-      macnix = nixpkgs.lib.nixosSystem {
+      minimal-aarch64 = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
-        modules = [
-          disko.nixosModules.disko
-          ./host/macnix/configuration.nix
-        ];
+        specialArgs = {
+          diskDevice = "/dev/vda"; # Provide the disk device as parameter
+          hostName = "aarch64-minimal"; # Provide the hostname as parameter
+        };
+        modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
     };
   };
 }
-
-

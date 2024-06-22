@@ -2,61 +2,97 @@
 
 These are experiments with Nix; on NixOS, Ubuntu and on MacOS
 
-This should eventually replace my dotfiles repo.
+I am embarking on my Mix/NixOS journey, and I need to make a wholistic plan.
+So far I have done learning experiments, enough to decide that this is the way forward for me.
+I chose nix to eventually replace:
 
-## Objectives
+- My Homelab Infrastructure as Code
+- My Homebrew Setup on MacOS (multiple systems)
 
-- [ ] Consolidate `nixvana` and `fleek-garden` repos.
-- [ ] TODO alejandra for VSCode
-- Minimal Flake based config
-  - Home Manager
-  - NoxOS config
-  - nix-darwin config
-- Associated bootstrap from fresh NixOS install - one liner!
-- Stretch goals:
-  - Injecting secrets (age?)
-  - Disk formatting and partitioning (disko)
+This repository should contain:
+
+- Phase 1: Bootstrapping processes (Determinate Systems installer)
+  - Installing nix (on MacOS, Ubuntu, NixOS)
+  - Minimal boot iso for NixOS - including (disko) disk formatting
+  - one-liner to bootstrap on NixOS, Ubuntu, MacOS
+- Phase 2: User Level: (multiple OSs/architectures/hosts)
+  - home-manager
+  - using secrets (age)
+  - updating, checking for updates and planning
+- Phase 3: Project Level: (multiple OSs/architectures/hosts)
+  - (direnv, use flakes)
+  - updating, checking for updates and planning
+- Phase 4: System Level: (multiple OSs/architectures/hosts)
+  - MacOS System configs (nix-darwin)
+  - NixOS System configs (NixOs)
+  - updating, checking for updates and planning
 
 ## TODO
 
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
-- [ ] bootstrap from minimal/full iso
-  - [ ] refactor shared config between proxnix and macnix
-- [ ] custom iso: <https://nixos.wiki/wiki/Creating_a_NixOS_live_CD>
-  - [ ] make aarch64 minimal iso
-  - [ ] rename isos for clarity
-- [ ] copy/paste from terminals
-- [ ] alternative disk layouts
-- [ ] describe nix config hierarchy (jsngruk)
+- [ ] NixOS: bootstrap from minimal/full iso
+- [ ] alternative (ZFS) disk layouts
 - [ ] VSCode / remote development / Extensions
+  - [ ] TODO alejandra for VSCode
+- Phase 1: bootstraping
+  - [ ] NixOS
+    - [ ] rename proxnix and macnix: minimal-_arch_
+    - [ ] fix disko usage (zfs)
+    - [ ] wrap install script in a flake
+  - [ ] MacOS (UTM and Proxmox)
+- Phases 2-4
+  - [ ] Home-manager
+    - [ ] Consolidate `fleek-garden` repo.
+  - [ ] direnv - CodeSpaces
+    - [ ] Consolidate `nixvana`repo.
+  - [ ] nix-darwin
+  - [ ] nixos
 
-## Bootstrapping NixOS
+## Phase 1: Bootstrapping Nix
 
-Using the configuration example from [nixos-anywhere-examples](https://github.com/nix-community/nixos-anywhere-examples/),
-I managed to get a minimal install working.
+### MacOS
 
-This decouples the disko config from what usually appears in `hardware-configuration.nix`, because
-disko will add all devices that have a EF02 partition to the list already
+We will be using [Determinate Nix Installer](https://zero-to-nix.com/concepts/nix-installer) for MacOS (and perhaps Ubuntu, if we keep that)
 
-### Minimal iso
+### NixOS
+
+Whereas for NixOS we will boot from a customized minimal boot iso, and use disko to format the disk.
+
+The minimal iso is built with a custom configuration, that includes sshd enabled with an authorized key for `galois`.
+The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 
 - Boot with either minimal iso
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-x86_64-linux.iso`
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
+- Trigger the boostrap script (requires git clone for now)
 
 ```bash
 nix-shell -p git
 # clone this repo : NOT working!!!
 git clone https://github.com/daneroo/nix-garden
 cd nix-garden
-./scripts/install-with-disko.sh
-# sudo nixos-generate-config --root /path/to/your/directory
+./scripts/install-with-disko.sh # proxnix or macnix
 ```
 
-### Custom iso
+- Disko examples: <https://github.com/nix-community/disko/tree/master/example>
+  Using the configuration example from [nixos-anywhere-examples](https://github.com/nix-community/nixos-anywhere-examples/),
+  I managed to get a minimal install working.
 
-Build our own custom iso
+This decouples the disko config from what usually appears in `hardware-configuration.nix`, because
+disko will add all devices that have a EF02 partition to the list already
+
+### NixOS Custom Minimal iso
+
+This is how we built our own custom iso, it's purpose is to be able to boot and install on a new machine.
+It is derived from the NixOS [cd-dvd/installation-cd-minimal.nix](https://github.com/NixOS/nixpkgs/blob/24.05/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix), and in addition:
+
+The image are rename with `my-` prefix but otherwise keep the name of the artifact from the derivation. i.e.
+
+```txt
+my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso
+my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso.iso
+```
 
 - enable flakes
 - enable ssh
@@ -92,6 +128,11 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock
 
 ## References
 
+- [Erase Your Darlings](https://grahamc.com/blog/erase-your-darlings/)
+  - [Associated ZFS disko config](https://github.com/nix-community/disko-templates/blob/main/zfs-impermanence/disko-config.nix)
+- Disko examples:
+  - <https://github.com/nix-community/disko/tree/master/example>
+  - <https://github.com/nix-community/disko-templates>
 - [Talk: disko and nixos-anywhere](https://www.youtube.com/watch?v=U_UwzMhixr8)
 - [Youtube: Nerding out about Nix and NixOS with Jon Seager, Canonical](https://www.youtube.com/watch?v=9l-U2NwbKOc&t=1s)
   - [Jon Seager's nixos-config](https://github.com/jnsgruk/nixos-config)

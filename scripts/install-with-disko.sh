@@ -3,8 +3,12 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-TARGET_HOST="${1:-proxnix}"
-# TARGET_USER="${2:-daniel}"
+
+TARGET_HOST="${1}"
+if [ -z "${TARGET_HOST}" ]; then
+  echo "ERROR! ${0} requires a target host as the first argument"
+  exit 1
+fi
 DISKO_NIX="host/${TARGET_HOST}/disks.nix"
 
 EXEC_NAME=$(basename "${0}")
@@ -30,9 +34,16 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo true
 
+    # Usage: diskko [options] disk-config.nix
+    # or disko [options] --flake github:somebody/somewhere#disk-config
+
+    # set the mode, either format, mount or disko
+    #   format: create partition tables, zpools, lvms, raids and filesystems
+    #   mount: mount the partition at the specified root-mountpoint
+    #   disko: first unmount and destroy all filesystems on the disks we want to format, then run the create and mount mode
+
     # run disko
     sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
-    # sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode zap_create_mount "${DISKO_NIX}"
 
     # Install NixOS
     echo "Installing NixOS (${TARGET_HOST})"
