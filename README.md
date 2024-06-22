@@ -31,7 +31,9 @@ This repository should contain:
 
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
-- [ ] NixOS: bootstrap from minimal/full iso
+- [ ] NixOS: bootstrap from minimal iso
+  - [ ] test on proxmox (x86_64)
+  - [ ] test on UTM (aarch64)
 - [ ] alternative (ZFS) disk layouts
 - [ ] VSCode / remote development / Extensions
   - [ ] TODO alejandra for VSCode

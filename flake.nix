@@ -13,7 +13,7 @@
         system = "x86_64-linux";
         specialArgs = {
           diskDevice = "/dev/sda"; # Provide the disk device as parameter
-          hostName = "x86_64-minimal"; # Provide the hostname as parameter
+          hostName = "minimal-x86_64"; # Provide the hostname as parameter
         };
         modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
@@ -21,7 +21,7 @@
         system = "aarch64-linux";
         specialArgs = {
           diskDevice = "/dev/vda"; # Provide the disk device as parameter
-          hostName = "aarch64-minimal"; # Provide the hostname as parameter
+          hostName = "minimal-aarch64"; # Provide the hostname as parameter
         };
         modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
