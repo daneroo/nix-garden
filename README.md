@@ -82,6 +82,19 @@ cd nix-garden
 This decouples the disko config from what usually appears in `hardware-configuration.nix`, because
 disko will add all devices that have a EF02 partition to the list already
 
+```bash
+nix flake show github:daneroo/nix-garden
+nix flake show github:daneroo/nix-garden --json | jq '.nixosConfigurations | keys'
+
+# With flakes, disk-config is discovered first under the .diskoConfigurations top level attribute
+# or else from the disko module of a NixOS configuration of that name under .nixosConfigurations.
+sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-aarch64
+sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-x86_64
+# and installation part
+sudo nixos-install --flake github:daneroo/nix-garden#minimal-aarch64 --no-root-passwd
+sudo nixos-install --flake github:daneroo/nix-garden#minimal-x86_64 --no-root-passwd
+```
+
 ### NixOS Custom Minimal iso
 
 This is how we built our own custom iso, it's purpose is to be able to boot and install on a new machine.

@@ -3,26 +3,27 @@
 set -euo pipefail
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
+FLAKE_URI="github:daneroo/nix-garden"
 
 TARGET_HOST="${1}"
 if [ -z "${TARGET_HOST}" ]; then
   echo "ERROR! ${0} requires a target host as the first argument"
+  echo "Shouls be one of:"
+  # nix flake show ${FLAKE_URI} --json | jq '.nixosConfigurations | keys'
+  nix flake show ${FLAKE_URI}
   exit 1
 fi
-DISKO_NIX="host/${TARGET_HOST}/disks.nix"
 
 EXEC_NAME=$(basename "${0}")
-echo "Running ${EXEC_NAME} host: ${TARGET_HOST} disko: ${DISKO_NIX}"
+FLAKE_OUTPUT_REF="${FLAKE_URI}#${TARGET_HOST}"
+echo "Running ${EXEC_NAME} flake: ${FLAKE_URI} host: ${TARGET_HOST}"
+echo " Flake output reference: ${FLAKE_OUTPUT_REF}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "ERROR! ${EXEC_NAME} should be run as a regular user"
   exit 1
 fi
 
-if [ ! -e "${DISKO_NIX}" ]; then
-  echo "ERROR! ${EXEC_NAME} could not find the required ${DISKO_NIX}"
-  exit 1
-fi
 
 
 echo "WARNING! The disks are about to get wiped"
@@ -34,21 +35,14 @@ echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     sudo true
 
-    # Usage: diskko [options] disk-config.nix
-    # or disko [options] --flake github:somebody/somewhere#disk-config
-
-    # set the mode, either format, mount or disko
-    #   format: create partition tables, zpools, lvms, raids and filesystems
-    #   mount: mount the partition at the specified root-mountpoint
-    #   disko: first unmount and destroy all filesystems on the disks we want to format, then run the create and mount mode
-
-    # run disko
-    sudo nix --experimental-features "nix-command flakes" run github:nix-community/disko -- --mode disko "${DISKO_NIX}"
+    # nix run github:nix-community/disko -- --help
+    sudo nix run github:nix-community/disko -- --mode disko --flake ${FLAKE_OUTPUT_REF}
 
     # Install NixOS
     echo "Installing NixOS (${TARGET_HOST})"
     # make sure  you set passwd/authorizedKeys in configuration.nix if you use --no-root-passwd
-    sudo nixos-install --flake ".#${TARGET_HOST}" --no-root-passwd
+    # sudo nixos-install --flake ".#${TARGET_HOST}" --no-root-passwd
+    sudo nixos-install --flake ${FLAKE_OUTPUT_REF} --no-root-passwd
 
     # Reboot
     echo "Remove the installation media (or adjust boot priority) and reboot"
