@@ -9,19 +9,19 @@
 
   outputs = { self, nixpkgs, disko, ... }: {
     nixosConfigurations = {
-      minimal-x86_64 = nixpkgs.lib.nixosSystem {
+      minimal-amd64 = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         specialArgs = {
           diskDevice = "/dev/sda"; # Provide the disk device as parameter
-          hostName = "minimal-x86_64"; # Provide the hostname as parameter
+          hostName = "minimal-amd64"; # Provide the hostname as parameter
         };
         modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
-      minimal-aarch64 = nixpkgs.lib.nixosSystem {
+      minimal-arm64 = nixpkgs.lib.nixosSystem {
         system = "aarch64-linux";
         specialArgs = {
           diskDevice = "/dev/vda"; # Provide the disk device as parameter
-          hostName = "minimal-aarch64"; # Provide the hostname as parameter
+          hostName = "minimal-arm64"; # Provide the hostname as parameter
         };
         modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
       };
