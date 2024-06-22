@@ -74,7 +74,8 @@ nix-shell -p git
 # clone this repo : NOT working!!!
 git clone https://github.com/daneroo/nix-garden
 cd nix-garden
-./scripts/install-with-disko.sh # proxnix or macnix
+./scripts/install-with-disko.sh # minimal-amd64 minimal-arm64
+
 ```
 
 - Disko examples: <https://github.com/nix-community/disko/tree/master/example>
