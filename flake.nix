@@ -2,29 +2,48 @@
   description = "nix-garden experiments NixOS flake";
 
   inputs = {
+    # flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, ... }: {
-    nixosConfigurations = {
-      minimal-amd64 = nixpkgs.lib.nixosSystem {
-        system = "x86_64-linux";
-        specialArgs = {
-          diskDevice = "/dev/sda"; # Provide the disk device as parameter
-          hostName = "minimal-amd64"; # Provide the hostname as parameter
+  outputs = { self, nixpkgs, disko, flake-utils, ... }:
+    let
+      nixosSystems = [ "x86_64-linux" "aarch64-linux" ];
+
+      nixosConfigSpecialArgs = {
+        "x86_64-linux" = {
+          diskDevice = "/dev/sda";
+          hostName = "minimal-amd64";
         };
-        modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
+        "aarch64-linux" = {
+          diskDevice = "/dev/vda";
+          hostName = "minimal-arm64";
+        };
       };
-      minimal-arm64 = nixpkgs.lib.nixosSystem {
-        system = "aarch64-linux";
-        specialArgs = {
-          diskDevice = "/dev/vda"; # Provide the disk device as parameter
-          hostName = "minimal-arm64"; # Provide the hostname as parameter
+
+      makeNixosConfig = system:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          specialArgs = nixosConfigSpecialArgs.${system};
+          modules =
+            [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
         };
-        modules = [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
+    in {
+      # for some reason, flake-utils.lib.eachSystem nixosSystems is not working here
+      nixosConfigurations = {
+        minimal-amd64 = makeNixosConfig "x86_64-linux";
+        minimal-arm64 = makeNixosConfig "aarch64-linux";
+      };
+
+      packages = {
+        x86_64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
+          { };
+        aarch64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
+          { };
       };
     };
-  };
 }
