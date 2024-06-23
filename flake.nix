@@ -5,9 +5,11 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
+    scripts.url = "path:./scripts";
+    scripts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, ... }:
+  outputs = { self, nixpkgs, disko, scripts, ... }:
     let
       nixosSystems = [ "x86_64-linux" "aarch64-linux" ];
 
@@ -42,19 +44,8 @@
       #   ${nixosConfigSpecialArgs.${system}.hostName} = makeNixosConfig system;
       # });
 
-      packages = forAllNixOSSystems (system: {
-        nixos-disko-format-install =
-          nixpkgs.legacyPackages.${system}.callPackage ./scripts/default.nix
-          { };
-      });
-
       apps = forAllNixOSSystems (system: {
-        nixos-disko-format-install = {
-          type = "app";
-          program = "${
-              self.packages.${system}.nixos-disko-format-install
-            }/bin/nixos-disko-format-install";
-        };
+        nixos-disko-format-install = scripts.apps.${system}.default;
       });
 
     };

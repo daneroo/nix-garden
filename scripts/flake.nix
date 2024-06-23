@@ -1,0 +1,26 @@
+{
+  description = "NixOS Disko Format Install Script";
+
+  inputs = { nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11"; };
+
+  outputs = { self, nixpkgs }:
+    let
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+    in {
+      packages = forAllSystems (system:
+        let pkgs = nixpkgs.legacyPackages.${system};
+        in {
+          default = pkgs.writeScriptBin "nixos-disko-format-install"
+            (builtins.readFile ./nixos-disko-format-install.sh);
+        });
+
+      apps = forAllSystems (system: {
+        default = {
+          type = "app";
+          program =
+            "${self.packages.${system}.default}/bin/nixos-disko-format-install";
+        };
+      });
+    };
+}
