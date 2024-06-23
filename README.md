@@ -68,14 +68,14 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-x86_64-linux.iso`
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
 - Trigger the boostrap script (requires git clone for now)
-  - `nixos-disko-format-install`
+  - `disko-format-install`
 
 ```bash
 #  trigger install
-nix flake update github:daneroo/nix-garden?dir=scripts
-nix flake show github:daneroo/nix-garden?dir=scripts
+nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
+nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install
 
-nix run github:daneroo/nix-garden?dir=scripts
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install
 ```
 
 - Disko examples: <https://github.com/nix-community/disko/tree/master/example>

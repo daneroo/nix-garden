@@ -44,10 +44,5 @@
       #   ${nixosConfigSpecialArgs.${system}.hostName} = makeNixosConfig system;
       # });
 
-      # This does not work
-      # apps = forAllNixOSSystems (system: {
-      #   nixos-disko-format-install = scripts.apps.${system}.default;
-      # });
-
     };
 }
