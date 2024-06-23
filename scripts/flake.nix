@@ -11,10 +11,17 @@
       packages = forAllSystems (system:
         let pkgs = nixpkgs.legacyPackages.${system};
         in {
-          default = pkgs.writeScriptBin "nixos-disko-format-install" {
-            text = builtins.readFile ./nixos-disko-format-install.sh;
-            buildInputs =
-              [ pkgs.jq pkgs.gum ]; # Ensuring dependencies are included
+          default = pkgs.symlinkJoin {
+            name = "nixos-disko-format-install";
+            paths = [
+              (pkgs.writeShellScriptBin "nixos-disko-format-install"
+                (builtins.readFile ./nixos-disko-format-install.sh))
+            ];
+            buildInputs = [ pkgs.makeWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/nixos-disko-format-install \
+                --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.jq pkgs.gum ]}
+            '';
           };
         });
 
