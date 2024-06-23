@@ -30,33 +30,32 @@
             [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
         };
 
-      forAllSystems = nixpkgs.lib.genAttrs nixosSystems;
+      forAllNixOSSystems = nixpkgs.lib.genAttrs nixosSystems;
 
     in {
       nixosConfigurations = {
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
+      # this works but has system as key... I prefer my own names as above
+      # nixosConfigurations = forAllNixOSSystems (system: {
+      #   ${nixosConfigSpecialArgs.${system}.hostName} = makeNixosConfig system;
+      # });
 
-      packages = {
-        x86_64-linux.nixos-disko-format-install =
-          nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
+      packages = forAllNixOSSystems (system: {
+        nixos-disko-format-install =
+          nixpkgs.legacyPackages.${system}.callPackage ./scripts/default.nix
           { };
-        aarch64-linux.nixos-disko-format-install =
-          nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
-          { };
-      };
-      apps = {
-        x86_64-linux.nixos-disko-format-install = {
+      });
+
+      apps = forAllNixOSSystems (system: {
+        nixos-disko-format-install = {
           type = "app";
-          program =
-            "${self.packages.x86_64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
+          program = "${
+              self.packages.${system}.nixos-disko-format-install
+            }/bin/nixos-disko-format-install";
         };
-        aarch64-linux.nixos-disko-format-install = {
-          type = "app";
-          program =
-            "${self.packages.aarch64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
-        };
-      };
+      });
+
     };
 }
