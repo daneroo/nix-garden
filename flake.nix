@@ -9,7 +9,7 @@
     # scripts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, scripts, ... }:
+  outputs = { self, nixpkgs, disko, ... }:
     let
       nixosSystems = [ "x86_64-linux" "aarch64-linux" ];
 

@@ -39,25 +39,7 @@
     "root": {
       "inputs": {
         "disko": "disko",
-        "nixpkgs": "nixpkgs",
-        "scripts": "scripts"
-      }
-    },
-    "scripts": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-hvqI9aokIpnEfz1b7spw/LejblPBoy9oTWEToF3Vg5I=",
-        "path": "./scripts",
-        "type": "path"
-      },
-      "original": {
-        "path": "./scripts",
-        "type": "path"
+        "nixpkgs": "nixpkgs"
       }
     }
   },
