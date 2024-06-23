@@ -38,23 +38,25 @@
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
 
-      # packages = {
-      #   x86_64-linux.nixos-disko-format-install =
-      #     nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
-      #     { };
-      #   aarch64-linux.nixos-disko-format-install =
-      #     nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
-      #     { };
-      # };
-      apps = forAllSystems (system: {
-        nixos-disko-format-install = {
+      packages = {
+        x86_64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
+          { };
+        aarch64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
+          { };
+      };
+      apps = {
+        x86_64-linux.nixos-disko-format-install = {
           type = "app";
-          program = nixpkgs.legacyPackages.${system}.writeShellApplication {
-            name = "nixos-disko-format-install";
-            runtimeInputs = with nixpkgs.legacyPackages.${system}; [ jq gum ];
-            text = builtins.readFile ./scripts/nixos-disko-format-install.sh;
-          };
+          program =
+            "${self.packages.x86_64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
         };
-      });
+        aarch64-linux.nixos-disko-format-install = {
+          type = "app";
+          program =
+            "${self.packages.aarch64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
+        };
+      };
     };
 }
