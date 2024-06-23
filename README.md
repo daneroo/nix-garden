@@ -73,9 +73,9 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 ```bash
 #  trigger install
 nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
-nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install
+nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install # minimal-amd64 or minimal-arm64
 ```
 
 - Disko examples: <https://github.com/nix-community/disko/tree/master/example>
