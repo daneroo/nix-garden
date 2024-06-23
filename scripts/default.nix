@@ -8,11 +8,8 @@ stdenv.mkDerivation {
 
   buildInputs = [ jq gum ];  # Dependencies
 
-  installPhase = ''
-    mkdir -p $out/bin
-    cp $src $out/bin/nixos-disko-format-install
-    chmod +x $out/bin/nixos-disko-format-install
-  '';
+# Directly specify the installation command in one line
+  installPhase = "install -D -m0755 ${./nixos-disko-format-install.sh} $out/bin/nixos-disko-format-install";
 
   meta = {
     description = "A script to format disks with disko and install NixOS";
