@@ -9,8 +9,10 @@ TARGET_HOST="${1}"
 if [ -z "${TARGET_HOST}" ]; then
   echo "ERROR! ${0} requires a target host as the first argument"
   echo "Shouls be one of:"
-  # nix flake show ${FLAKE_URI} --json | jq '.nixosConfigurations | keys'
   nix flake show ${FLAKE_URI}
+  echo "Shouls be one of: (jq)"
+  nix flake show ${FLAKE_URI} --json | jq '.nixosConfigurations | keys'
+  echo "$(gum --version)"
   exit 1
 fi
 
