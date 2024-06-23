@@ -2,13 +2,12 @@
   description = "nix-garden experiments NixOS flake";
 
   inputs = {
-    # flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, flake-utils, ... }:
+  outputs = { self, nixpkgs, disko, ... }:
     let
       nixosSystems = [ "x86_64-linux" "aarch64-linux" ];
 
@@ -30,32 +29,32 @@
           modules =
             [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
         };
+
+      forAllSystems = nixpkgs.lib.genAttrs nixosSystems;
+
     in {
-      # for some reason, flake-utils.lib.eachSystem nixosSystems is not working here
       nixosConfigurations = {
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
 
-      packages = {
-        x86_64-linux.nixos-disko-format-install =
-          nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
-          { };
-        aarch64-linux.nixos-disko-format-install =
-          nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
-          { };
-      };
-      apps = {
-        x86_64-linux.nixos-disko-format-install = {
+      # packages = {
+      #   x86_64-linux.nixos-disko-format-install =
+      #     nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
+      #     { };
+      #   aarch64-linux.nixos-disko-format-install =
+      #     nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
+      #     { };
+      # };
+      apps = forAllSystems (system: {
+        nixos-disko-format-install = {
           type = "app";
-          program =
-            "${self.packages.x86_64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
+          program = nixpkgs.legacyPackages.${system}.writeShellApplication {
+            name = "nixos-disko-format-install";
+            runtimeInputs = with nixpkgs.legacyPackages.${system}; [ jq gum ];
+            text = builtins.readFile ./scripts/nixos-disko-format-install.sh;
+          };
         };
-        aarch64-linux.nixos-disko-format-install = {
-          type = "app";
-          program =
-            "${self.packages.aarch64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
-        };
-      };
+      });
     };
 }
