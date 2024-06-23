@@ -11,20 +11,15 @@
       packages = forAllSystems (system:
         let pkgs = nixpkgs.legacyPackages.${system};
         in {
-          nixos-disko-format-install =
-            pkgs.writeScriptBin "nixos-disko-format-install"
-            (builtins.readFile ./nixos-disko-format-install.sh) {
-              runtimeInputs =
-                [ pkgs.jq pkgs.gum ]; # Ensuring dependencies are included
-            };
+          default = pkgs.writeScriptBin "nixos-disko-format-install"
+            (builtins.readFile ./nixos-disko-format-install.sh);
         });
 
       apps = forAllSystems (system: {
-        nixos-disko-format-install = {
+        default = {
           type = "app";
-          program = "${
-              self.packages.${system}.nixos-disko-format-install
-            }/bin/nixos-disko-format-install";
+          program =
+            "${self.packages.${system}.default}/bin/nixos-disko-format-install";
         };
       });
     };
