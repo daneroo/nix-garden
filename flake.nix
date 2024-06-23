@@ -37,14 +37,14 @@
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
 
-      # packages = {
-      #   x86_64-linux.nixos-disko-format-install =
-      #     nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
-      #     { };
-      #   aarch64-linux.nixos-disko-format-install =
-      #     nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
-      #     { };
-      # };
+      packages = {
+        x86_64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts/default.nix
+          { };
+        aarch64-linux.nixos-disko-format-install =
+          nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
+          { };
+      };
       apps = {
         x86_64-linux.nixos-disko-format-install = {
           type = "app";
