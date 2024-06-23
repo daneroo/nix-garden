@@ -12,14 +12,14 @@
         let pkgs = nixpkgs.legacyPackages.${system};
         in {
           default = pkgs.symlinkJoin {
-            name = "nixos-disko-format-install";
+            name = "disko-format-install";
             paths = [
-              (pkgs.writeShellScriptBin "nixos-disko-format-install"
-                (builtins.readFile ./nixos-disko-format-install.sh))
+              (pkgs.writeShellScriptBin "disko-format-install"
+                (builtins.readFile ./disko-format-install.sh))
             ];
             buildInputs = [ pkgs.makeWrapper ];
             postBuild = ''
-              wrapProgram $out/bin/nixos-disko-format-install \
+              wrapProgram $out/bin/disko-format-install \
                 --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.jq pkgs.gum ]}
             '';
           };
@@ -29,7 +29,7 @@
         default = {
           type = "app";
           program =
-            "${self.packages.${system}.default}/bin/nixos-disko-format-install";
+            "${self.packages.${system}.default}/bin/disko-format-install";
         };
       });
     };
