@@ -5,8 +5,8 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixos-23.11";
     disko.url = "github:nix-community/disko";
     disko.inputs.nixpkgs.follows = "nixpkgs";
-    scripts.url = "path:./scripts";
-    scripts.inputs.nixpkgs.follows = "nixpkgs";
+    # scripts.url = "path:./scripts";
+    # scripts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = { self, nixpkgs, disko, scripts, ... }:
@@ -44,9 +44,10 @@
       #   ${nixosConfigSpecialArgs.${system}.hostName} = makeNixosConfig system;
       # });
 
-      apps = forAllNixOSSystems (system: {
-        nixos-disko-format-install = scripts.apps.${system}.default;
-      });
+      # This does not work
+      # apps = forAllNixOSSystems (system: {
+      #   nixos-disko-format-install = scripts.apps.${system}.default;
+      # });
 
     };
 }
