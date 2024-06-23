@@ -12,8 +12,8 @@
         let pkgs = nixpkgs.legacyPackages.${system};
         in {
           nixos-disko-format-install =
-            pkgs.writeScriptBin "nixos-disko-format-install" {
-              text = builtins.readFile ./nixos-disko-format-install.sh;
+            pkgs.writeScriptBin "nixos-disko-format-install"
+            (builtins.readFile ./nixos-disko-format-install.sh) {
               runtimeInputs =
                 [ pkgs.jq pkgs.gum ]; # Ensuring dependencies are included
             };
