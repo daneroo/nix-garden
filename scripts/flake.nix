@@ -13,7 +13,7 @@
         in {
           default = pkgs.writeScriptBin "nixos-disko-format-install" {
             text = builtins.readFile ./nixos-disko-format-install.sh;
-            runtimeInputs =
+            buildInputs =
               [ pkgs.jq pkgs.gum ]; # Ensuring dependencies are included
           };
         });
