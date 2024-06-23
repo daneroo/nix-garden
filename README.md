@@ -71,8 +71,9 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 
 ```bash
 #  new way:
+nix flake update github:daneroo/nix-garden
 nix flake show github:daneroo/nix-garden
-nix build github:daneroo/nix-garden#packages.x86_64-linux.nixos-disko-format-install
+nix run github:daneroo/nix-garden#nixos-disko-format-install coco
 
 # old way
 nix-shell -p git
