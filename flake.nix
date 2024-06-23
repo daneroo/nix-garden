@@ -45,5 +45,17 @@
           nixpkgs.legacyPackages.aarch64-linux.callPackage ./scripts/default.nix
           { };
       };
+      apps = {
+        x86_64-linux.nixos-disko-format-install = {
+          type = "app";
+          program =
+            "${self.packages.x86_64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
+        };
+        aarch64-linux.nixos-disko-format-install = {
+          type = "app";
+          program =
+            "${self.packages.aarch64-linux.nixos-disko-format-install}/bin/nixos-disko-format-install";
+        };
+      };
     };
 }

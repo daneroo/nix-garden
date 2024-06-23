@@ -70,7 +70,11 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 - Trigger the boostrap script (requires git clone for now)
 
 ```bash
+#  new way:
+nix flake show github:daneroo/nix-garden
+nix build github:daneroo/nix-garden#packages.x86_64-linux.nixos-disko-format-install
 
+# old way
 nix-shell -p git
 # clone this repo : NOT working!!!
 git clone https://github.com/daneroo/nix-garden
