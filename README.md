@@ -32,6 +32,7 @@ This repository should contain:
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
 - [ ] NixOS: bootstrap from minimal iso
+  - add guard to `disko-format-install` with gum jq (constrain to proper arch)
   - [ ] test on proxmox (x86_64)
   - [ ] test on UTM (aarch64)
 - [ ] alternative (ZFS) disk layouts
