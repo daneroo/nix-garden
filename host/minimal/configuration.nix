@@ -14,20 +14,37 @@
   nix.settings.experimental-features = "nix-command flakes";
 
   # TODO(daneroo): Let's circle back and understand our options here, but this works
-  boot.loader.grub = {
-    efiSupport = true;
-    efiInstallAsRemovable = true;
-    # no need to set devices, disko will add all devices that have a EF02 partition to the list already
-    # devices = [ ];
-  };
+  # REPLACED grub with systemd-boot
+  # boot.loader.grub = {
+  #   efiSupport = true;
+  #   efiInstallAsRemovable = true;
+  #   # no need to set devices, disko will add all devices that have a EF02 partition to the list already
+  #   # devices = [ ];
+  # };
+  # Use the systemd-boot EFI boot loader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
 
   # TODO(daneroo) regenerate in UTM for macnix
   # These are usually in hardware-configuration.nix
   # They were generateed from nixos-generate-config on proxmox
+  # $ nixos-generate-config --show-hardware-config
+  # Cannot write to /etc/nixos/ so generate in current directory and copy it out
+  # $ nixos-generate-config --dir .
   # boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
   # boot.initrd.kernelModules = [ ];
   # boot.kernelModules = [ ];
   # boot.extraModulePackages = [ ];
+  ####### ------- aarch64 / arm64 ------ #######
+  ## FROM hardware-configuration-utm-arm64.nix
+  # boot.initrd.availableKernelModules = [ "xhci_pci" "virtio_pci" "usbhid" "usb_storage" "sr_mod" ];
+  # networking.useDHCP = lib.mkDefault true;
+  # nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
+  ####### ------- x86_64 / amd64 ------ #######
+  ## FROM hardware-configuration-pxmx-amd64.nix
+  # boot.initrd.availableKernelModules = [ "uhci_hcd" "ehci_pci" "ahci" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
+  # networking.useDHCP = lib.mkDefault true;
+  # nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -69,7 +86,6 @@
     emacs-nox
     git
     fastfetch
-
   ];
 
   users.users = {

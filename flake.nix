@@ -39,10 +39,6 @@
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
-      # this works but has system as key... I prefer my own names as above
-      # nixosConfigurations = forAllNixOSSystems (system: {
-      #   ${nixosConfigSpecialArgs.${system}.hostName} = makeNixosConfig system;
-      # });
 
     };
 }

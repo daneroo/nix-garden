@@ -11,6 +11,9 @@ I chose nix to eventually replace:
 
 This repository should contain:
 
+- Phase 0: commit to repo layout from
+  - [EmergentMind GitHub](https://github.com/EmergentMind/nix-config)
+    - [Emergent Mind Blog](https://unmovedcentre.com/posts/)
 - Phase 1: Bootstrapping processes (Determinate Systems installer)
   - Installing nix (on MacOS, Ubuntu, NixOS)
   - Minimal boot iso for NixOS - including (disko) disk formatting
@@ -33,22 +36,21 @@ This repository should contain:
 
 - [ ] NixOS: bootstrap from minimal iso
   - add guard to `disko-format-install` with gum jq (constrain to proper arch)
-  - [ ] test on proxmox (x86_64)
-  - [ ] test on UTM (aarch64)
+  - [ ] test on proxmox (x86_64) - minimal-amd64
+  - [ ] test on UTM (aarch64) - minimal-arm64
 - [ ] alternative (ZFS) disk layouts
 - [ ] VSCode / remote development / Extensions
   - [ ] TODO alejandra for VSCode
 - Phase 1: bootstraping
   - [ ] NixOS
-    - [ ] rename proxnix and macnix: minimal-_arch_
     - [ ] fix disko usage (zfs)
     - [ ] wrap install script in a flake
-  - [ ] MacOS (UTM and Proxmox)
+  - [ ] MacOS (UTM/MacOS and Proxmox/MacOS)
 - Phases 2-4
   - [ ] Home-manager
     - [ ] Consolidate `fleek-garden` repo.
   - [ ] direnv - CodeSpaces
-    - [ ] Consolidate `nixvana`repo.
+    - [ ] Consolidate [`nixvana`](https://github.com/daneroo/nixvana) repo.
   - [ ] nix-darwin
   - [ ] nixos
 
@@ -68,15 +70,20 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 - Boot with either minimal iso
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-x86_64-linux.iso`
   - `nixos-minimal-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
-- Trigger the boostrap script (requires git clone for now)
-  - `disko-format-install`
+- Login in (from galois)
+- Trigger the bootstrap script: `disko-format-install`
 
 ```bash
-#  trigger install
-nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
-nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 
+# login to the new VM as nixos user
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
+#  trigger disk format and install from remote flake
+nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
+# nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install # minimal-amd64 or minimal-arm64
+
+# Reboot and login to the new VM as daniel
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null daniel@192.168....
 ```
 
 - Disko examples: <https://github.com/nix-community/disko/tree/master/example>
@@ -100,6 +107,14 @@ sudo nixos-install --flake github:daneroo/nix-garden#minimal-x86_64 --no-root-pa
 ```
 
 ### NixOS Custom Minimal iso
+
+- [ ] move this to minimal-iso/README.md ( or wherever it belongs in the new layout)
+
+Note: see also [nix-generators (image builders)](https://github.com/nix-community/nixos-generators)
+
+```bash
+  nix run github:nix-community/nixos-generators -- --help
+```
 
 This is how we built our own custom iso, it's purpose is to be able to boot and install on a new machine.
 It is derived from the NixOS [cd-dvd/installation-cd-minimal.nix](https://github.com/NixOS/nixpkgs/blob/24.05/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix), and in addition:
@@ -145,6 +160,10 @@ sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock
 
 ## References
 
+- Reference nix-config/dotfiles layouts
+  - [EmergentMind GitHub](https://github.com/EmergentMind/nix-config)
+    - [Emergent Mind Blog](https://unmovedcentre.com/posts/)
+  - [Misterio77](https://github.com/Misterio77/nix-config)
 - [Erase Your Darlings](https://grahamc.com/blog/erase-your-darlings/)
   - [Associated ZFS disko config](https://github.com/nix-community/disko-templates/blob/main/zfs-impermanence/disko-config.nix)
 - Disko examples:
