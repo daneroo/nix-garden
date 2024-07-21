@@ -35,7 +35,9 @@ This repository should contain:
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
 - [ ] NixOS: bootstrap from minimal iso
-  - add guard to `disko-format-install` with gum jq (constrain to proper arch)
+  - [ ] add guard to `disko-format-install` with gum jq (constrain to proper arch)
+  - [ ] split disko and install scripts (add gum choices...)
+  - [ ] boot with boot.initrd.systemd (see EmergentMind:hosts/grief kernelModules vs availableKernelModules)
   - [ ] test on proxmox (x86_64) - minimal-amd64
   - [ ] test on UTM (aarch64) - minimal-arm64
 - [ ] alternative (ZFS) disk layouts
@@ -80,7 +82,8 @@ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168...
 #  trigger disk format and install from remote flake
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install # minimal-amd64 or minimal-arm64
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
 
 # Reboot and login to the new VM as daniel
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null daniel@192.168....

@@ -14,16 +14,13 @@
   nix.settings.experimental-features = "nix-command flakes";
 
   # TODO(daneroo): Let's circle back and understand our options here, but this works
-  # REPLACED grub with systemd-boot
-  # boot.loader.grub = {
-  #   efiSupport = true;
-  #   efiInstallAsRemovable = true;
-  #   # no need to set devices, disko will add all devices that have a EF02 partition to the list already
-  #   # devices = [ ];
-  # };
-  # Use the systemd-boot EFI boot loader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  #  Wasn't able to boot with systemd-boot, so back to grub
+  boot.loader.grub = {
+    efiSupport = true;
+    efiInstallAsRemovable = true;
+    # no need to set devices, disko will add all devices that have a EF02 partition to the list already
+    # devices = [ ];
+  };
 
   # TODO(daneroo) regenerate in UTM for macnix
   # These are usually in hardware-configuration.nix
