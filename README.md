@@ -43,7 +43,7 @@ This repository should contain:
 - [ ] alternative (ZFS) disk layouts
 - [ ] VSCode / remote development / Extensions
   - [ ] TODO alejandra for VSCode
-- Phase 1: bootstraping
+- Phase 1: bootstrapping
   - [ ] NixOS
     - [ ] fix disko usage (zfs)
     - [ ] wrap install script in a flake
