@@ -27,7 +27,8 @@
   # They were generateed from nixos-generate-config on proxmox
   # $ nixos-generate-config --show-hardware-config
   # Cannot write to /etc/nixos/ so generate in current directory and copy it out
-  # $ nixos-generate-config --dir .
+  # Also our filesystems are handled by disko configs
+  # $ nixos-generate-config --no-filesystems --dir .
   # boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "virtio_scsi" "sd_mod" "sr_mod" ];
   # boot.initrd.kernelModules = [ ];
   # boot.kernelModules = [ ];

@@ -38,8 +38,8 @@ This repository should contain:
   - [ ] add guard to `disko-format-install` with gum jq (constrain to proper arch)
   - [ ] split disko and install scripts (add gum choices...)
   - [ ] boot with boot.initrd.systemd (see EmergentMind:hosts/grief kernelModules vs availableKernelModules)
-  - [ ] test on proxmox (x86_64) - minimal-amd64
-  - [ ] test on UTM (aarch64) - minimal-arm64
+  - [x] test on proxmox (x86_64) - minimal-amd64
+  - [x] test on UTM (aarch64) - minimal-arm64
 - [ ] alternative (ZFS) disk layouts
 - [ ] VSCode / remote development / Extensions
   - [ ] TODO alejandra for VSCode
