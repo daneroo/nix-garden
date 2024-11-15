@@ -71,7 +71,7 @@
 
   # Enable the OpenSSH server.
   services.openssh.enable = true;
-  services.openssh.settings.PermitRootLogin = "yes";
+  #services.openssh.settings.PermitRootLogin = "yes";
 
   # Enable the QEMU Guest Agent
   services.qemuGuest.enable = true;
