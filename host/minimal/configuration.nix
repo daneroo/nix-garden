@@ -49,8 +49,9 @@
   # Set your time zone.
   time.timeZone = "America/New_York";
 
-  # Select internationalisation properties.
+  # Select internationalization properties.
   i18n.defaultLocale = "en_US.UTF-8";
+  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
   # What is this for?
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
@@ -63,6 +64,7 @@
     LC_TELEPHONE = "en_US.UTF-8";
     LC_TIME = "en_US.UTF-8";
   };
+
   # Configure keymap in X11
   # services.xserver.xkb.layout = "us";
 
@@ -82,6 +84,7 @@
     #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
     wget
     curl
+    jq
     htop
     emacs-nox
     git
