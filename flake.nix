@@ -57,16 +57,8 @@
 
     in
     {
-      nixosConfigurations = {
-        minimal-amd64 = makeNixosConfig "x86_64-linux";
-        minimal-arm64 = makeNixosConfig "aarch64-linux";
-      };
+      nixosConfigurations = forAllNixOSSystems (system: makeNixosConfig system);
 
-      formatter = builtins.listToAttrs (
-        map (platform: {
-          name = platform;
-          value = makeFormatter platform;
-        }) platforms
-      );
+      formatter = builtins.genAttrs platforms makeFormatter;
     };
 }
