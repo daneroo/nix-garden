@@ -17,11 +17,6 @@
       ...
     }:
     let
-      nixosSystems = [
-        "x86_64-linux"
-        "aarch64-linux"
-      ];
-
       nixosConfigSpecialArgs = {
         "x86_64-linux" = {
           diskDevice = "/dev/sda";
@@ -44,8 +39,6 @@
           ];
         };
 
-      forAllNixOSSystems = nixpkgs.lib.genAttrs nixosSystems;
-
       platforms = [
         "x86_64-linux"
         "aarch64-linux"
@@ -60,7 +53,10 @@
 
     in
     {
-      nixosConfigurations = forAllNixOSSystems (system: makeNixosConfig system);
+      nixosConfigurations = {
+        minimal-amd64 = makeNixosConfig "x86_64-linux";
+        minimal-arm64 = makeNixosConfig "aarch64-linux";
+      };
 
       formatter = builtins.listToAttrs (map makeFormatter platforms);
     };
