@@ -1,7 +1,7 @@
 {
   description = "My Customized Minimal NixOS installation media";
 
-  # inputs.nixos.url = "nixpkgs/23.11";
+  # Proven Repeatable on 2024-11-15
   inputs.nixos.url = "nixpkgs/24.05";
 
   outputs = { self, nixos }:

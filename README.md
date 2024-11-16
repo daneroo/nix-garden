@@ -64,7 +64,7 @@ We will be using [Determinate Nix Installer](https://zero-to-nix.com/concepts/ni
 
 ### NixOS
 
-Whereas for NixOS we will boot from a customized minimal boot iso, and use disko to format the disk.
+For NixOS we will boot from a customized minimal boot iso, and use disko to format the disk.
 
 The minimal iso is built with a custom configuration, that includes sshd enabled with an authorized key for `galois`.
 The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
@@ -116,13 +116,13 @@ sudo nixos-install --flake github:daneroo/nix-garden#minimal-x86_64 --no-root-pa
 Note: see also [nix-generators (image builders)](https://github.com/nix-community/nixos-generators)
 
 ```bash
-  nix run github:nix-community/nixos-generators -- --help
+nix run github:nix-community/nixos-generators -- --help
 ```
 
 This is how we built our own custom iso, it's purpose is to be able to boot and install on a new machine.
 It is derived from the NixOS [cd-dvd/installation-cd-minimal.nix](https://github.com/NixOS/nixpkgs/blob/24.05/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix), and in addition:
 
-The image are rename with `my-` prefix but otherwise keep the name of the artifact from the derivation. i.e.
+The image are renamed with `my-` prefix but otherwise keep the name of the artifact from the derivation. i.e.
 
 ```txt
 my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso

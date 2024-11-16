@@ -1,3 +1,11 @@
 {
-  "cSpell.words": ["aarch", "disko", "fleek", "nixos"]
+  "cSpell.words": [
+    "aarch",
+    "disko",
+    "fastfetch",
+    "fleek",
+    "nixos",
+    "nixpkgs",
+    "pkgs"
+  ]
 }
