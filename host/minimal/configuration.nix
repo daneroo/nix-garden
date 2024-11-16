@@ -50,8 +50,12 @@
   time.timeZone = "America/New_York";
 
   # Select internationalization properties.
+  environment.variables = {
+    LANG = "en_US.UTF-8";
+    LC_ALL = "en_US.UTF-8";
+  };
   i18n.defaultLocale = "en_US.UTF-8";
-  i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
+  # i18n.supportedLocales = [ "en_US.UTF-8/UTF-8" ];
   # What is this for?
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
