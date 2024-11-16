@@ -25,8 +25,8 @@
   # TODO(daneroo): Let's circle back and understand our options here, but this works
   #  Wasn't able to boot with systemd-boot, so back to grub
   boot.loader.grub = {
-    efiSupport = true;
-    efiInstallAsRemovable = true;
+    efiSupport = false;
+    # efiInstallAsRemovable = true;
     # no need to set devices, disko will add all devices that have a EF02 partition to the list already
     # devices = [ ];
   };
