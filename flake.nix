@@ -53,12 +53,15 @@
         "x86_64-darwin"
       ];
 
-      makeFormatter = platform: nixpkgs.legacyPackages.${platform}.nixfmt-rfc-style;
+      makeFormatter = platform: {
+        name = platform;
+        value = nixpkgs.legacyPackages.${platform}.nixfmt-rfc-style;
+      };
 
     in
     {
       nixosConfigurations = forAllNixOSSystems (system: makeNixosConfig system);
 
-      formatter = builtins.genAttrs platforms makeFormatter;
+      formatter = builtins.listToAttrs (map makeFormatter platforms);
     };
 }
