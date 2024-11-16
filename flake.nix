@@ -9,9 +9,18 @@
     # scripts.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, disko, ... }:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      disko,
+      ...
+    }:
     let
-      nixosSystems = [ "x86_64-linux" "aarch64-linux" ];
+      nixosSystems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
       nixosConfigSpecialArgs = {
         "x86_64-linux" = {
@@ -24,21 +33,40 @@
         };
       };
 
-      makeNixosConfig = system:
+      makeNixosConfig =
+        system:
         nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = nixosConfigSpecialArgs.${system};
-          modules =
-            [ ./host/minimal/configuration.nix disko.nixosModules.disko ];
+          modules = [
+            ./host/minimal/configuration.nix
+            disko.nixosModules.disko
+          ];
         };
 
       forAllNixOSSystems = nixpkgs.lib.genAttrs nixosSystems;
 
-    in {
+      platforms = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+
+      makeFormatter = platform: nixpkgs.legacyPackages.${platform}.nixfmt-rfc-style;
+
+    in
+    {
       nixosConfigurations = {
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
       };
 
+      formatter = builtins.listToAttrs (
+        map (platform: {
+          name = platform;
+          value = makeFormatter platform;
+        }) platforms
+      );
     };
 }
