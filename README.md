@@ -99,6 +99,7 @@ disko will add all devices that have a EF02 partition to the list already
 ```bash
 nix flake show github:daneroo/nix-garden
 # nix-shell -p jq # if not already installed
+# nix flake update github:daneroo/nix-garden # if necessary (caching)
 nix flake show github:daneroo/nix-garden --json | jq '.nixosConfigurations | keys'
 
 # With flakes, disk-config is discovered first under the .diskoConfigurations top level attribute
@@ -154,15 +155,15 @@ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69
 ```bash
 git clone https://github.com/daneroo/nix-garden
 cd nix-garden
-sudo nixos-rebuild switch --flake ./#<ARCH_TARGET> --no-write-lock-file
+# sudo nixos-rebuild switch --flake ./#ARCH_TARGET --no-write-lock-file
 sudo nixos-rebuild switch --flake ./#minimal-amd64 --no-write-lock-file
 sudo nixos-rebuild switch --flake ./#minimal-arm64 --no-write-lock-file
+
 # or
-sudo nixos-rebuild switch --flake github:daneroo/nix-garden#TARGET --no-write-lock-file
-# update the flake
-nix flake update
-# rebuild
-sudo nixos-rebuild switch --flake github:daneroo/nix-garden#post --no-write-lock-file
+
+nix flake show github:daneroo/nix-garden
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-amd64 --no-write-lock-file
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-arm64 --no-write-lock-file
 ```
 
 ## References
