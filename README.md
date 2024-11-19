@@ -32,6 +32,11 @@ This repository should contain:
 
 ## TODO
 
+### Short-term 2024-11-19
+
+- [ ] separate repo for clan, from galois to both proxmox (gauss) and UTM
+- [ ] reproduce/cleanup documentation minimal-iso and install process
+
 2024-02-18: I am able to run disko, but cannot perform a nix-install (disk config or boot is badly setup)
 
 - [ ] NixOS: bootstrap from minimal iso
@@ -80,6 +85,8 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 # login to the new VM as nixos user
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
 #  trigger disk format and install from remote flake
+
+# I don;t think this works anymore, see alternative below
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
@@ -104,8 +111,8 @@ nix flake show github:daneroo/nix-garden --json | jq '.nixosConfigurations | key
 
 # With flakes, disk-config is discovered first under the .diskoConfigurations top level attribute
 # or else from the disko module of a NixOS configuration of that name under .nixosConfigurations.
-sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-aarch64
-sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-x86_64
+sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-arm64
+sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-amd64
 
 # and installation part - when booted from minimal iso, and disko has formatted the disk
 sudo nixos-install --flake github:daneroo/nix-garden#minimal-aarch64 --no-root-passwd
