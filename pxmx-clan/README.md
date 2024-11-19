@@ -2,6 +2,12 @@
 
 - <https://docs.clan.lol/getting-started/>
 
+## Notes
+
+- The generated flake `my-clan`, or `pxmx-clan` must the root of it's own got repo.
+- I seem to have to be on the same architecteure as the target system (x86_64)
+- My `own minimal-iso`  produces extraneous output when ssh'ing to execute commands.
+
 ```bash
 # on galois
 nix shell git+https://git.clan.lol/clan/clan-core#clan-cli
