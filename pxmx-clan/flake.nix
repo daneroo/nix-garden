@@ -1,5 +1,5 @@
 {
-  description = "<Put your description here>";
+  description = "my first pxmx clan";
 
   inputs.clan-core.url = "https://git.clan.lol/clan/clan-core/archive/main.tar.gz";
 
@@ -10,7 +10,7 @@
       clan = clan-core.lib.buildClan {
         directory = self;
         # Ensure this is unique among all clans you want to use.
-        meta.name = "__CHANGE_ME__";
+        meta.name = "pxmx-clan";
 
         # Prerequisite: boot into the installer.
         # See: https://docs.clan.lol/getting-started/installer

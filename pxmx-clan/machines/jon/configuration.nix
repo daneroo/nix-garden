@@ -9,23 +9,23 @@
   ];
 
   # This is your user login name.
-  users.users.user.name = "<your-username>";
+  users.users.user.name = "daniel";
 
   # Set this for clan commands use ssh i.e. `clan machines update`
   # If you change the hostname, you need to update this line to root@<new-hostname>
   # This only works however if you have avahi running on your admin machine else use IP
-  clan.core.networking.targetHost = "root@<IP>";
+  clan.core.networking.targetHost = "root@192.168.2.124";
 
   # You can get your disk id by running the following command on the installer:
   # Replace <IP> with the IP of the installer printed on the screen or by running the `ip addr` command.
   # ssh root@<IP> lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
-  disko.devices.disk.main.device = "/dev/disk/by-id/__CHANGE_ME__";
+  disko.devices.disk.main.device = "/dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi0";
 
   # IMPORTANT! Add your SSH key here
   # e.g. > cat ~/.ssh/id_ed25519.pub
   users.users.root.openssh.authorizedKeys.keys = [
     ''
-      __YOUR_SSH_KEY__
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois
     ''
   ];
 

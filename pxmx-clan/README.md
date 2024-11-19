@@ -12,19 +12,26 @@ clan flakes create pxmx-clan
 
 ## Installer
 
-Can I write an iso file?
+I was able to re-use my own minimal installer (As root ssh login is allowed on it).
+
+### Target disk
+
+To identify the target disk I used `lsblk` on the installer.
 
 ```bash
-# on minimal-amd64 (or any working x86_64 nixos...)
-nix shell git+https://git.clan.lol/clan/clan-core#clan-cli
-
-scp -p galois.imetrical.com:.ssh/id_ed25519.pub galois_id_ed25519.pub
-
-clan flash write --flake git+https://git.clan.lol/clan/clan-core \
-  --ssh-pubkey galois_id_ed25519.pub \
-  --keymap us \
-  --language en_US.UTF-8 \
-  --disk main clan-installer.iso \
-  flash-installer
+ssh root@<IP> lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
+# e.g.  
+ssh root@192.168.2.124 lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
 ```
 
+### Hardware config
+
+```bash
+clan machines update-hardware-config <machine_name> <hostname>
+
+# OR
+
+ssh root@<hostname> nixos-generate-config --no-filesystems --show-hardware-config > hardware-configuration.nix
+
+ssh root@192.168.2.124 nixos-generate-config --no-filesystems --show-hardware-config > hardware-configuration.nix
+```
