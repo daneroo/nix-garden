@@ -4,9 +4,9 @@
 
 ## Notes
 
-- The generated flake `my-clan`, or `pxmx-clan` must the root of it's own got repo.
-- I seem to have to be on the same architecteure as the target system (x86_64)
-- My `own minimal-iso`  produces extraneous output when ssh'ing to execute commands.
+- [ ] The generated flake `my-clan`, or `pxmx-clan` must the root of it's own got repo.
+- [ ] I seem to have to be on the same architecteure as the target system (x86_64)
+- [x] My `own minimal-iso`  produces extraneous output when ssh'ing to execute commands.
 
 ```bash
 # on galois
@@ -28,6 +28,7 @@ To identify the target disk I used `lsblk` on the installer.
 ssh root@<IP> lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
 # e.g.  
 ssh root@192.168.2.124 lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
+ssh root@192.168.71.3 lsblk --output NAME,ID-LINK,FSTYPE,SIZE,MOUNTPOINT
 ```
 
 ### Hardware config
