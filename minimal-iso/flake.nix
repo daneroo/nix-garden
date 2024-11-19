@@ -43,14 +43,18 @@
 
                 # Custom /etc/profile
                 environment.etc."profile".text = ''
-                  fastfetch
-                  # show my ip!
-                  MYIP=$(ip -4 addr | grep -oP 'inet \K[\d.]+' | grep -v '^127\.0\.0\.1$')
-                  if [ -z "$MYIP" ]; then
-                    echo "IPv4 is not yet assigned; Just exit this shell to try again"
-                  else
-                    echo "Connect with SSH:"
-                    echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@$MYIP"
+                  # Check if the shell is interactive
+                  # [ -t 1 ]: True if file descriptor number file_descriptor (1) is open and is associated with a terminal.
+                  if [ -t 1 ]; then
+                    fastfetch
+                    # show my ip!
+                    MYIP=$(ip -4 addr | grep -oP 'inet \K[\d.]+' | grep -v '^127\.0\.0\.1$')
+                    if [ -z "$MYIP" ]; then
+                      echo "IPv4 is not yet assigned; Just exit this shell to try again"
+                    else
+                      echo "Connect with SSH:"
+                      echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@$MYIP"
+                    fi
                   fi
                 '';
               }
