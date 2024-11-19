@@ -127,14 +127,15 @@ It is derived from the NixOS [cd-dvd/installation-cd-minimal.nix](https://github
 
 The image are renamed with `my-` prefix but otherwise keep the name of the artifact from the derivation. i.e.
 
-```txt
-my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso
-my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso.iso
+```bash
+❯ (cd ~/Downloads/iso/; sha256sum my-nixos-24.05.20240531.63dacb4-*.iso)
+e8c39ae1f8239220d0e1b7371bb421083bb24442991f620450632e6f045bd64b  my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso
+fd90bfe1c177c676bb9f1497b7face1324b918fa1d35c988f862166c7bde4d17  my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso
 ```
 
 - enable flakes
 - enable ssh
-- show ip on console
+- show ip on console (when logged in as a terminal ([ -t 1]))
 
 ```bash
 cd minimal-iso
