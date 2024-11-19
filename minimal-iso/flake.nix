@@ -34,8 +34,6 @@
 
                 # Enable and configure SSH
                 systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
-                services.openssh.settings.PermitRootLogin = "yes";
-
                 users.users.root.openssh.authorizedKeys.keys = [
                   "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p"
                 ];
