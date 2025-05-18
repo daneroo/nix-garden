@@ -31,6 +31,10 @@
     # devices = [ ];
   };
 
+  # ------ ensure Btrfs works in OrbStack/Colima VMs ------
+  # pulls the btrfs kernel module into the init-rd
+  boot.supportedFilesystems = [ "btrfs" ];
+
   # TODO(daneroo) regenerate in UTM for macnix
   # These are usually in hardware-configuration.nix
   # They were generateed from nixos-generate-config on proxmox
@@ -89,6 +93,7 @@
     emacs-nox
     git
     fastfetch
+    btrfs-progs # CLI needed by switch-to-configuration
   ];
 
   users.users = {

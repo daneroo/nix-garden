@@ -5,8 +5,10 @@
 ## Notes
 
 - [ ] The generated flake `my-clan`, or `pxmx-clan` must the root of it's own got repo.
-- [ ] I seem to have to be on the same architecteure as the target system (x86_64)
+  - can use --flake (local-ref) of $CLAN
+- [ ] I seem to have to be on the same architecture as the target system (x86_64)
 - [x] My `own minimal-iso`  produces extraneous output when ssh'ing to execute commands.
+- [ ] Try to create an installer iso with a loopback device?
 - [ ] docker x86_64: seccomp stuff
 
 ## Create the new clan flake (directory/repo)
@@ -70,6 +72,7 @@ Don't forget to commit, if not using `clan machined update-hardware-config`
 ssh root@<hostname> nixos-generate-config --no-filesystems --show-hardware-config > machines/<machine_name>/hardware-configuration.nix
 
 ssh root@192.168.2.127 nixos-generate-config --no-filesystems --show-hardware-config > machines/jon/hardware-configuration.nix
+ssh root@192.168.71.5 nixos-generate-config --no-filesystems --show-hardware-config > machines/jon/hardware-configuration.nix
 
 # OR
 
@@ -121,9 +124,10 @@ clan machines install jon --target-host 192.168.2.127
 docker run -it --rm \
   -v $(pwd):/clan \
   -v "$HOME/Library/Application Support/sops/age/keys.txt:/root/.config/sops/age/keys.txt:ro" \
+  -v "$HOME/.ssh/id_ed25519:/root/.ssh/id_ed25519:ro" \
+  -v "$HOME/.ssh/id_ed25519.pub:/root/.ssh/id_ed25519.pub:ro" \
   -w /clan \
   nixpkgs/nix-flakes:nixos-24.05-aarch64-linux
-
 # x86_64 : not working yet
 # -security-opt seccomp=unconfined
 # --privileged
@@ -137,15 +141,13 @@ nix develop
 # OR
 nix shell git+https://git.clan.lol/clan/clan-core#clan-cli
 
-
 clan secrets key show
-```
 
-## Lima VM
+#   --host-key-check {strict,ask,tofu,none}
+#                       Host key (.ssh/known_hosts) check mode.
+#   --target-host TARGET_HOST
 
-```bash
-brew install lima
+clan machines install jon --target-host 192.168.71.5
+clan machines update jon
 
-# Create a NixOS x86_64 VM specifically for clan
-limactl start --name=test-x86 --arch=x86_64 default
 ```

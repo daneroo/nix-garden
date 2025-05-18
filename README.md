@@ -67,6 +67,29 @@ This repository should contain:
 
 We will be using [Determinate Nix Installer](https://zero-to-nix.com/concepts/nix-installer) for MacOS (and perhaps Ubuntu, if we keep that)
 
+### NixOS - OrbStack
+
+```bash
+nix fmt flake.nix
+nix flake update
+
+nixos-generate-config --no-filesystems --show-hardware-config
+
+sudo sh -c 'nix shell nixpkgs#btrfs-progs -c \
+  nixos-generate-config --show-hardware-config \
+  > /etc/nixos/hardware-configuration.nix'
+
+sudo nix --extra-experimental-features "nix-command flakes" \
+  shell nixpkgs#btrfs-progs -c \
+  nixos-generate-config --show-hardware-config |
+sudo tee /etc/nixos/hardware-configuration.nix >/dev/null
+
+# this is the old, non-experimental command – it just works
+sudo nix-env -iA nixpkgs.btrfs-progs
+
+
+```
+
 ### NixOS
 
 For NixOS we will boot from a customized minimal boot iso, and use disko to format the disk.
