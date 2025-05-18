@@ -12,9 +12,7 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
-    # Colima VM is already formatted Btrfs; skip ext4 disko layout
-    # TODO: uncomment later to restore
-    # ../../disko/single-disk-ext4/disko-config.nix # Ensure the correct path
+    ../../disko/single-disk-ext4/disko-config.nix # Ensure the correct path
   ];
 
   # System settings passed as parameters
@@ -32,10 +30,6 @@
     # no need to set devices, disko will add all devices that have a EF02 partition to the list already
     # devices = [ ];
   };
-
-  # ------ ensure Btrfs works in OrbStack/Colima VMs ------
-  # pulls the btrfs kernel module into the init-rd
-  boot.supportedFilesystems = [ "btrfs" ];
 
   # TODO(daneroo) regenerate in UTM for macnix
   # These are usually in hardware-configuration.nix
