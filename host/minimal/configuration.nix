@@ -12,7 +12,9 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     (modulesPath + "/profiles/qemu-guest.nix")
-    ../../disko/single-disk-ext4/disko-config.nix # Ensure the correct path
+    # Colima VM is already formatted Btrfs; skip ext4 disko layout
+    # TODO: uncomment later to restore
+    # ../../disko/single-disk-ext4/disko-config.nix # Ensure the correct path
   ];
 
   # System settings passed as parameters
