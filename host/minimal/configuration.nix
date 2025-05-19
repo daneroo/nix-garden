@@ -24,11 +24,10 @@
 
   # TODO(daneroo): Let's circle back and understand our options here, but this works
   #  Wasn't able to boot with systemd-boot, so back to grub
-  boot.loader.grub = {
-    efiSupport = false;
-    # efiInstallAsRemovable = true;
-    # no need to set devices, disko will add all devices that have a EF02 partition to the list already
-    # devices = [ ];
+  boot.loader = {
+    grub.enable = false;
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;   # false for read-only firmware
   };
 
   # TODO(daneroo) regenerate in UTM for macnix

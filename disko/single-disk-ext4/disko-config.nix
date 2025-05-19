@@ -2,7 +2,10 @@
 # Update devices to match your hardware.
 # {
 #  imports = [ ./disko-config.nix ];
-#  disko.devices.disk.main.device = "/dev/sda";
+#  disko.devices.disk.main.device = "/dev/sda"; # or /dev/sda, /dev/nvme0n1
+#  boot.loader.grub.enable = false;
+#  boot.loader.systemd-boot.enable = true;
+#  boot.loader.efi.canTouchEfiVariables = true;   # false for read-only firmware
 # }
 {
   disko.devices = {
