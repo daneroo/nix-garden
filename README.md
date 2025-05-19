@@ -194,8 +194,8 @@ sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/n
 sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-amd64
 
 # and installation part - when booted from minimal iso, and disko has formatted the disk
-sudo nixos-install --flake github:daneroo/nix-garden#minimal-aarch64 --no-root-passwd
-sudo nixos-install --flake github:daneroo/nix-garden#minimal-x86_64 --no-root-passwd
+sudo nixos-install --flake github:daneroo/nix-garden#minimal-arm64 --no-root-passwd
+sudo nixos-install --flake github:daneroo/nix-garden#minimal-amd64 --no-root-passwd
 ```
 
 ### NixOS Custom Minimal iso
