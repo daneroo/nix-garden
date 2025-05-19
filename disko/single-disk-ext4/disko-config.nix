@@ -7,7 +7,7 @@
 {
   disko.devices = {
     disk = {
-      my-disk = {
+      main = {
         type = "disk";
         content = {
           type = "gpt";
