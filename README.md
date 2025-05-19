@@ -168,8 +168,8 @@ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168...
 # List the targets!
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 
 # Reboot and login to the new VM as daniel
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null daniel@192.168....
