@@ -27,7 +27,7 @@
   boot.loader = {
     grub.enable = false;
     systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;   # false for read-only firmware
+    efi.canTouchEfiVariables = true; # false for read-only firmware
   };
 
   # TODO(daneroo) regenerate in UTM for macnix
