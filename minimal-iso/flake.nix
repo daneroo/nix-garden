@@ -1,8 +1,8 @@
 {
   description = "My Customized Minimal NixOS installation media";
 
-  # Proven Repeatable on 2024-11-15
-  inputs.nixos.url = "nixpkgs/24.05";
+  # Proven Repeatable on 2025-05-18
+  inputs.nixos.url = "nixpkgs/24.11";
 
   outputs =
     { self, nixos }:
@@ -62,11 +62,26 @@
           ];
         };
 
+      platforms = [
+        "x86_64-linux"
+        "aarch64-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
+      ];
+
+      makeFormatter = platform: {
+        name = platform;
+        value = nixos.legacyPackages.${platform}.nixfmt-rfc-style;
+      };
+
     in
     {
       nixosConfigurations = {
         x86_64Iso = commonConfiguration "x86_64-linux";
         aarch64Iso = commonConfiguration "aarch64-linux";
       };
+
+      formatter = builtins.listToAttrs (map makeFormatter platforms);
+
     };
 }

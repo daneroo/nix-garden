@@ -32,6 +32,61 @@ This repository should contain:
 
 ## TODO
 
+## Colima
+
+Ok, time to speed things up!
+
+- MacOS
+  - incus: running in ubuntu 24.04 VM - zfs root
+  - start: `colima start --runtime incus --vm-type vz`
+  - exec: `colima ssh cat /etc/lsb-release`
+  - got tailscale to work: expected
+    - Container: NixOS 24.11 (incus cannot run nested vm's)
+    - start: `incus launch images:nixos/24.11/arm64 nixos-container`
+    - exec: `incus exec nixos-container bash`
+    - got tailscale to work: unexpected!
+
+```bash
+colima start --runtime incus --vm-type vz --cpu 4 --memory 8192
+incus launch images:nixos/24.11/arm64 nixos-vm --vm # NOT WORKING ON MacOS
+incus launch images:nixos/24.11/arm64 nixos-container # WORKING
+incus exec nixos-container bash
+nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#emacs-nox
+export TERM=vt100
+emacs /etc/nixos/configuration.nix
+```
+
+```nix
+  nix.settings = {
+    experimental-features = "nix-command flakes";
+    sandbox = false;                     # Incus container lacks namespaces
+  };
+  virtualisation.docker.enable = true;
+  # services.tailscale.enable = true;
+  environment.systemPackages = [
+    pkgs.emacs-nox
+  ];
+```
+
+now rebuild
+
+```bash
+sudo nixos-rebuild switch \
+  -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz \
+  --option sandbox false
+
+docker run hello-world
+```
+
+Cleanup
+
+```bash
+incus delete nixos-container # --force
+colima stop
+colima delete
+colima prune --very-verbose
+```
+
 ### Short-term 2024-11-19
 
 - [ ] separate repo for clan, from galois to both proxmox (gauss) and UTM
@@ -98,8 +153,9 @@ The minimal iso is built with a custom configuration, that includes sshd enabled
 The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 
 - Boot with either minimal iso
-  - `nixos-minimal-23.11.4030.9f2ee8c91ac4-x86_64-linux.iso`
-  - `nixos-minimal-23.11.4030.9f2ee8c91ac4-aarch64-linux.iso`
+  - `my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso`
+  - `my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso`
+
 - Login in (from galois)
 - Trigger the bootstrap script: `disko-format-install`
 
@@ -109,7 +165,7 @@ The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
 #  trigger disk format and install from remote flake
 
-# I don;t think this works anymore, see alternative below
+# List the targets!
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
@@ -186,9 +242,9 @@ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69
 ```bash
 git clone https://github.com/daneroo/nix-garden
 cd nix-garden
-# sudo nixos-rebuild switch --flake ./#ARCH_TARGET --no-write-lock-file
+# sudo nixos-rebuild switch --flake .#ARCH_TARGET --no-write-lock-file
 sudo nixos-rebuild switch --flake ./#minimal-amd64 --no-write-lock-file
-sudo nixos-rebuild switch --flake ./#minimal-arm64 --no-write-lock-file
+sudo nixos-rebuild switch --flake .#minimal-arm64 --no-write-lock-file
 
 # or
 

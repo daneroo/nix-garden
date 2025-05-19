@@ -5,8 +5,10 @@
     "fastfetch",
     "fleek",
     "keymap",
+    "nixfmt",
     "nixos",
     "nixpkgs",
-    "pkgs"
+    "pkgs",
+    "virtualisation"
   ]
 }
