@@ -8,14 +8,12 @@
   disko.devices = {
     disk = {
       main = {
+        # defined elsewhere
+        # device = "/dev/disk/by-id/some-disk-id";
         type = "disk";
         content = {
           type = "gpt";
           partitions = {
-            boot = {
-              size = "1M";
-              type = "EF02"; # for grub MBR
-            };
             ESP = {
               type = "EF00";
               size = "500M";
