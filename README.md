@@ -34,7 +34,6 @@ This repository should contain:
 ## TODO
 
 - [Colmena: for deployment](https://github.com/zhaofengli/colmena)
-- [x] [MCP for NixOS](https://mcp-nixos.io/) - configured in `.cursorrules`
 
 ## Colima
 
