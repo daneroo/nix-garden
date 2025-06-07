@@ -65,7 +65,7 @@
       nixosConfigurations = {
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
-        
+
         installer-x86_64 = makeInstallerConfig "x86_64-linux";
         installer-aarch64 = makeInstallerConfig "aarch64-linux";
       };

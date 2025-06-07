@@ -1,4 +1,4 @@
-# NixOS 25.05 Installer Configuration  
+# NixOS 25.05 Installer Configuration
 # Uses the new installer framework with system.build.images
 {
   config,
@@ -34,7 +34,7 @@
 
   # Enable and configure SSH access
   systemd.services.sshd.wantedBy = pkgs.lib.mkForce [ "multi-user.target" ];
-  
+
   # SSH authorized keys for remote access
   users.users.root.openssh.authorizedKeys.keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p"
@@ -63,4 +63,4 @@
   # Image configuration for NixOS 25.05
   # Uses the new system.build.images approach
   # The actual image options are configured through the installation-device profile
-} 
+}
