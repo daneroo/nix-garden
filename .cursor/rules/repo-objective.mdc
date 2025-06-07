@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Repository Objective: nix-garden
 
-## High-Level Mission
+## Overview
 This repository serves as a comprehensive learning journey and practical implementation guide for adopting the Nix ecosystem across multiple platforms and use cases. The primary goal is to replace traditional infrastructure management approaches with declarative, reproducible configurations.
 
 ## Core Objectives
