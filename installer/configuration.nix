@@ -60,13 +60,7 @@
     fi
   '';
 
-  # ISO image configuration
-  isoImage = {
-    # Custom label for the ISO
-    isoName = lib.mkForce "my-nixos-25.05";
-    
-    # Make the ISO bootable on UEFI systems
-    makeEfiBootable = true;
-    makeUsbBootable = true;
-  };
+  # Image configuration for NixOS 25.05
+  # Uses the new system.build.images approach
+  # The actual image options are configured through the installation-device profile
 } 
