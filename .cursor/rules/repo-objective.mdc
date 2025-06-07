@@ -1,0 +1,71 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Repository Objective: nix-garden
+
+## High-Level Mission
+This repository serves as a comprehensive learning journey and practical implementation guide for adopting the Nix ecosystem across multiple platforms and use cases. The primary goal is to replace traditional infrastructure management approaches with declarative, reproducible configurations.
+
+## Core Objectives
+
+### Infrastructure Transformation
+- **Replace Homelab Infrastructure as Code** with NixOS-based declarative configurations
+- **Replace Homebrew Setup on macOS** with nix-darwin and home-manager
+- **Establish reproducible, cross-platform development environments**
+
+### Phased Implementation Strategy
+
+#### Phase 0: Foundation
+- Adopt proven repository layouts and patterns
+- Establish project structure and documentation standards
+
+#### Phase 1: Bootstrapping Infrastructure
+- Create custom NixOS installation ISOs for multiple architectures (x86_64, aarch64)
+- Implement automated bootstrap processes for NixOS, Ubuntu, and macOS
+- Develop disko-based disk partitioning and installation workflows
+
+#### Phase 2: System-Level Configuration
+- Deploy full NixOS system configurations
+- Implement nix-darwin for macOS system management
+- Establish comprehensive system update and maintenance procedures
+
+#### Phase 3: User-Level Configuration
+- Deploy home-manager across multiple platforms
+- Implement secrets management using age
+- Establish update and maintenance workflows
+
+#### Phase 4: Project-Level Environment Management
+- Integrate direnv with Nix flakes for development environments
+- Create reproducible project configurations
+- Implement dependency and update management
+
+
+## Technical Architecture
+
+### Multi-Platform Support
+- **NixOS**: Full system configurations with custom ISOs
+- **macOS**: System management via nix-darwin
+- **Development**: Cross-platform environments via direnv and flakes
+
+### Key Components
+- **Custom Minimal ISOs**: Pre-configured installation media with SSH and flakes enabled
+- **Disko Integration**: Declarative disk partitioning supporting EXT4 and ZFS
+- **Bootstrap Scripts**: One-liner installation automation
+- **Host Configurations**: Minimal, extensible system configurations
+
+### Deployment Targets
+- Virtual Machines (Proxmox x86_64, UTM (Mac) aarch64, Incus VM's and System COntainers)
+- Containers (Docker, Incus/LXC/LXD)
+- Physical hardware installations
+- Development environments (Colima, OrbStack)
+
+## Learning & Documentation Focus
+This repository serves as both a practical implementation and educational resource, documenting the transition from traditional system administration to declarative infrastructure management. It provides clear progression paths, automation tools, and real-world examples for others following a similar journey.
+
+## Future Consolidation Goals
+- Integrate configurations from `fleek-garden` repository (home-manager)
+- Merge development environments from `nixvana` repository (direnv/flakes)
+- Implement Colmena for multi-system deployment management
+- Add MCP for NixOS integration for enhanced development workflows

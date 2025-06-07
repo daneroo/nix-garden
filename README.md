@@ -14,23 +14,27 @@ This repository should contain:
 - Phase 0: commit to repo layout from
   - [EmergentMind GitHub](https://github.com/EmergentMind/nix-config)
     - [Emergent Mind Blog](https://unmovedcentre.com/posts/)
+
 - Phase 1: Bootstrapping processes (Determinate Systems installer)
   - Installing nix (on MacOS, Ubuntu, NixOS)
   - Minimal boot iso for NixOS - including (disko) disk formatting
   - one-liner to bootstrap on NixOS, Ubuntu, MacOS
-- Phase 2: User Level: (multiple OSs/architectures/hosts)
-  - home-manager
-  - using secrets (age)
-  - updating, checking for updates and planning
-- Phase 3: Project Level: (multiple OSs/architectures/hosts)
-  - (direnv, use flakes)
-  - updating, checking for updates and planning
-- Phase 4: System Level: (multiple OSs/architectures/hosts)
+- Phase 2: System Level: (multiple OSs/architectures/hosts)
   - MacOS System configs (nix-darwin)
   - NixOS System configs (NixOs)
   - updating, checking for updates and planning
+- Phase 3: User Level: (multiple OSs/architectures/hosts)
+  - home-manager
+  - using secrets (age)
+  - updating, checking for updates and planning
+- Phase 4: Project Level: (multiple OSs/architectures/hosts)
+  - (direnv, use flakes)
+  - updating, checking for updates and planning
 
 ## TODO
+
+- [Colmena: for deployment](https://github.com/zhaofengli/colmena)
+- [x] [MCP for NixOS](https://mcp-nixos.io/) - configured in `.cursorrules`
 
 ## Colima
 
@@ -109,12 +113,12 @@ colima prune --very-verbose
     - [ ] wrap install script in a flake
   - [ ] MacOS (UTM/MacOS and Proxmox/MacOS)
 - Phases 2-4
+  - [ ] nixos
+  - [ ] nix-darwin
   - [ ] Home-manager
     - [ ] Consolidate `fleek-garden` repo.
   - [ ] direnv - CodeSpaces
     - [ ] Consolidate [`nixvana`](https://github.com/daneroo/nixvana) repo.
-  - [ ] nix-darwin
-  - [ ] nixos
 
 ## Phase 1: Bootstrapping Nix
 
