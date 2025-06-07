@@ -39,6 +39,15 @@
           ];
         };
 
+      makeInstallerConfig =
+        system:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            ./installer/configuration.nix
+          ];
+        };
+
       platforms = [
         "x86_64-linux"
         "aarch64-linux"
@@ -56,6 +65,9 @@
       nixosConfigurations = {
         minimal-amd64 = makeNixosConfig "x86_64-linux";
         minimal-arm64 = makeNixosConfig "aarch64-linux";
+        
+        installer-x86_64 = makeInstallerConfig "x86_64-linux";
+        installer-aarch64 = makeInstallerConfig "aarch64-linux";
       };
 
       formatter = builtins.listToAttrs (map makeFormatter platforms);

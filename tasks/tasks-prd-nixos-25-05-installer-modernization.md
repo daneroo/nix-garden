@@ -20,7 +20,7 @@
 
 ## Tasks
 
-- [ ] 1.0 Research and Understand NixOS 25.05 Installer Framework
+- [x] 1.0 Research and Understand NixOS 25.05 Installer Framework
   - [x] 1.1 Study NixOS 25.05 release notes for installer framework changes
   - [x] 1.2 Research `nixos.generateInstallerImage` functionality and API
   - [x] 1.3 Investigate `nixos-install-tools` package collection contents
@@ -34,9 +34,9 @@
   - [x] 2.4 Check for any breaking changes affecting current disko/install workflow
   - [x] 2.5 Update any other flakes in repository to NixOS 25.05 if necessary
 - [ ] 3.0 Implement New Installer Configuration Using generateInstallerImage
-  - [ ] 3.1 Create new installer flake structure (separate or integrated based on research)
-  - [ ] 3.2 Implement `generateInstallerImage` configuration for x86_64-linux
-  - [ ] 3.3 Implement `generateInstallerImage` configuration for aarch64-linux
+  - [x] 3.1 Create new installer flake structure (separate or integrated based on research)
+  - [x] 3.2 Implement `generateInstallerImage` configuration for x86_64-linux
+  - [x] 3.3 Implement `generateInstallerImage` configuration for aarch64-linux
   - [ ] 3.4 Migrate SSH key configuration and authorized users setup
   - [ ] 3.5 Migrate IP display functionality for console login
   - [ ] 3.6 Include necessary system packages (wget, curl, htop, emacs-nox, git, fastfetch)
