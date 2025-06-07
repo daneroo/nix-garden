@@ -34,6 +34,10 @@ This repository should contain:
 ## TODO
 
 - [Colmena: for deployment](https://github.com/zhaofengli/colmena)
+- Formatting best practices for Nix
+  - formatter attribute/default values
+  - invoke with `nix run nixpkgs#nixfmt-tree -- .`
+  - or consider `shopt -s globstar`
 
 ## Colima
 

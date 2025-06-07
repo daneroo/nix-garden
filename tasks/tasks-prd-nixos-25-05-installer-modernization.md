@@ -27,12 +27,12 @@
   - [x] 1.4 Compare new framework with current `minimal-iso/flake.nix` approach
   - [x] 1.5 Determine if installer configs should be integrated into main flake or kept separate
   - [x] 1.6 Document findings and create implementation plan
-- [ ] 2.0 Upgrade Dependencies to NixOS 25.05
-  - [ ] 2.1 Update main `flake.nix` to use NixOS 25.05 inputs
-  - [ ] 2.2 Update `flake.lock` and test existing configurations still work
-  - [ ] 2.3 Verify `host/minimal/` configurations are compatible with NixOS 25.05
-  - [ ] 2.4 Check for any breaking changes affecting current disko/install workflow
-  - [ ] 2.5 Update any other flakes in repository to NixOS 25.05 if necessary
+- [x] 2.0 Upgrade Dependencies to NixOS 25.05
+  - [x] 2.1 Update main `flake.nix` to use NixOS 25.05 inputs
+  - [x] 2.2 Update `flake.lock` and test existing configurations still work
+  - [x] 2.3 Verify `host/minimal/` configurations are compatible with NixOS 25.05
+  - [x] 2.4 Check for any breaking changes affecting current disko/install workflow
+  - [x] 2.5 Update any other flakes in repository to NixOS 25.05 if necessary
 - [ ] 3.0 Implement New Installer Configuration Using generateInstallerImage
   - [ ] 3.1 Create new installer flake structure (separate or integrated based on research)
   - [ ] 3.2 Implement `generateInstallerImage` configuration for x86_64-linux

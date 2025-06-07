@@ -120,5 +120,5 @@
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
   # on your system were taken. See https://nixos.org/nixos/options.html).
-  system.stateVersion = "23.11";
+  system.stateVersion = "25.05";
 }
