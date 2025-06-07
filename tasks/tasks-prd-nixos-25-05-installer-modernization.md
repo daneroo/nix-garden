@@ -21,12 +21,12 @@
 ## Tasks
 
 - [ ] 1.0 Research and Understand NixOS 25.05 Installer Framework
-  - [ ] 1.1 Study NixOS 25.05 release notes for installer framework changes
-  - [ ] 1.2 Research `nixos.generateInstallerImage` functionality and API
-  - [ ] 1.3 Investigate `nixos-install-tools` package collection contents
-  - [ ] 1.4 Compare new framework with current `minimal-iso/flake.nix` approach
-  - [ ] 1.5 Determine if installer configs should be integrated into main flake or kept separate
-  - [ ] 1.6 Document findings and create implementation plan
+  - [x] 1.1 Study NixOS 25.05 release notes for installer framework changes
+  - [x] 1.2 Research `nixos.generateInstallerImage` functionality and API
+  - [x] 1.3 Investigate `nixos-install-tools` package collection contents
+  - [x] 1.4 Compare new framework with current `minimal-iso/flake.nix` approach
+  - [x] 1.5 Determine if installer configs should be integrated into main flake or kept separate
+  - [x] 1.6 Document findings and create implementation plan
 - [ ] 2.0 Upgrade Dependencies to NixOS 25.05
   - [ ] 2.1 Update main `flake.nix` to use NixOS 25.05 inputs
   - [ ] 2.2 Update `flake.lock` and test existing configurations still work

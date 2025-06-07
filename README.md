@@ -144,33 +144,61 @@ sudo tee /etc/nixos/hardware-configuration.nix >/dev/null
 
 # this is the old, non-experimental command – it just works
 sudo nix-env -iA nixpkgs.btrfs-progs
-
-
 ```
 
 ### NixOS
 
-For NixOS we will boot from a customized minimal boot iso, and use disko to format the disk.
+#### Modernizing with NixOS 25.05 Installer Framework (In Progress)
 
-The minimal iso is built with a custom configuration, that includes sshd enabled with an authorized key for `galois`.
-The minimal iso is built for `x86_64-linux` and `aarch64-linux` architectures.
+We are transitioning from the legacy custom ISO approach to NixOS 25.05's new installer framework built on `nixos-generators` and `nixos-install-tools`.
 
-- Boot with either minimal iso
-  - `my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso`
-  - `my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso`
+#### New NixOS 25.05 Approach (Target)
 
-- Login in (from galois)
-- Trigger the bootstrap script: `disko-format-install`
+Key Improvements:
+
+- Unified Framework: Built on official `nixos-generators` integration  
+- Enhanced Tool Collection: `nixos-install-tools` package bundles disko, parted, e2fsprogs, etc.
+- Better Integration: Enhanced disko and nixos-anywhere support
+- Modern Build Process: Uses `system.build.images` and new build commands
+
+Planned Workflow:
 
 ```bash
+# Build installer images (new approach - will produce my-nixos-25.05.xxx-*.iso files)
+nix build .#nixosConfigurations.installer-x86_64.config.system.build.isoImage
+nix build .#nixosConfigurations.installer-aarch64.config.system.build.isoImage
 
-# login to the new VM as nixos user
+# Same bootstrap process (unchanged)
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
-#  trigger disk format and install from remote flake
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
+nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
+```
+
+#### Current Legacy Approach (Deprecated)
+
+For NixOS we boot from a customized minimal boot iso (built with NixOS 24.11), and use disko to format the disk.
+
+The minimal iso includes sshd enabled with authorized keys and supports both `x86_64-linux` and `aarch64-linux` architectures.
+
+Current Build Process (Separate Flake):
+
+```bash
+cd minimal-iso
+nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
+nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
+```
+
+Bootstrap Workflow (Unchanged):
+
+```bash
+# Login to the new VM as nixos user
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
 
 # List the targets!
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
+
+# Trigger disk format and install from remote flake
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 
@@ -178,32 +206,31 @@ nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null daniel@192.168....
 ```
 
-- Disko examples: <https://github.com/nix-community/disko/tree/master/example>
-  Using the configuration example from [nixos-anywhere-examples](https://github.com/nix-community/nixos-anywhere-examples/),
-  I managed to get a minimal install working.
+Disko Integration:
 
-This decouples the disko config from what usually appears in `hardware-configuration.nix`, because
-disko will add all devices that have a EF02 partition to the list already
+Our own `./scripts/disko-format-install` script combines disko disk formatting and nixos-install into a single operation. The manual steps it performs are:
+
+- Disko examples: <https://github.com/nix-community/disko/tree/master/example>
 
 ```bash
+# Show the available configs in the flake (top of this repo) that we can use
 nix flake show github:daneroo/nix-garden
 # nix-shell -p jq # if not already installed
 # nix flake update github:daneroo/nix-garden # if necessary (caching)
 nix flake show github:daneroo/nix-garden --json | jq '.nixosConfigurations | keys'
 
-# With flakes, disk-config is discovered first under the .diskoConfigurations top level attribute
-# or else from the disko module of a NixOS configuration of that name under .nixosConfigurations.
+# First: disko formats the disk (destructive operation)
 sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-arm64
 sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-amd64
 
-# and installation part - when booted from minimal iso, and disko has formatted the disk
+# Then: nixos-install installs the system to the formatted disk
 sudo nixos-install --flake github:daneroo/nix-garden#minimal-arm64 --no-root-passwd
 sudo nixos-install --flake github:daneroo/nix-garden#minimal-amd64 --no-root-passwd
 ```
 
-### NixOS Custom Minimal iso
+### Migration Notes - Legacy Custom Minimal ISO
 
-- [ ] move this to minimal-iso/README.md ( or wherever it belongs in the new layout)
+Note: This section documents the legacy approach. The `minimal-iso/` directory will be removed once the NixOS 25.05 implementation is complete.
 
 Note: see also [nix-generators (image builders)](https://github.com/nix-community/nixos-generators)
 
