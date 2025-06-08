@@ -63,4 +63,7 @@
   # Image configuration for NixOS 25.05
   # Uses the new system.build.images approach
   # The actual image options are configured through the installation-device profile
+  
+  # Customize ISO filename with "my-" prefix to match previous naming convention
+  isoImage.isoName = "my-nixos-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.system}.iso";
 }
