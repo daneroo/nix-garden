@@ -61,6 +61,13 @@
   '';
 
   # Image configuration for NixOS 25.05
-  # Uses the new image.fileName option (renamed from isoImage.isoName in 25.05)
-  image.fileName = "my-nixos-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.system}.iso";
+  # Define the iso-installer variant using the new image.modules framework
+  image.modules.iso-installer = {
+    # Import the ISO image building module for this variant
+    imports = [ (modulesPath + "/installer/cd-dvd/iso-image.nix") ];
+
+    # Configure ISO-specific options
+    isoImage.makeEfiBootable = true;
+    isoImage.makeUsbBootable = true;
+  };
 }
