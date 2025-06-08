@@ -70,7 +70,7 @@
     isoImage.makeEfiBootable = true;
     isoImage.makeUsbBootable = true;
 
-    # Custom ISO naming with "my-" prefix
-    isoImage.isoName = "my-nixos-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.system}.iso";
+    # Custom ISO naming with "my-" prefix (test with hardcoded value first)
+    isoImage.isoName = "my-nixos-test.iso";
   };
 }
