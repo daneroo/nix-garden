@@ -94,4 +94,4 @@ The goal is to replace the existing `minimal-iso/` directory with a modern imple
 
 4. **Documentation Scope**: Should this include updating the bootstrap scripts in `scripts/disko-format-install/` to work with the new framework?
 
-5. **Upgrade Path**: Should we research and document any breaking changes or considerations when moving from NixOS 24.11 to 25.05? 
+5. **Upgrade Path**: Should we research and document any breaking changes or considerations when moving from NixOS 24.11 to 25.05?
