@@ -11,6 +11,8 @@
   imports = [
     # Use the new image building modules instead of old cd-dvd approach
     (modulesPath + "/profiles/installation-device.nix")
+    # Import the ISO image module for configuration options
+    (modulesPath + "/installer/cd-dvd/iso-image.nix")
   ];
 
   # Enable experimental Nix features
@@ -61,9 +63,6 @@
   '';
 
   # Image configuration for NixOS 25.05
-  # Uses the new system.build.images approach
-  # The actual image options are configured through the installation-device profile
-  
-  # Customize ISO filename with "my-" prefix to match previous naming convention
+  # Uses the new system.build.images approach with custom naming
   isoImage.isoName = "my-nixos-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.system}.iso";
 }
