@@ -69,5 +69,8 @@
     # Configure ISO-specific options
     isoImage.makeEfiBootable = true;
     isoImage.makeUsbBootable = true;
+
+    # Custom ISO naming with "my-" prefix
+    isoImage.isoName = "my-nixos-${config.system.nixos.release}-${pkgs.stdenv.hostPlatform.system}.iso";
   };
 }
