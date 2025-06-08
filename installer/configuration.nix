@@ -1,5 +1,16 @@
 # NixOS 25.05 Installer Configuration
-# Uses the new installer framework with system.build.images
+# 
+# This configuration uses the NEW NixOS 25.05 installer framework built on system.build.images
+# Key differences from legacy approach:
+# - Uses image.modules.VARIANT to define image types
+# - Provides system.build.images.VARIANT instead of system.build.isoImage
+# - Build with: nix build .#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
+# 
+# NAMING: The new framework generates deterministic names like:
+#   nixos-25.05.20250605.4792576-x86_64-linux.iso
+# Custom naming via isoImage.isoName does NOT work within image.modules scope.
+# The framework appears to override naming programmatically.
+#
 {
   config,
   lib,
@@ -9,16 +20,16 @@
 }:
 {
   imports = [
-    # Use the new image building modules instead of old cd-dvd approach
+    # Installation device profile: provides installer environment (users, services, etc.)
     (modulesPath + "/profiles/installation-device.nix")
   ];
 
-  # Enable experimental Nix features
+  # Enable experimental Nix features for flakes
   nix.settings = {
     experimental-features = "nix-command flakes";
   };
 
-  # Include NixOS 25.05 installer tools package
+  # Essential packages for the installer environment
   environment.systemPackages = with pkgs; [
     wget
     curl
@@ -60,17 +71,16 @@
     fi
   '';
 
-  # Image configuration for NixOS 25.05
-  # Define the iso-installer variant using the new image.modules framework
+  # NixOS 25.05 Image Framework Configuration
+  # Define the iso-installer variant that provides system.build.images.iso-installer
   image.modules.iso-installer = {
-    # Import the ISO image building module for this variant
     imports = [ (modulesPath + "/installer/cd-dvd/iso-image.nix") ];
-
-    # Configure ISO-specific options
+    
+    # ISO configuration
     isoImage.makeEfiBootable = true;
     isoImage.makeUsbBootable = true;
-
-    # Custom ISO naming with "my-" prefix (test with hardcoded value first)
-    isoImage.isoName = "my-nixos-test.iso";
+    
+    # NOTE: Custom naming doesn't work - framework overrides isoImage.isoName
+    # Results in: nixos-25.05.20250605.4792576-x86_64-linux.iso (deterministic and good)
   };
 }
