@@ -11,8 +11,6 @@
   imports = [
     # Use the new image building modules instead of old cd-dvd approach
     (modulesPath + "/profiles/installation-device.nix")
-    # Import the ISO image module for configuration options
-    (modulesPath + "/installer/cd-dvd/iso-image.nix")
   ];
 
   # Enable experimental Nix features
