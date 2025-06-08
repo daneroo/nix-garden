@@ -34,6 +34,11 @@ This repository should contain:
 ## TODO
 
 - [Colmena: for deployment](https://github.com/zhaofengli/colmena)
+- Explain the bootstrap process - and shorten it!
+  - utimately - right from an off-the shelf installer (NixOS - Or ubuntu?)
+  - or my minimal iso
+  - or from a working NixOS
+  - also combine everything into a safe architecture neutrl script?
 - Formatting best practices for Nix
   - formatter attribute/default values
   - invoke with `nix run nixpkgs#nixfmt-tree -- .`
@@ -168,9 +173,30 @@ Key Improvements:
 Planned Workflow:
 
 ```bash
-# Build installer images (new approach - will produce my-nixos-25.05.xxx-*.iso files)
-nix build .#nixosConfigurations.installer-x86_64.config.system.build.isoImage
-nix build .#nixosConfigurations.installer-aarch64.config.system.build.isoImage
+# On a working NixOS, of the right architecture, build the installer image
+git clone https://github.com/daneroo/nix-garden.git
+cd nix-garden
+# Build installer images (new approach - produces nixos-25.05.xxx-*.iso files)
+# x86_64
+nix build .#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
+# copy the artifact
+cp result/iso/nixos-25.05.20250605.4792576-x86_64-linux.iso my-nixos-25.05.20250605.4792576-x86_64-linux.iso
+# checksum
+sha256sum my-nixos-25.05.20250605.4792576-x86_64-linux.iso
+# copy to our registry!
+chmod 644 my-nixos-25.05.20250605.4792576-x86_64-linux.iso
+scp -p ./my-nixos-25.05.20250605.4792576-x86_64-linux.iso daniel@galois:Downloads/iso/
+
+# aarch64
+nix build .#nixosConfigurations.installer-aarch64.config.system.build.images.iso-installer
+# copy the artifact
+cp result/iso/nixos-25.05.20250605.4792576-aarch64-linux.iso my-nixos-25.05.20250605.4792576-aarch64-linux.iso
+# checksum
+sha256sum my-nixos-25.05.20250605.4792576-aarch64-linux.iso
+chmod 644 my-nixos-25.05.20250605.4792576-aarch64-linux.iso
+scp -p ./my-nixos-25.05.20250605.4792576-aarch64-linux.iso daniel@galois:Downloads/iso/
+
+## Now boot these images on a new machine: 8GB if you want to build the iso in the installer!
 
 # Same bootstrap process (unchanged)
 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
