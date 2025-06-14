@@ -38,7 +38,7 @@ This repository should contain:
   - utimately - right from an off-the shelf installer (NixOS - Or ubuntu?)
   - or my minimal iso
   - or from a working NixOS
-  - also combine everything into a safe architecture neutrl script?
+  - also combine everything into a safe architecture neutral script?
 - Formatting best practices for Nix
   - formatter attribute/default values
   - invoke with `nix run nixpkgs#nixfmt-tree -- .`
@@ -197,38 +197,17 @@ chmod 644 my-nixos-25.05.20250605.4792576-aarch64-linux.iso
 scp -p ./my-nixos-25.05.20250605.4792576-aarch64-linux.iso daniel@galois:Downloads/iso/
 
 ## Now boot these images on a new machine: 8GB if you want to build the iso in the installer!
-
-# Same bootstrap process (unchanged)
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 ```
 
-#### Current Legacy Approach (Deprecated)
-
-For NixOS we boot from a customized minimal boot iso (built with NixOS 24.11), and use disko to format the disk.
-
-The minimal iso includes sshd enabled with authorized keys and supports both `x86_64-linux` and `aarch64-linux` architectures.
-
-Current Build Process (Separate Flake):
+Bootstrap Workflow:
 
 ```bash
-cd minimal-iso
-nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
-nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
-```
-
-Bootstrap Workflow (Unchanged):
-
-```bash
-# Login to the new VM as nixos user
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168....
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.{2|73}.xx
 
 # List the targets!
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
+# force update the cache - if necessary (cache busting)
 # nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
-
-# Trigger disk format and install from remote flake
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 
