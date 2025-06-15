@@ -1,6 +1,20 @@
 #!/bin/bash
 
-echo "=== Remote Script Execution ==="
+# VM Configuration
+CORES=4
+MEMORY=8192
+DISK_SIZE="32"
+NETWORK="virtio,bridge=vmbr0,firewall=1"
+STORAGE="local-zfs"
+SCSIHW="virtio-scsi-single"
+IOTHREAD=1
+# Proxmox storage mapping: pve-storage_backups-isos -> /pve-storage/backups-isos/template/
+ISO_STORAGE="pve-storage_backups-isos"  # Used in qm create --ide2
+ISO_PATH="/pve-storage/backups-isos/template/iso"  # Used for filesystem checks
+VM_NAME="nix2505"
+
+echo "# Remote Script Execution"
+echo ""
 echo "Host: $(hostname)"
 echo "Date: $(date)"
 echo ""
@@ -11,14 +25,14 @@ VMID=""
 
 # Function to show usage
 show_usage() {
-    echo "Usage: $0 --iso <ISO_FILE> --vmid <VM_ID>"
+    echo "Usage: $0 --iso <ISO_FILENAME> --vmid <VM_ID>"
     echo "Options:"
-    echo "  --iso, --iso-file    Path to ISO file (required)"
+    echo "  --iso, --iso-file    ISO filename (required)"
     echo "  --vmid, --vm-id      Virtual Machine ID - must be integer (required)"
     echo "  --help, -h           Show this help message"
     echo ""
     echo "Example:"
-    echo "  $0 --iso /path/to/file.iso --vmid 123"
+    echo "  $0 --iso my-nixos-25.05.20250605.4792576-x86_64-linux.iso --vmid 123"
 }
 
 # Function to validate integer
@@ -75,9 +89,10 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-echo "Arguments received:"
-echo "  ISO_IMAGE_FILE: $ISO_IMAGE_FILE"
-echo "  VMID: $VMID"
+echo "## Arguments validation:"
+echo ""
+echo "  - ISO_IMAGE_FILE: $ISO_IMAGE_FILE"
+echo "  - VMID: $VMID"
 echo ""
 
 # Validate required parameters
@@ -103,36 +118,82 @@ fi
 echo "✓ VMID validation passed: $VMID"
 
 # Validate ISO file exists and has .iso extension
-if [ ! -f "$ISO_IMAGE_FILE" ]; then
-    echo "✗ ERROR: ISO file does not exist: $ISO_IMAGE_FILE"
+if [ ! -f "$ISO_PATH/$ISO_IMAGE_FILE" ]; then
+    echo "✗ ERROR: ISO file does not exist: $ISO_PATH/$ISO_IMAGE_FILE"
     exit 1
 fi
 
 # Check file extension (optional but good practice)
 if [[ ! "$ISO_IMAGE_FILE" =~ \.(iso|ISO)$ ]]; then
-    echo "⚠ WARNING: File doesn't have .iso extension: $ISO_IMAGE_FILE"
+    echo "✗ ERROR: File doesn't have .iso extension: $ISO_IMAGE_FILE"
+    exit 1
 fi
 
-echo "✓ ISO file exists: $ISO_IMAGE_FILE"
+echo "✓ ISO file exists in storage: $ISO_PATH/$ISO_IMAGE_FILE"
 
 # Print file info and SHA256 sum
-echo "File size: $(du -h "$ISO_IMAGE_FILE" | cut -f1)"
-echo "Computing SHA256 sum..."
-sha256sum "$ISO_IMAGE_FILE"
+echo "  - File size: $(du -h "$ISO_PATH/$ISO_IMAGE_FILE" | cut -f1)"
+echo "  - Computing SHA256 sum..."
+sha256sum "$ISO_PATH/$ISO_IMAGE_FILE"
 echo ""
 
-# Check if VMID already exists (Proxmox VE)
+# Create VM if VMID does not already exist (Proxmox VE)
 if command -v qm >/dev/null 2>&1; then
     if qm list | grep -q "^[[:space:]]*$VMID[[:space:]]"; then
-        echo "⚠ WARNING: VM with ID $VMID already exists!"
+        echo "- INFO: VM with ID $VMID already exists!"
         echo "Existing VM details:"
         qm list | grep "^[[:space:]]*$VMID[[:space:]]"
     else
         echo "✓ VM ID $VMID is available"
+        # Create VM here
+        qm create "$VMID" \
+            --memory "$MEMORY" \
+            --cores "$CORES" \
+            --net0 "$NETWORK" \
+            --scsihw "$SCSIHW" \
+            --scsi0 "$STORAGE:$DISK_SIZE" \
+            --ide2 "$ISO_STORAGE:iso/$ISO_IMAGE_FILE,media=cdrom" \
+            --boot order=scsi0\;ide2\;net0 \
+            --agent 1 \
+            --name "$VM_NAME"
     fi
 else
-    echo "⚠ WARNING: 'qm' command not found - cannot check VM existence"
+    echo "✗ ERROR: 'qm' command not found - cannot check VM existence"
+    exit 1
+fi
+
+# Here the VM should exist
+echo "## VM Configuration"
+echo ""
+qm config "$VMID"
+echo ""
+
+## Starting VM
+echo "Starting VM $VMID..."
+qm start "$VMID"
+
+## Waiting for VM to be running
+echo "Waiting for VM to be running..."
+MAX_ATTEMPTS=30
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    STATUS=$(qm status "$VMID" | grep "status:" | cut -d' ' -f2)
+    echo "  Status: $STATUS"
+    if [ "$STATUS" = "running" ]; then
+        echo "✓ VM is running"
+        break
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    sleep 2
+done
+
+if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+    echo "✗ ERROR: VM failed to start within timeout"
+    exit 1
 fi
 
 echo ""
-echo "=== Script completed successfully ==="
+
+
+echo ""
+echo "## Script completed successfully"

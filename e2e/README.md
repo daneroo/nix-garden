@@ -25,6 +25,7 @@ Process:
 ## Invocation
 
 ```bash
+# ssh-copy-id -i ~/.ssh/id_ed25519.pub root@hilbert
 ./proxmox-bootstrap.sh
 # or from parent directory
 ./e2e/proxmox-bootstrap.sh
