@@ -246,13 +246,13 @@ ping_sweep() {
 
 # if VM_NEWLY_CREATED=true, wait 10 seconds before pinging
 if [ "$VM_NEWLY_CREATED" = true ]; then
-    echo "- VM was newly created, wait before first ping sweep"
-    sleep 10
+    echo "- VM was newly created, wait before first ping sweep (20s)"
+    sleep 20
 fi
 
 for try in {1..3}; do
-    echo "- Starting Ping Sweep $try/3"
     sleep 10
+    echo "- Starting Ping Sweep $try/3"
     ping_sweep
     [ ! -z "$VM_IP" ] && break
 done
