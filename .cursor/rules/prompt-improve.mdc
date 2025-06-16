@@ -5,6 +5,8 @@ alwaysApply: false
 ---
 # Improve the User's Prompt Following the Patterns Below
 
+- source: <https://github.com/snarktank/ai-dev-tasks>
+
 > Practical prompt patterns to help anyone get clearer, more reliable answers from an AI agent.
 
 | # | Pattern | Why It Matters | Template | Example Prompt |

@@ -5,6 +5,8 @@ alwaysApply: false
 ---
 # Task List Management
 
+- source: <https://github.com/snarktank/ai-dev-tasks>
+
 Guidelines for managing task lists in markdown files to track progress on completing a PRD
 
 ## Task Implementation
