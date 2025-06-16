@@ -220,31 +220,41 @@ echo "- SUBNET_PREFIX: ${SUBNET_PREFIX}.0/24"
 echo "- PING_TIMEOUT: ${PING_TIMEOUT}s"
 
 ping_sweep() {
-  echo "- Starting Ping Sweep"
-  # Step 1 – populate ARP cache with a controlled parallel ping sweep (Linux)
-  CONCURRENCY=64      # plenty, yet far below raw-socket / FD ceilings
-  WAIT_S=1            # ping timeout in seconds on Linux
+    # Step 1 – populate ARP cache with a controlled parallel ping sweep (Linux)
+    CONCURRENCY=64      # plenty, yet far below raw-socket / FD ceilings
+    WAIT_S=1            # ping timeout in seconds on Linux
 
-  {
-    seq 1 254 | \
-      xargs -P"$CONCURRENCY" -I{} \
-        sh -c 'ping -c1 -W'"$WAIT_S"' '"$SUBNET_PREFIX"'.{} >/dev/null 2>&1 || true'     
-  } || true   # swallow any non-zero xargs status so "set -euo pipefail" stays happy
-  echo "✓ Ping Sweep Completed"
-  # Step 2 – give the neighbor table a moment to settle
-  echo "- Waiting for ARP table to settle..."
-  sleep 1
-  echo "✓ ARP table settled"
+    {
+      seq 1 254 | \
+        xargs -P"$CONCURRENCY" -I{} \
+          sh -c 'ping -c1 -W'"$WAIT_S"' '"$SUBNET_PREFIX"'.{} >/dev/null 2>&1 || true'     
+    } || true   # swallow any non-zero xargs status so "set -euo pipefail" stays happy
+    echo "  ✓ Ping Sweep Completed"
+    # Step 2 – give the neighbor table a moment to settle
+    echo "  - Waiting for ARP table to settle..."
+    sleep 1
+    echo "  ✓ ARP table settled"
 
-  # Step 3: Get IP from ARP table
-  # can't use arp on proxmox - using ip neigh instead
-  # VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
-  # ip neigh show returns both IPv4 and IPv6 addresses, we only want the IPv4 one
-  VM_IP=$(ip neigh show | grep -i "${TARGET_MAC}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $1}')
-  echo "- VM_IP: ${VM_IP}"
+    # Step 3: Get IP from ARP table
+    # can't use arp on proxmox - using ip neigh instead
+    # VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
+    # ip neigh show returns both IPv4 and IPv6 addresses, we only want the IPv4 one
+    VM_IP=$(ip neigh show | grep -i "${TARGET_MAC}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $1}')
 }
 
-ping_sweep
+for try in {1..3}; do
+    echo "- Starting Ping Sweep $try/3"
+    sleep 2
+    ping_sweep
+    [ ! -z "$VM_IP" ] && break
+done
+
+if [ -z "$VM_IP" ]; then
+    echo "✗ ERROR: Could not find VM IP after 3 attempts"
+    exit 1
+fi
+
+echo "- VM_IP: ${VM_IP}"
 
 echo ""
 echo "## Completion"

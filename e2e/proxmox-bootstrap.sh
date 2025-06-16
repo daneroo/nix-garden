@@ -52,7 +52,7 @@ echo "- VM_IP: ${VM_IP}"
 echo ""
 echo "## SSHing into VM"
 echo ""
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR nixos@${VM_IP} cat /etc/os-release
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR nixos@${VM_IP} cat /etc/os-release |grep PRETTY_NAME
 echo ""
 echo ""
 echo "To connect to the VM:"
