@@ -24,5 +24,17 @@ PING_TIMEOUT=1                   # seconds to wait for each reply
 VM_IP=$(seq 1 254 | xargs -P${CONCURRENCY} -n1 -I{} sh -c 'ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.{} >/dev/null 2>&1' ; sleep 1; arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
 echo "Found VM IP: ${VM_IP}"
 
+# Alternative readable version (commented out for now)
+# echo "## Resolving VM IP from MAC address (readable version)..."
+# Step 1: Run parallel pings
+seq 1 254 | xargs -P${CONCURRENCY} -n1 -I{} sh -c 'ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.{} >/dev/null 2>&1' || true
+# Step 2: Wait for ARP responses
+sleep 1
+# Step 3: Get IP from ARP table
+VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
+echo "Found VM IP: ${VM_IP}"
+
+echo "still here"
+
 # on proxmox side
 #  ip neigh show | grep -i "$(echo 'B2:EA:94:49:DB:E4' | tr '[:upper:]' '[:lower:]')"
