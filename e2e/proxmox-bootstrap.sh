@@ -13,28 +13,35 @@ ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
 ssh root@$PROXMOX_HOST 'bash -s --' "--iso" "$ISO_FILENAME" "--vmid" "$VMID" < "$SCRIPT_DIR/local-script-for-remote-execution.sh"
 
 # Now let's resolve the IP from the mac address
+# Hold your nose the only version of this that works (without qemu-agent)
+# is ping scanning the whole subnet.
 echo "## Resolving VM IP from MAC address..."
 
-TARGET_MAC="b2:ea:94:49:db:e4"   # lowercase, colon-separated
+TARGET_MAC="B2:EA:94:49:DB:E4"   # This would be retrived from the qemu config, where it is upper case
 SUBNET_PREFIX="192.168.2"        # 192.168.2.0/24
-CONCURRENCY=64                   # how many pings in parallel
 PING_TIMEOUT=1                   # seconds to wait for each reply
 
 # Resolve VM IP from MAC address using parallel pings
-VM_IP=$(seq 1 254 | xargs -P${CONCURRENCY} -n1 -I{} sh -c 'ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.{} >/dev/null 2>&1' ; sleep 1; arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
-echo "Found VM IP: ${VM_IP}"
+# VM_IP=$(seq 1 254 | xargs -P${CONCURRENCY} -n1 -I{} sh -c 'ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.{} >/dev/null 2>&1' ; sleep 1; arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
+# echo "Found VM IP: ${VM_IP}"
 
-# Alternative readable version (commented out for now)
-# echo "## Resolving VM IP from MAC address (readable version)..."
 # Step 1: Run parallel pings
-seq 1 254 | xargs -P${CONCURRENCY} -n1 -I{} sh -c 'ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.{} >/dev/null 2>&1' || true
+# This spawns 254 background processes (one for each IP in 192.168.2.1-254)
+# The & at the end of ping makes each ping run in the background
+for i in $(seq 1 254); do
+  ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.$i >/dev/null 2>&1 &
+done
+# wait for ALL background processes to complete
+# || true needed because most pings will fail (timeout) since most IPs don't exist
+# set -e (above)would make the script exit on these failures
+wait || true
 # Step 2: Wait for ARP responses
 sleep 1
 # Step 3: Get IP from ARP table
 VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
 echo "Found VM IP: ${VM_IP}"
 
-echo "still here"
+echo "## End Of Provisioning Script"
 
 # on proxmox side
 #  ip neigh show | grep -i "$(echo 'B2:EA:94:49:DB:E4' | tr '[:upper:]' '[:lower:]')"
