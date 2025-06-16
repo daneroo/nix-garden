@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Network Config MAC to IP : for ping scan 
+SUBNET_PREFIX="192.168.2"        # 192.168.2.0/24
+PING_TIMEOUT=1                   # seconds to wait for each reply
+
 # VM Configuration
 CORES=4
 MEMORY=8192
@@ -13,7 +17,7 @@ ISO_STORAGE="pve-storage_backups-isos"  # Used in qm create --ide2
 ISO_PATH="/pve-storage/backups-isos/template/iso"  # Used for filesystem checks
 VM_NAME="nix2505"
 
-echo "# Remote Script Execution"
+echo "## Remote Script Start (proxmox side)"
 echo ""
 echo "Host: $(hostname)"
 echo "Date: $(date)"
@@ -191,9 +195,40 @@ if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
     echo "✗ ERROR: VM failed to start within timeout"
     exit 1
 fi
-
 echo ""
 
+echo "## Resolving VM IP from MAC address..."
+# Now let's resolve the IP from the mac address
+# Hold your nose the only version of this that works (without qemu-agent)
+# is ping scanning the whole subnet.
+
+
+# Extract MAC from VM config
+# e.g. net0: virtio=B2:EA:94:49:DB:E4,bridge=vmbr0,firewall=1
+TARGET_MAC=$(qm config "$VMID" | grep "net0:" | sed -E 's/.*virtio=([^,]+).*/\1/')
+echo "Target MAC: ${TARGET_MAC}"
+echo "Subnet: ${SUBNET_PREFIX}.0/24"
+echo "Ping timeout: ${PING_TIMEOUT}s"
+
+# Step 1: Run parallel pings
+# This spawns 254 background processes (one for each IP in 192.168.2.1-254)
+# The & at the end of ping makes each ping run in the background
+for i in $(seq 1 254); do
+  ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.$i >/dev/null 2>&1 &
+done
+# wait for ALL background processes to complete
+# || true needed because most pings will fail (timeout) since most IPs don't exist
+# set -e (above)would make the script exit on these failures
+wait || true
+# Step 2: Wait for ARP responses
+sleep 1
+# Step 3: Get IP from ARP table
+# can't use arp on proxmox - using ip neigh instead
+# VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
+# ip neigh show returns both IPv4 and IPv6 addresses, we only want the IPv4 one
+VM_IP=$(ip neigh show | grep -i "${TARGET_MAC}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $1}')
+echo "Found VM IP: ${VM_IP}"
+
 
 echo ""
-echo "## Script completed successfully"
+echo "## Script completed successfully (proxmox side)"

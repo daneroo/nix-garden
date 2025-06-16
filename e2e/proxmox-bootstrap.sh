@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+echo "# Script Start (provisioning side)"
+
 # Get script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -12,12 +14,14 @@ ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
 # Execute local script on remote host with named parameters
 ssh root@$PROXMOX_HOST 'bash -s --' "--iso" "$ISO_FILENAME" "--vmid" "$VMID" < "$SCRIPT_DIR/local-script-for-remote-execution.sh"
 
+echo "## Resolving VM IP from MAC address..."
 # Now let's resolve the IP from the mac address
 # Hold your nose the only version of this that works (without qemu-agent)
 # is ping scanning the whole subnet.
-echo "## Resolving VM IP from MAC address..."
 
-TARGET_MAC="B2:EA:94:49:DB:E4"   # This would be retrived from the qemu config, where it is upper case
+# Get MAC from remote Proxmox host
+TARGET_MAC=$(ssh root@$PROXMOX_HOST "qm config $VMID | grep 'net0:' | sed -E 's/.*virtio=([^,]+).*/\1/'")
+echo "Target MAC: ${TARGET_MAC}"
 SUBNET_PREFIX="192.168.2"        # 192.168.2.0/24
 PING_TIMEOUT=1                   # seconds to wait for each reply
 
@@ -41,7 +45,4 @@ sleep 1
 VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
 echo "Found VM IP: ${VM_IP}"
 
-echo "## End Of Provisioning Script"
-
-# on proxmox side
-#  ip neigh show | grep -i "$(echo 'B2:EA:94:49:DB:E4' | tr '[:upper:]' '[:lower:]')"
+echo "## Successfully completed (provisioning side)"
