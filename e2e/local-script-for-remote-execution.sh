@@ -161,6 +161,8 @@ if command -v qm >/dev/null 2>&1; then
             --boot order=scsi0\;ide2\;net0 \
             --agent 1 \
             --name "$VM_NAME"
+        echo "✓ VM created"
+        VM_NEWLY_CREATED=true
     fi
 else
     echo "✗ ERROR: 'qm' command not found - cannot check VM existence"
@@ -242,9 +244,15 @@ ping_sweep() {
     VM_IP=$(ip neigh show | grep -i "${TARGET_MAC}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $1}')
 }
 
+# if VM_NEWLY_CREATED=true, wait 10 seconds before pinging
+if [ "$VM_NEWLY_CREATED" = true ]; then
+    echo "- VM was newly created, wait before first ping sweep"
+    sleep 10
+fi
+
 for try in {1..3}; do
     echo "- Starting Ping Sweep $try/3"
-    sleep 2
+    sleep 10
     ping_sweep
     [ ! -z "$VM_IP" ] && break
 done
