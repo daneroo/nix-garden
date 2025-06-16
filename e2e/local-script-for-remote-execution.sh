@@ -19,8 +19,8 @@ VM_NAME="nix2505"
 
 echo "## Remote Script Start (proxmox side)"
 echo ""
-echo "Host: $(hostname)"
-echo "Date: $(date)"
+echo "- Proxmox Host: $(hostname)"
+echo "- Date: $(date -Iseconds)"
 echo ""
 
 # Initialize variables
@@ -95,8 +95,8 @@ done
 
 echo "## Arguments validation:"
 echo ""
-echo "  - ISO_IMAGE_FILE: $ISO_IMAGE_FILE"
-echo "  - VMID: $VMID"
+echo "- ISO_IMAGE_FILE: $ISO_IMAGE_FILE"
+echo "- VMID: $VMID"
 echo ""
 
 # Validate required parameters
@@ -136,19 +136,20 @@ fi
 echo "✓ ISO file exists in storage: $ISO_PATH/$ISO_IMAGE_FILE"
 
 # Print file info and SHA256 sum
-echo "  - File size: $(du -h "$ISO_PATH/$ISO_IMAGE_FILE" | cut -f1)"
-echo "  - Computing SHA256 sum..."
-sha256sum "$ISO_PATH/$ISO_IMAGE_FILE"
+echo "- ISOFileSize: $(du -h "$ISO_PATH/$ISO_IMAGE_FILE" | cut -f1)"
+echo "- ISOSHA256: $(sha256sum "$ISO_PATH/$ISO_IMAGE_FILE" | awk '{print $1}')"
 echo ""
 
 # Create VM if VMID does not already exist (Proxmox VE)
 if command -v qm >/dev/null 2>&1; then
-    if qm list | grep -q "^[[:space:]]*$VMID[[:space:]]"; then
-        echo "- INFO: VM with ID $VMID already exists!"
-        echo "Existing VM details:"
-        qm list | grep "^[[:space:]]*$VMID[[:space:]]"
+    QM_LIST=$(qm list)
+    if echo "$QM_LIST" | grep -q "^[[:space:]]*$VMID[[:space:]]"; then
+        echo "✓ INFO: VM with ID $VMID already exists!"
+        # show the header, then show the matched line
+        echo "$QM_LIST" | head -n1
+        echo "$QM_LIST" | grep "^[[:space:]]*$VMID[[:space:]]"
     else
-        echo "✓ VM ID $VMID is available"
+        echo "✓ INFO: VM ID $VMID is available, creating VM"
         # Create VM here
         qm create "$VMID" \
             --memory "$MEMORY" \
@@ -165,24 +166,31 @@ else
     echo "✗ ERROR: 'qm' command not found - cannot check VM existence"
     exit 1
 fi
+echo "" # empty line
 
 # Here the VM should exist
 echo "## VM Configuration"
-echo ""
+echo "" # empty line
+echo '```txt'
 qm config "$VMID"
+echo '```'
+echo "" # empty line
 echo ""
 
+echo "## VM Start"
+echo "" # empty line
+
 ## Starting VM
-echo "Starting VM $VMID..."
+echo "- Starting VM $VMID..."
 qm start "$VMID"
 
 ## Waiting for VM to be running
-echo "Waiting for VM to be running..."
+echo "- Waiting for VM to be running..."
 MAX_ATTEMPTS=30
 ATTEMPT=0
 while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     STATUS=$(qm status "$VMID" | grep "status:" | cut -d' ' -f2)
-    echo "  Status: $STATUS"
+    echo "  - Status: $STATUS"
     if [ "$STATUS" = "running" ]; then
         echo "✓ VM is running"
         break
@@ -198,6 +206,7 @@ fi
 echo ""
 
 echo "## Resolving VM IP from MAC address..."
+echo "" # empty line
 # Now let's resolve the IP from the mac address
 # Hold your nose the only version of this that works (without qemu-agent)
 # is ping scanning the whole subnet.
@@ -206,29 +215,41 @@ echo "## Resolving VM IP from MAC address..."
 # Extract MAC from VM config
 # e.g. net0: virtio=B2:EA:94:49:DB:E4,bridge=vmbr0,firewall=1
 TARGET_MAC=$(qm config "$VMID" | grep "net0:" | sed -E 's/.*virtio=([^,]+).*/\1/')
-echo "Target MAC: ${TARGET_MAC}"
-echo "Subnet: ${SUBNET_PREFIX}.0/24"
-echo "Ping timeout: ${PING_TIMEOUT}s"
+echo "- TARGET_MAC: ${TARGET_MAC}"
+echo "- SUBNET_PREFIX: ${SUBNET_PREFIX}.0/24"
+echo "- PING_TIMEOUT: ${PING_TIMEOUT}s"
 
-# Step 1: Run parallel pings
-# This spawns 254 background processes (one for each IP in 192.168.2.1-254)
-# The & at the end of ping makes each ping run in the background
-for i in $(seq 1 254); do
-  ping -c1 -W${PING_TIMEOUT} ${SUBNET_PREFIX}.$i >/dev/null 2>&1 &
-done
-# wait for ALL background processes to complete
-# || true needed because most pings will fail (timeout) since most IPs don't exist
-# set -e (above)would make the script exit on these failures
-wait || true
-# Step 2: Wait for ARP responses
+echo "- Starting Ping Sweep"
+
+###############################################################################
+# Step 1 – populate ARP cache with a controlled parallel ping sweep (Linux)
+###############################################################################
+CONCURRENCY=64      # plenty, yet far below raw-socket / FD ceilings
+WAIT_S=1            # ping timeout in seconds on Linux
+
+{
+  seq 1 254 | \
+    xargs -P"$CONCURRENCY" -I{} \
+      sh -c 'ping -c1 -W'"$WAIT_S"' '"$SUBNET_PREFIX"'.{} >/dev/null 2>&1 || true'     
+} || true   # swallow any non-zero xargs status so “set -euo pipefail” stays happy
+echo "✓ Ping Sweep Completed"
+# Step 2 – give the neighbor table a moment to settle
+echo "- Waiting for ARP table to settle..."
 sleep 1
+echo "✓ ARP table settled"
+
 # Step 3: Get IP from ARP table
 # can't use arp on proxmox - using ip neigh instead
 # VM_IP=$(arp -an | grep -i "${TARGET_MAC}" | sed -E 's/.*\(([0-9.]+)\).*/\1/')
 # ip neigh show returns both IPv4 and IPv6 addresses, we only want the IPv4 one
 VM_IP=$(ip neigh show | grep -i "${TARGET_MAC}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $1}')
-echo "Found VM IP: ${VM_IP}"
+echo "- VM_IP: ${VM_IP}"
+
+
 
 
 echo ""
-echo "## Script completed successfully (proxmox side)"
+echo "## Completion"
+echo ""
+echo "✓ Script completed successfully (proxmox side)"
+echo ""
