@@ -58,9 +58,9 @@ for ARCH in "${ARCHS[@]}"; do
     echo "Building..."
     # Note: Docker containers have sandboxing issues with seccomp BPF
     # Options: --privileged (enables proper sandboxing) or --option sandbox false (disables sandboxing)
-    # We assume sandboxing is not critical for building NixOS ISOs from trusted sources
-    docker run --rm --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} \
-        nix --extra-experimental-features "nix-command flakes" --option sandbox false \
+    # We use --privileged since --option sandbox false didn't resolve the seccomp BPF error
+    docker run --rm --privileged --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} \
+        nix --extra-experimental-features "nix-command flakes" \
         build --quiet .#nixosConfigurations.${BUILD_TARGET}.config.system.build.images.iso-installer
     
     echo ""
