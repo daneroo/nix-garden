@@ -151,6 +151,7 @@ if command -v qm >/dev/null 2>&1; then
     else
         echo "✓ INFO: VM ID $VMID is available, creating VM"
         # Create VM here
+        # - bios ovmf, is for UEFI boot
         qm create "$VMID" \
             --memory "$MEMORY" \
             --cores "$CORES" \
@@ -159,6 +160,7 @@ if command -v qm >/dev/null 2>&1; then
             --scsi0 "$STORAGE:$DISK_SIZE" \
             --ide2 "$ISO_STORAGE:iso/$ISO_IMAGE_FILE,media=cdrom" \
             --boot order=scsi0\;ide2\;net0 \
+            --bios ovmf \
             --agent 1 \
             --name "$VM_NAME"
         echo "✓ VM created"
