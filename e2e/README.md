@@ -2,6 +2,7 @@
 
 ## TODO
 
+- [ ] remove all references to branch (after merge) feature/nixos-25-05-installer
 - [ ] complete the proxmox-bootstrap script : validate what?
 - [ ] find alternative so my installer can broadcast it;s ip!
   - [ ] nats, local or remote?

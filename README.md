@@ -207,12 +207,24 @@ ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.{2
 # List the targets!
 nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
 # force update the cache - if necessary (cache busting)
-# nix flake update github:daneroo/nix-garden?dir=scripts/disko-format-install
+# nix flake update --flake github:daneroo/nix-garden?dir=scripts/disko-format-install
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
 nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
 
-# Reboot and login to the new VM as daniel
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null daniel@192.168....
+# or while I'm on the branch
+# but that still won;t work because scripts/disko-format refers to main branch
+DISKO_AUTO_CONFIRM=true nix run --impure github:daneroo/nix-garden/feature/nixos-25-05-installer?dir=scripts/disko-format-install minimal-amd64
+# So...
+# we'll duplicate it here
+FLAKE_URI="github:daneroo/nix-garden/feature/nixos-25-05-installer"
+nix flake show ${FLAKE_URI} --json | jq '.nixosConfigurations | keys'
+TARGET_HOST="minimal-amd64"
+FLAKE_OUTPUT_REF="${FLAKE_URI}#${TARGET_HOST}"
+sudo nix run github:nix-community/disko -- --mode disko --flake ${FLAKE_OUTPUT_REF}
+# Test if the configuration can be built (without installing)
+nix build ${FLAKE_URI}#nixosConfigurations.minimal-amd64.config.system.build.toplevel --dry-run
+sudo nixos-install --flake ${FLAKE_OUTPUT_REF} --no-root-passwd
+sudo nixos-install --flake ${FLAKE_OUTPUT_REF} --no-root-passwd --verbose
 ```
 
 Disko Integration:
