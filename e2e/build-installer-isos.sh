@@ -77,20 +77,46 @@ for ARCH in "${ARCHS[@]}"; do
     # Work-arounds applied:
     #   1. --security-opt seccomp=unconfined   → disable Docker-level seccomp
     #   2. nix --option filter-syscalls false  → disable Nix's internal seccomp filter
+    
+    # HEREDOC BEHAVIOR:
+    # - With unquoted <<EOT: Both $variables and $(command) substitutions happen on HOST before content is sent to container
+    # - With quoted <<'EOT': No substitutions occur, everything is passed literally to the container
+    # - We need to use unquoted heredoc to pass BUILD_TARGET from host to container
     docker run --rm -i --security-opt seccomp=unconfined --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_PLATFORM_DOCKER_IMAGE} bash <<EOT
+# set -x # for tracing
+echo "Nix version: $(nix --version)"
+echo "Building for target: ${BUILD_TARGET}"
+# remove the result (usually a nix store path link) directory
+# so we don't get spurious 'Git tree '/repo' is dirty' warnings
+# use || true to prevent errors if directory doesn't exist
+rm -rf result || true
 nix --extra-experimental-features 'nix-command flakes' --option filter-syscalls false \
     build --quiet .#nixosConfigurations.${BUILD_TARGET}.config.system.build.images.iso-installer
     
+# Find the ISO file (there should be only one)
+ISO_FILE=\$(find result/iso -name "*.iso" -type f | head -n 1)
+
+# Check if we actually found an ISO file
+if [ -z "\${ISO_FILE}" ]; then
+  echo "✗ ERROR: No ISO file found in result/iso directory!"
+  exit 1
+fi
+
+echo "ISO file: \${ISO_FILE}"
 # Calculate checksum of the ISO inside the container
-sha256sum result/iso/*iso
-du -sh result/iso/*iso
+sha256sum \${ISO_FILE}
+du -sh \${ISO_FILE}
+# now copy it out to the hosts' current directory (mounted as /repo) with nu- prefix
+cp \${ISO_FILE} /repo/nu-\$(basename \${ISO_FILE})
 EOT
-    echo "TODO: Copy out artifacts later"
-    echo ""
-    
     echo "✓ Completed ${ARCH} build"
     echo ""
 done
+
+echo "## Copied ISO digests (host)"
+sha256sum nu-*.iso
+echo ""
+
 
 echo "## Completion"
 echo ""
