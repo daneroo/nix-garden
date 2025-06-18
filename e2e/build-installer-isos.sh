@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# TODO:
+# - [ ] Remove set +x : annoying
+# - [ ] Figure out how to use EOT - heredoc
+# - [ ] Justify set -euo pipefail: seems to cause more issues than safety
+
 echo "# Build Installer ISOs Script"
 echo ""
 
@@ -15,19 +20,16 @@ echo ""
 # Configuration
 # Using multi-arch nixos/nix:latest image which automatically selects the right architecture
 # Alternative: could use single arch images like nixos/nix:latest-amd64, nixos/nix:latest-arm64
-NIXOS_DOCKER_IMAGE="nixos/nix:latest"
+# Preferred: use pinned tags nixos/nix:2.28.3, nixos/nix:2.28.3-amd64, nixos/nix:2.28.3-arm64
+# NIXOS_DOCKER_IMAGE="nixos/nix:latest"
+NIXOS_DOCKER_IMAGE="nixos/nix:2.28.3"
+
 ARCHS=("aarch64" "x86_64")
 
-# Map architectures to build targets
-declare -A BUILD_TARGET_MAP=(
-    ["x86_64"]="installer-x86_64"
-    ["aarch64"]="installer-aarch64"
-)
-
-# Map architectures to Docker platforms
-declare -A DOCKER_PLATFORM_MAP=(
-    ["x86_64"]="linux/amd64"
-    ["aarch64"]="linux/arm64"
+# Map architectures to Docker platforms, e.g. docker run --platform linux/amd64
+declare -A PLATFORM_MAP=(
+    ["x86_64"]="amd64"
+    ["aarch64"]="arm64"
 )
 
 echo "## Configuration"
@@ -35,11 +37,22 @@ echo "- Docker Image: ${NIXOS_DOCKER_IMAGE}"
 echo "- Architectures: ${ARCHS[*]}"
 echo ""
 
-# Show flake structure
-echo "## Flake Structure"
-echo ""
-docker run --rm --platform linux/amd64 -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} \
-    nix --extra-experimental-features "nix-command flakes" flake show --quiet --all-systems
+# echo "## Check Nix Version"
+# docker run --rm  ${NIXOS_DOCKER_IMAGE} nix --version
+# docker run --rm --platform linux/amd64 ${NIXOS_DOCKER_IMAGE}-amd64 nix --version
+# docker run --rm --platform linux/arm64 ${NIXOS_DOCKER_IMAGE}-arm64 nix --version
+# echo ""
+# # temporary early exit while we investigate multiple issues
+# exit 0
+
+# Figure out how to use EOT - heredoc
+# print Nix version in container!
+echo "## Check Nix Version and Flake Structure"
+# Using -i flag to ensure output is properly captured
+docker run --rm -i --platform linux/amd64 -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} bash <<EOT
+nix --version
+nix --extra-experimental-features "nix-command flakes" flake show --quiet --all-systems
+EOT
 echo ""
 
 # Build ISOs for each architecture
@@ -47,12 +60,14 @@ for ARCH in "${ARCHS[@]}"; do
     echo "## Building ${ARCH} Installer ISO"
     echo ""
     
-    BUILD_TARGET="${BUILD_TARGET_MAP[$ARCH]}"
-    DOCKER_PLATFORM="${DOCKER_PLATFORM_MAP[$ARCH]}"
+    BUILD_TARGET="installer-${ARCH}"
+    DOCKER_PLATFORM="linux/${PLATFORM_MAP[$ARCH]}"
+    NIXOS_PLATFORM_DOCKER_IMAGE="${NIXOS_DOCKER_IMAGE}-${PLATFORM_MAP[$ARCH]}"
     
     echo "- Architecture: ${ARCH}"
     echo "- Build Target: ${BUILD_TARGET}"
     echo "- Docker Platform: ${DOCKER_PLATFORM}"
+    echo "- NixOS Platform Docker Image: ${NIXOS_PLATFORM_DOCKER_IMAGE}"
     echo ""
     
     echo "Building..."
@@ -62,29 +77,14 @@ for ARCH in "${ARCHS[@]}"; do
     # Work-arounds applied:
     #   1. --security-opt seccomp=unconfined   → disable Docker-level seccomp
     #   2. nix --option filter-syscalls false  → disable Nix's internal seccomp filter
-    docker run --rm --security-opt seccomp=unconfined --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} \
-        bash -euo pipefail -c "\
-        set -x
-        nix --extra-experimental-features 'nix-command flakes' --option filter-syscalls false \\
-            build --quiet .#nixosConfigurations.${BUILD_TARGET}.config.system.build.images.iso-installer
-            
-        # Calculate checksum of the ISO inside the container
-        ls -la result/
-        if [ -d result/iso ]; then
-            ls -la result/iso/
-            iso_file=\"result/iso/nixos-25.05.20250605.4792576-${ARCH}-linux.iso\"
-            if [ -f \$iso_file ]; then
-                echo \"  - ISO file: \$(basename \$iso_file)\"
-                echo \"  - SHA256: \$(sha256sum \$iso_file | cut -d' ' -f1)\"
-            else
-                echo \"ERROR: ISO file not found at \$iso_file\"
-                find result -name \"*.iso\" -type f
-            fi
-        else
-            echo \"ERROR: result/iso directory not found\"
-            ls -la result
-            readlink result
-        fi"
+    docker run --rm -i --security-opt seccomp=unconfined --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_PLATFORM_DOCKER_IMAGE} bash <<EOT
+nix --extra-experimental-features 'nix-command flakes' --option filter-syscalls false \
+    build --quiet .#nixosConfigurations.${BUILD_TARGET}.config.system.build.images.iso-installer
+    
+# Calculate checksum of the ISO inside the container
+sha256sum result/iso/*iso
+du -sh result/iso/*iso
+EOT
     echo "TODO: Copy out artifacts later"
     echo ""
     
