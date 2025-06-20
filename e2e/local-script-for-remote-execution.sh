@@ -7,7 +7,7 @@ PING_TIMEOUT=1                   # seconds to wait for each reply
 # VM Configuration
 CORES=4
 MEMORY=8192
-DISK_SIZE="32"
+DISK_SIZE="64"
 NETWORK="virtio,bridge=vmbr0,firewall=1"
 STORAGE="local-zfs"
 SCSIHW="virtio-scsi-single"
