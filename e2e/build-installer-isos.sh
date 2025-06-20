@@ -13,13 +13,26 @@ echo "- Repo Root: ${REPO_ROOT}"
 echo ""
 
 # Configuration
-# Using multi-arch nixos/nix:latest image which automatically selects the right architecture
-# Alternative: could use single arch images like nixos/nix:latest-amd64, nixos/nix:latest-arm64
-# Preferred: use pinned tags nixos/nix:2.28.3, nixos/nix:2.28.3-amd64, nixos/nix:2.28.3-arm64
+# Using multi-arch nixos/nix:latest causes problems
+# Preferred: Use single arch, pinned tags nixos/nix:2.28.3-amd64, nixos/nix:2.28.3-arm64
 # NIXOS_DOCKER_IMAGE="nixos/nix:latest"
 NIXOS_DOCKER_IMAGE="nixos/nix:2.28.3"
 
-ARCHS=("aarch64" "x86_64")
+# Set architectures based on OS
+case "$(uname -s)" in
+    Darwin)
+        # On macOS, build for both architectures
+        ARCHS=("aarch64" "x86_64")
+        ;;
+    Linux)
+        # On Linux, build only for current architecture
+        ARCHS=("$(uname -m)")
+        ;;
+    *)
+        echo "Error: Unsupported operating system: $(uname -s)" >&2
+        exit 1
+        ;;
+esac
 
 # Map architectures to Docker platforms, e.g. docker run --platform linux/amd64
 declare -A PLATFORM_MAP=(
@@ -33,10 +46,13 @@ GROUP_ID=$(id -g)
 
 # Common Docker options
 # Using -i flag to ensure output (EOT) is properly captured
-DOCKER_OPTS="--rm -i -e HOME=/repo -v ${REPO_ROOT}:/repo -w /repo"
+DOCKER_OPTS="--rm -i -v ${REPO_ROOT}:/repo -w /repo"
+
+# Command to run bash in a cross-platform way
+BASH_CMD="env bash"
 
 echo "## Configuration"
-echo "- Docker Image: ${NIXOS_DOCKER_IMAGE}"
+echo "- NixOS Docker Image (platform): ${NIXOS_DOCKER_IMAGE}-${PLATFORM_MAP[${ARCHS[0]}]}"
 echo "- Architectures: ${ARCHS[*]}"
 echo "- User ID: ${USER_ID}, Group ID: ${GROUP_ID}"
 echo ""
@@ -52,7 +68,8 @@ echo ""
 # Figure out how to use EOT - heredoc
 # print Nix version in container!
 echo "## Check Nix Version and Flake Structure"
-docker run ${DOCKER_OPTS} --platform linux/amd64 ${NIXOS_DOCKER_IMAGE} bash <<EOT
+ARCH="${ARCHS[0]}"
+docker run ${DOCKER_OPTS} --platform "linux/${PLATFORM_MAP[$ARCH]}" ${NIXOS_DOCKER_IMAGE}-${PLATFORM_MAP[$ARCH]} env bash <<EOT
 nix --version
 nix --extra-experimental-features "nix-command flakes" flake show --quiet --all-systems
 EOT
@@ -70,14 +87,14 @@ for ARCH in "${ARCHS[@]}"; do
     echo "- Architecture: ${ARCH}"
     echo "- Build Target: ${BUILD_TARGET}"
     echo "- Docker Platform: ${DOCKER_PLATFORM}"
-    echo "- NixOS Platform Docker Image: ${NIXOS_PLATFORM_DOCKER_IMAGE}"
+    echo "- NixOS Docker Image (platform): ${NIXOS_PLATFORM_DOCKER_IMAGE}"
     echo ""
     
     echo "Building..."
     # ISO_OUT_DIR="${SCRIPT_DIR}/isos"
     # mkdir -p "${ISO_OUT_DIR}"
     # Docker sandboxing issues (seccomp) under qemu-emulated amd64 on macOS
-    # Work-arounds applied:
+    # Workarounds applied:
     #   1. --security-opt seccomp=unconfined   → disable Docker-level seccomp
     #   2. nix --option filter-syscalls false  → disable Nix's internal seccomp filter
     
