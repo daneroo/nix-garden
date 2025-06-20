@@ -12,6 +12,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROXMOX_HOST="hilbert"
 VMID="997"
 ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
+# SSH options for convenience
+# - ConnectTimeout=10: Prevent hanging by timing out after 10 seconds
+# - StrictHostKeyChecking=no: Don't verify host keys (for automation)
+# - UserKnownHostsFile=/dev/null: Don't store or use known hosts file
+# - LogLevel=ERROR: Suppress warnings about unverified host keys
+SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
 
 # Execute local script on remote host with named parameters
 # - $(...) captures command output into variable
@@ -52,9 +58,6 @@ echo "- VM_IP: ${VM_IP}"
 echo ""
 echo "## SSHing into VM"
 echo ""
-
-# SSH options for convenience
-SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
 
 echo "### Executing in Installer VM (as nixos)"
 echo ""
