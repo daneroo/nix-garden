@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# TODO:
-# - [ ] Remove set +x : annoying
-# - [ ] Figure out how to use EOT - heredoc
-# - [ ] Justify set -euo pipefail: seems to cause more issues than safety
-
 echo "# Build Installer ISOs Script"
 echo ""
 
@@ -32,9 +27,18 @@ declare -A PLATFORM_MAP=(
     ["aarch64"]="arm64"
 )
 
+# Get current user and group IDs for Docker volume mounting
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
+
+# Common Docker options
+# Using -i flag to ensure output (EOT) is properly captured
+DOCKER_OPTS="--rm -i -e HOME=/repo -v ${REPO_ROOT}:/repo -w /repo"
+
 echo "## Configuration"
 echo "- Docker Image: ${NIXOS_DOCKER_IMAGE}"
 echo "- Architectures: ${ARCHS[*]}"
+echo "- User ID: ${USER_ID}, Group ID: ${GROUP_ID}"
 echo ""
 
 # echo "## Check Nix Version"
@@ -48,8 +52,7 @@ echo ""
 # Figure out how to use EOT - heredoc
 # print Nix version in container!
 echo "## Check Nix Version and Flake Structure"
-# Using -i flag to ensure output is properly captured
-docker run --rm -i --platform linux/amd64 -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_DOCKER_IMAGE} bash <<EOT
+docker run ${DOCKER_OPTS} --platform linux/amd64 ${NIXOS_DOCKER_IMAGE} bash <<EOT
 nix --version
 nix --extra-experimental-features "nix-command flakes" flake show --quiet --all-systems
 EOT
@@ -82,7 +85,7 @@ for ARCH in "${ARCHS[@]}"; do
     # - With unquoted <<EOT: Both $variables and $(command) substitutions happen on HOST before content is sent to container
     # - With quoted <<'EOT': No substitutions occur, everything is passed literally to the container
     # - We need to use unquoted heredoc to pass BUILD_TARGET from host to container
-    docker run --rm -i --security-opt seccomp=unconfined --platform ${DOCKER_PLATFORM} -v ${REPO_ROOT}:/repo -w /repo ${NIXOS_PLATFORM_DOCKER_IMAGE} bash <<EOT
+    docker run ${DOCKER_OPTS} --security-opt seccomp=unconfined --platform ${DOCKER_PLATFORM} ${NIXOS_PLATFORM_DOCKER_IMAGE} bash <<EOT
 # set -x # for tracing
 echo "Nix version: $(nix --version)"
 echo "Building for target: ${BUILD_TARGET}"
