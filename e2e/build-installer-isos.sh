@@ -46,7 +46,7 @@ GROUP_ID=$(id -g)
 
 # Common Docker options
 # Using -i flag to ensure output (EOT) is properly captured
-DOCKER_OPTS="--rm -i -v ${REPO_ROOT}:/repo -w /repo"
+DOCKER_OPTS="--rm -i -e HOME=/repo -v ${REPO_ROOT}:/repo -w /repo"
 
 # Command to run bash in a cross-platform way
 BASH_CMD="env bash"
