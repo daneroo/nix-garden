@@ -19,7 +19,7 @@
   boot.binfmt.emulatedSystems =
     if pkgs.stdenv.hostPlatform.isx86_64 then
       [ "aarch64-linux" ]
-    else if pkgs.stdenv.hostPlatform.isaarch64 then
+    else if pkgs.stdenv.hostPlatform.isAarch64 then
       [ "x86_64-linux" ]
     else
       [ ];
