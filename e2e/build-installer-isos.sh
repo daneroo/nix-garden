@@ -46,7 +46,7 @@ GROUP_ID=$(id -g)
 
 # Common Docker options
 # Using -i flag to ensure output (EOT) is properly captured
-DOCKER_OPTS="--rm -i -e HOME=/repo -v ${REPO_ROOT}:/repo -w /repo"
+DOCKER_OPTS="--rm -i -v ${REPO_ROOT}:/repo -w /repo"
 
 # Command to run bash in a cross-platform way
 BASH_CMD="env bash"
@@ -57,20 +57,14 @@ echo "- Architectures: ${ARCHS[*]}"
 echo "- User ID: ${USER_ID}, Group ID: ${GROUP_ID}"
 echo ""
 
-# echo "## Check Nix Version"
-# docker run --rm  ${NIXOS_DOCKER_IMAGE} nix --version
-# docker run --rm --platform linux/amd64 ${NIXOS_DOCKER_IMAGE}-amd64 nix --version
-# docker run --rm --platform linux/arm64 ${NIXOS_DOCKER_IMAGE}-arm64 nix --version
-# echo ""
-# # temporary early exit while we investigate multiple issues
-# exit 0
-
 # Figure out how to use EOT - heredoc
 # print Nix version in container!
 echo "## Check Nix Version and Flake Structure"
 ARCH="${ARCHS[0]}"
 docker run ${DOCKER_OPTS} --platform "linux/${PLATFORM_MAP[$ARCH]}" ${NIXOS_DOCKER_IMAGE}-${PLATFORM_MAP[$ARCH]} env bash <<EOT
 nix --version
+# Configure git to trust the repository directory, avoids: repository path '/repo' is not owned by current user
+git config --global --add safe.directory /repo
 nix --extra-experimental-features "nix-command flakes" flake show --quiet --all-systems
 EOT
 echo ""
@@ -106,6 +100,8 @@ for ARCH in "${ARCHS[@]}"; do
 # set -x # for tracing
 echo "Nix version: $(nix --version)"
 echo "Building for target: ${BUILD_TARGET}"
+# Configure git to trust the repository directory
+git config --global --add safe.directory /repo
 # remove the result (usually a nix store path link) directory
 # so we don't get spurious 'Git tree '/repo' is dirty' warnings
 # use || true to prevent errors if directory doesn't exist
