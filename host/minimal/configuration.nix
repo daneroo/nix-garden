@@ -15,6 +15,15 @@
     ../../disko/single-disk-ext4/disko-config.nix # Ensure the correct path
   ];
 
+  # Enable QEMU for cross-architecture builds based on host platform
+  boot.binfmt.emulatedSystems =
+    if pkgs.stdenv.hostPlatform.isX86_64 then
+      [ "aarch64-linux" ]
+    else if pkgs.stdenv.hostPlatform.isAarch64 then
+      [ "x86_64-linux" ]
+    else
+      [ ];
+
   # System settings passed as parameters
   networking.hostName = hostName; # Set hostname
   disko.devices.disk.main.device = diskDevice; # Set diskDevice

@@ -1,11 +1,11 @@
 # NixOS 25.05 Installer Configuration
-# 
+#
 # This configuration uses the NEW NixOS 25.05 installer framework built on system.build.images
 # Key differences from legacy approach:
 # - Uses image.modules.VARIANT to define image types
 # - Provides system.build.images.VARIANT instead of system.build.isoImage
 # - Build with: nix build .#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
-# 
+#
 # NAMING: The new framework generates deterministic names like:
 #   nixos-25.05.20250605.4792576-x86_64-linux.iso
 # Custom naming via isoImage.isoName does NOT work within image.modules scope.
@@ -75,11 +75,11 @@
   # Define the iso-installer variant that provides system.build.images.iso-installer
   image.modules.iso-installer = {
     imports = [ (modulesPath + "/installer/cd-dvd/iso-image.nix") ];
-    
+
     # ISO configuration
     isoImage.makeEfiBootable = true;
     isoImage.makeUsbBootable = true;
-    
+
     # NOTE: Custom naming doesn't work - framework overrides isoImage.isoName
     # Results in: nixos-25.05.20250605.4792576-x86_64-linux.iso (deterministic and good)
   };
