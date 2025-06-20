@@ -28,6 +28,18 @@
   networking.hostName = hostName; # Set hostname
   disko.devices.disk.main.device = diskDevice; # Set diskDevice
 
+  # Enable Docker
+  virtualisation.docker = {
+    enable = true;
+    enableOnBoot = true;
+  };
+
+  # Enable Incus (formerly LXD)
+  virtualisation.incus = {
+    enable = true;
+    # TODO add preseed init params
+  };
+
   # Nix specific settings
   nix.settings.experimental-features = "nix-command flakes";
 
@@ -98,6 +110,11 @@
     git
     fastfetch
     btrfs-progs # CLI needed by switch-to-configuration
+    
+    # Container tools
+    docker-compose
+    docker-buildx
+    incus-client
   ];
 
   users.users = {
@@ -115,6 +132,8 @@
       extraGroups = [
         "networkmanager"
         "wheel"
+        "docker"
+        "incus-admin"
       ];
       packages = with pkgs; [ ];
       # set a passwd with `mkpasswd -m sha-512`
