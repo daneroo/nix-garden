@@ -34,11 +34,11 @@
     enableOnBoot = true;
   };
 
-  # Enable Incus (formerly LXD)
-  virtualisation.incus = {
-    enable = true;
-    # TODO add preseed init params
-  };
+  # Enable Incus (formerly LXD) - Commented out for now
+  # virtualisation.incus = {
+  #   enable = true;
+  #   # TODO add preseed init params
+  # };
 
   # Nix specific settings
   nix.settings.experimental-features = "nix-command flakes";
@@ -114,7 +114,7 @@
     # Container tools
     docker-compose
     docker-buildx
-    incus-client
+    # incus-client
   ];
 
   users.users = {
@@ -133,7 +133,7 @@
         "networkmanager"
         "wheel"
         "docker"
-        "incus-admin"
+        # "incus-admin"
       ];
       packages = with pkgs; [ ];
       # set a passwd with `mkpasswd -m sha-512`
