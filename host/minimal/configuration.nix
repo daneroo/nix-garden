@@ -110,7 +110,7 @@
     git
     fastfetch
     btrfs-progs # CLI needed by switch-to-configuration
-    
+
     # Container tools
     docker-compose
     docker-buildx
