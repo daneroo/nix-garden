@@ -34,6 +34,7 @@ This repository should contain:
 ## TODO
 
 - [Colmena: for deployment](https://github.com/zhaofengli/colmena)
+- [Clan.lol](https://clan.lol/)
 - Explain the bootstrap process - and shorten it!
   - utimately - right from an off-the shelf installer (NixOS - Or ubuntu?)
   - or my minimal iso
@@ -44,14 +45,35 @@ This repository should contain:
   - invoke with `nix run nixpkgs#nixfmt-tree -- .`
   - or consider `shopt -s globstar`
 
+## Tart
+
+- cleanup: `~/.tart/`
+- also runs MacOS
+- <https://tart.run/quick-start/>
+- [Tart Guest Agent](https://tart.run/blog/2025/06/01/bridging-the-gaps-with-the-tart-guest-agent/)
+- <https://chatgpt.com/share/6856267e-df18-8013-8936-2eea85215ebc>
+
+```bash
+brew install cirruslabs/cli/tart          # CLI
+brew install cirruslabs/cli/tart-guest-agent   # helper for clipboard & exec
+
+tart create --linux --disk-size 64 nixos-vm
+tart run --disk nu-nixos-25.05.20250618.9ba04bd-aarch64-linux.iso nixos-vm
+# install guest agent, to get ip
+tart ip nixos-vm
+# regular format and install
+tart run nixos-vm
+```
+
 ## Colima
 
 Ok, time to speed things up!
 
 - MacOS
+  - cleanup: `~/Library/Caches/colima`
+  - Stéphane Graber / Zabbly
+    - [Youtube Video: Running Incus on a Mac](https://www.youtube.com/watch?v=5tcpXcipQ9E&t=169s)
   - incus: running in ubuntu 24.04 VM - zfs root
-  - start: `colima start --runtime incus --vm-type vz`
-  - exec: `colima ssh cat /etc/lsb-release`
   - got tailscale to work: expected
     - Container: NixOS 24.11 (incus cannot run nested vm's)
     - start: `incus launch images:nixos/24.11/arm64 nixos-container`
@@ -59,9 +81,22 @@ Ok, time to speed things up!
     - got tailscale to work: unexpected!
 
 ```bash
-colima start --runtime incus --vm-type vz --cpu 4 --memory 8192
-incus launch images:nixos/24.11/arm64 nixos-vm --vm # NOT WORKING ON MacOS
-incus launch images:nixos/24.11/arm64 nixos-container # WORKING
+brew install colima incus lima-additional-guestagents # additional if you want qemu/x86_64?
+
+# aarch64
+colima start --runtime incus --cpu 4 --memory 8 --vm-type vz
+colima ssh cat /etc/lsb-release
+incus launch images:nixos/25.05/arm64 nixos-vm --vm # NOT WORKING ON MacOS
+incus launch images:nixos/25.05/arm64 nixos-container # WORKING
+
+# x86_64
+colima start --runtime incus --cpu 4 --memory 8 --vm-type vz --vz-rosetta -a x86_64
+colima ssh cat /etc/lsb-release
+incus launch images:nixos/25.05/amd64 nixos-container # WORKING
+incus launch images:nixos/24.11/amd64 nixos-container # WORKING
+
+
+incus exec nixos-container grep PRETTY /etc/os-release
 incus exec nixos-container bash
 nix --extra-experimental-features 'nix-command flakes' shell nixpkgs#emacs-nox
 export TERM=vt100
@@ -86,6 +121,7 @@ now rebuild
 sudo nixos-rebuild switch \
   -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz \
   --option sandbox false
+sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-amd64 --no-write-lock-file --option sandbox false
 
 docker run hello-world
 ```
@@ -179,6 +215,7 @@ cd nix-garden
 # Build installer images (new approach - produces nixos-25.05.xxx-*.iso files)
 # x86_64
 nix build .#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
+# nix --extra-experimental-features 'nix-command flakes' build github:daneroo/nix-garden/feature/nixos-25-05-installer#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
 # copy the artifact
 cp result/iso/nixos-25.05.20250605.4792576-x86_64-linux.iso my-nixos-25.05.20250605.4792576-x86_64-linux.iso
 # checksum
@@ -302,6 +339,30 @@ sudo nixos-rebuild switch --flake .#minimal-arm64 --no-write-lock-file
 nix flake show github:daneroo/nix-garden
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-amd64 --no-write-lock-file
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-arm64 --no-write-lock-file
+```
+
+## ARM VM on proxmox
+
+ARM64 success: Attach the ISO as a VirtIO disk (--virtio1 path/to/iso) instead of CD-ROM media, plus add --arch aarch64, remove vmgenid (not supported), use VirtIO storage instead of SCSI (to avoid PCIe bus issues), and add --efidisk0 for proper UEFI variables - ARM64 UEFI firmware boots ISOs better when they're presented as regular disks rather than optical media.
+
+```bash
+root@hilbert:~# cat /etc/pve/nodes/hilbert/qemu-server/103.conf
+agent: 1
+arch: aarch64
+bios: ovmf
+boot: order=virtio1;virtio0;net0
+cores: 4
+efidisk0: local-zfs:vm-103-disk-1,efitype=4m,size=64M
+memory: 8192
+meta: creation-qemu=7.2.10,ctime=1750456615
+name: nix2505-aarch64
+net0: virtio=C6:FA:15:F7:73:F4,bridge=vmbr0,firewall=1
+numa: 0
+ostype: l26
+smbios1: uuid=ee5fa8f6-ef5b-4029-9ada-a8ed5ac0e7de
+sockets: 1
+virtio0: local-zfs:vm-103-disk-0,size=64G
+virtio1: pve-storage_backups-isos:iso/nu-nixos-25.05.20250605.4792576-aarch64-linux.iso,size=1503020K
 ```
 
 ## References

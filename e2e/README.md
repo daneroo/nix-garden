@@ -1,5 +1,26 @@
 # NixOS Installation End-to-End Testing
 
+## Copied ISO digests (host)
+
+- docker MacOS
+a699ca2d73ba3e5fef29adb55fe479d74d0d8edfe9322c950ccb815389b3f7e9  nu-nixos-25.05.20250618.9ba04bd-aarch64-linux.iso - docker
+1dc363d6bd2d79c12cc0c6c7e75357dddff7dc6e25e9bdca17bf9c760ecbc492  nu-nixos-25.05.20250618.9ba04bd-x86_64-linux.iso - docker
+
+- nixos x86_64 - proxmox
+d9e4e80b27f46ba153d5966f56b3fc982725712d4b308bbc829c449211890623  result/iso/nixos-25.05.20250618.9ba04bd-x86_64-linux.iso - native - 3min
+1dc363d6bd2d79c12cc0c6c7e75357dddff7dc6e25e9bdca17bf9c760ecbc492  nu-nixos-25.05.20250618.9ba04bd-x86_64-linux.iso - docker
+
+- nixos x86_64 - colima - incus (slow)
+f19088a3dcc1fb7bc3b530b86738a9f3f220e136393eb7580b32d13ed13966b7  result/iso/nixos-25.05.20250618.9ba04bd-x86_64-linux.iso - incus
+
+- nixos aarch64 - proxmox (slow)
+c6e3d8cd7bb8c2d901794dfe0239975290a3e3f52867cf8e90b4fb53d8e1bed3  result/iso/nixos-25.05.20250618.9ba04bd-aarch64-linux.iso - native - 34min
+
+- nixos arm64 - UTM
+c6e3d8cd7bb8c2d901794dfe0239975290a3e3f52867cf8e90b4fb53d8e1bed3  result/iso/nixos-25.05.20250618.9ba04bd-aarch64-linux.iso - native
+d9e4e80b27f46ba153d5966f56b3fc982725712d4b308bbc829c449211890623  result/iso/nixos-25.05.20250618.9ba04bd-x86_64-linux.iso - native cross-compile - 8min
+a699ca2d73ba3e5fef29adb55fe479d74d0d8edfe9322c950ccb815389b3f7e9  nu-nixos-25.05.20250618.9ba04bd-aarch64-linux.iso - docker
+
 ## TODO
 
 - [ ] remove all references to branch (after merge) feature/nixos-25-05-installer
@@ -101,4 +122,43 @@ MAC=$(cat /sys/class/net/$IFACE/address)
 IP=$(ip -4 -o addr show dev $IFACE | awk "{print \$4}" | cut -d/ -f1)
 elixir -e '\''[t,mac,ip]=System.argv(); System.cmd("curl", ["-sX","POST","https://ntfy.sh/"<>t,"-d",mac<>" "<>ip])'\'' "$TOPIC" "$MAC" "$IP"
 '
+```
+
+## Clan ISO password extraction
+
+```bash
+VMID=997
+DUMP=/tmp/vm${VMID}.mem
+
+echo "# 1. synchronous RAM dump (detach=false)"
+( echo '{"execute":"qmp_capabilities"}'
+  sleep 1
+  echo '{"execute":"dump-guest-memory",'\
+'"arguments":{"protocol":"file:'${DUMP//\//\\/}'",'\
+'"paging":false,"detach":false}}'
+) | socat - UNIX-CONNECT:/var/run/qemu-server/${VMID}.qmp >/dev/null
+
+echo "# 2. wait until the dump file stops growing"
+while :; do
+  s1=$(stat -c%s "$DUMP"); sleep 0.5; s2=$(stat -c%s "$DUMP")
+  [ "$s1" -eq "$s2" ] && break
+done
+
+echo "# 3. extract the password – no PCRE, no limits"
+pw=$(strings -n 3 "$DUMP" \
+     | grep -Eo '"pass"[[:space:]]*:[[:space:]]*"[a-z]+-[a-z]+-[a-z]+"' \
+     | head -n1 | cut -d'"' -f4)
+
+echo "# 4. if that failed, fall back to the first dashed triple after "root-password""
+if [ -z "$pw" ]; then
+  off=$(grep -aob 'root-password' "$DUMP" | head -n1 | cut -d: -f1)
+  pw=$(dd if="$DUMP" bs=1 skip="$off" count=4096 2>/dev/null \
+       | tr -d '\0' \
+       | strings -n 3 \
+       | grep -Eo '^[a-z]+-[a-z]+-[a-z]+' \
+       | head -n1)
+fi
+
+echo "root password: $pw"
+rm -f "$DUMP"
 ```

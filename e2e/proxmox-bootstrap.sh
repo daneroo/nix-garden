@@ -11,7 +11,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Configuration
 PROXMOX_HOST="hilbert"
 VMID="997"
-ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
+# ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
+ISO_FILENAME="clan-nixos-installer-x86_64-linux.iso"
 # SSH options for convenience
 # - ConnectTimeout=10: Prevent hanging by timing out after 10 seconds
 # - StrictHostKeyChecking=no: Don't verify host keys (for automation)
