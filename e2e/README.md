@@ -149,16 +149,6 @@ pw=$(strings -n 3 "$DUMP" \
      | grep -Eo '"pass"[[:space:]]*:[[:space:]]*"[a-z]+-[a-z]+-[a-z]+"' \
      | head -n1 | cut -d'"' -f4)
 
-echo "# 4. if that failed, fall back to the first dashed triple after "root-password""
-if [ -z "$pw" ]; then
-  off=$(grep -aob 'root-password' "$DUMP" | head -n1 | cut -d: -f1)
-  pw=$(dd if="$DUMP" bs=1 skip="$off" count=4096 2>/dev/null \
-       | tr -d '\0' \
-       | strings -n 3 \
-       | grep -Eo '^[a-z]+-[a-z]+-[a-z]+' \
-       | head -n1)
-fi
-
 echo "root password: $pw"
 rm -f "$DUMP"
 ```
