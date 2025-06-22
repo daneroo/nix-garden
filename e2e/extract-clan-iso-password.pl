@@ -10,6 +10,9 @@ use Time::HiRes qw(time sleep);
 use IO::Select;
 use IPC::Open2;
 
+# Enable autoflush for immediate output
+$| = 1;
+
 # Configuration
 my $VMID = 997;
 my $JSONLike_Regexp = qr/^\s*\{.*\}\s*$/;  # validate QMP output as valid JSON-like format
@@ -59,14 +62,15 @@ close($socat_out);
 waitpid($pid, 0);
 
 # 2. Wait for dump completion
-print "# 2  waiting for dump ";
+my @spinner = ('-', '\\', '|', '/');
 my $prev = 0;
 for my $i (0 .. $MAX_WAIT * 2) {  # 0.5-s steps
     my $size = -s $DUMP || 0;
-    printf "\r# 2  waiting for dump %d bytes", $size;
+    my $spin_char = $spinner[$i % 4];
+    printf "\r%s - waiting for dump %d bytes", $spin_char, $size;
     
     if ($size != 0 && $size == $prev) {
-        print "\n";
+        printf "\r✓ - dump complete %d bytes\n", $size;
         last;
     }
     $prev = $size;
