@@ -16,31 +16,37 @@ echo "- MAX_WAIT: $MAX_WAIT"
 echo ""
 
 # NOTE: Both QMP commands must be sent through same connection for session continuity
+# Bash syntax explanation: { commands; } | socat | { read responses; }
+# - First {...} groups commands to send through single socat connection
+# - Second {...} groups the response reading from that same connection
 {
   echo '{"execute":"qmp_capabilities"}'
-  sleep 1  # avoid handshake race
   echo '{"execute":"dump-guest-memory",'\
 '"arguments":{"protocol":"file:'${DUMP//\//\\/}'",'\
 '"paging":false,"detach":false}}'
-} | socat - UNIX-CONNECT:"$SOCK" >/dev/null
+} | socat - UNIX-CONNECT:"$SOCK" | {
+  read -r greeting
+  echo "✓ - QMP greeting: $greeting"
+  read -r cap_reply  
+  echo "✓ - qmp_capabilities: $cap_reply"
+  read -r dump_reply
+  echo "✓ - dump-guest-memory: $dump_reply"
+}
 
-echo "✓ - qmp_capabilities"
-echo "✓ - dump-guest-memory"
-
-echo -n "# 2  waiting for dump "
+echo -n "- waiting for dump "
 prev=0
 for ((i=0; i<MAX_WAIT*2; i++)); do          # 0.5-s steps → MAX_WAIT seconds
   size=$(stat -c%s "$DUMP" 2>/dev/null || echo 0)
-  printf "\r# 2  waiting for dump %s bytes" "$size"
+  printf "\r- waiting for dump %s bytes" "$size"
   if [ "$size" -ne 0 ] && [ "$size" -eq "$prev" ]; then
-    printf "\r✓ - dump complete %s bytes\n" "$size"
+    printf "\r\033[K✓ - dump complete %s bytes\n" "$size"
     break
   fi
   prev=$size
   sleep 0.5
 done
 
-echo "# 3  extract password"
+echo "- extract password"
 
 # 3.1  strings scan (≈ 40 s) - REFERENCE ONLY
 # start=$(date +%s%3N)
