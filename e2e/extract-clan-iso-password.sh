@@ -56,13 +56,13 @@ echo "- extract password"
 # end=$(date +%s%3N)
 # printf "✓ - root password: %s (strings %.3f s)\n" "$pw_strings" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
-# 3.2  PCRE grep (≈ 6 s)
+# 3.2  PCRE grep (≈ 8 s)
 start=$(date +%s%3N)
 pw_pcre=$(grep -aPzo -m1 '"pass"\s*:\s*"\K[a-z]+-[a-z]+-[a-z]+' "$DUMP" | tr -d '\0')
 end=$(date +%s%3N)
 printf "✓ - root password: %s (PCRE %.3f s)\n" "$pw_pcre" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
-# 3.3  Perl stream (≈ 0.4 s)
+# 3.3  Perl chunked (≈ 3.5s)
 start=$(date +%s%3N)
 pw_perl=$(perl - <<'PERL' "$DUMP"
 use strict;
