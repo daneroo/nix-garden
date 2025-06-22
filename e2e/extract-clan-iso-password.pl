@@ -1,12 +1,18 @@
 #!/usr/bin/env perl
+
+# invoke in a loop, to test
+# for i in {1..10}; do echo -e "\n=== iteration $i ==="; ./extract-clan-iso-password.pl; qm reset 997; sleep 40; done
+
 use strict;
 use warnings;
 use Socket;
 use Time::HiRes qw(time sleep);
 use IO::Select;
+use IPC::Open2;
 
 # Configuration
 my $VMID = 997;
+my $JSONLike_Regexp = qr/^\s*\{.*\}\s*$/;  # validate QMP output as valid JSON-like format
 my $DUMP = "/tmp/vm${VMID}.mem";
 my $MAX_WAIT = 60;
 my $SOCK = "/var/run/qemu-server/${VMID}.qmp";
@@ -17,17 +23,40 @@ print "- DUMP: $DUMP\n";
 print "- MAX_WAIT: $MAX_WAIT\n\n";
 
 # 1. QMP capabilities + dump-guest-memory
-print "# 1  qmp_capabilities + dump-guest-memory\n";
-
 my $dump_escaped = $DUMP;
 $dump_escaped =~ s/\//\\\//g;
 
-# Pipe directly to socat (like bash version)  
-open(my $socat, '|-', "socat - UNIX-CONNECT:$SOCK >/dev/null") or die "socat: $!";
-print $socat '{"execute":"qmp_capabilities"}' . "\n";
+# Use bidirectional communication with socat to capture responses
+my ($socat_in, $socat_out);
+my $pid = open2($socat_out, $socat_in, "socat - UNIX-CONNECT:$SOCK") or die "socat: $!";
+
+# Read initial QMP greeting
+my $greeting = <$socat_out>;
+print "DEBUG: QMP greeting: $greeting";
+
+print $socat_in '{"execute":"qmp_capabilities"}' . "\n";
+my $caps_response = <$socat_out>;
+print "DEBUG: Capabilities response: $caps_response";
+if ($caps_response && $caps_response =~ /$JSONLike_Regexp/) {
+    print "✓ - qmp_capabilities\n";
+} else {
+    print "✗ - qmp_capabilities - invalid response\n";
+}
+
 sleep(1);  # avoid handshake race
-print $socat '{"execute":"dump-guest-memory","arguments":{"protocol":"file:' . $dump_escaped . '","paging":false,"detach":false}}' . "\n";
-close($socat);
+
+print $socat_in '{"execute":"dump-guest-memory","arguments":{"protocol":"file:' . $dump_escaped . '","paging":false,"detach":false}}' . "\n";
+my $dump_response = <$socat_out>;
+print "DEBUG: Dump response: $dump_response";
+if ($dump_response && $dump_response =~ /$JSONLike_Regexp/) {
+    print "✓ - dump-guest-memory\n";
+} else {
+    print "✗ - dump-guest-memory - invalid response\n";
+}
+
+close($socat_in);
+close($socat_out);
+waitpid($pid, 0);
 
 # 2. Wait for dump completion
 print "# 2  waiting for dump ";
