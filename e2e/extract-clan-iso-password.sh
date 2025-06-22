@@ -15,7 +15,6 @@ echo "- DUMP: $DUMP"
 echo "- MAX_WAIT: $MAX_WAIT"
 echo ""
 
-echo "# 1  qmp_capabilities + dump-guest-memory"
 # NOTE: Both QMP commands must be sent through same connection for session continuity
 {
   echo '{"execute":"qmp_capabilities"}'
@@ -25,13 +24,16 @@ echo "# 1  qmp_capabilities + dump-guest-memory"
 '"paging":false,"detach":false}}'
 } | socat - UNIX-CONNECT:"$SOCK" >/dev/null
 
+echo "✓ - qmp_capabilities"
+echo "✓ - dump-guest-memory"
+
 echo -n "# 2  waiting for dump "
 prev=0
 for ((i=0; i<MAX_WAIT*2; i++)); do          # 0.5-s steps → MAX_WAIT seconds
   size=$(stat -c%s "$DUMP" 2>/dev/null || echo 0)
   printf "\r# 2  waiting for dump %s bytes" "$size"
   if [ "$size" -ne 0 ] && [ "$size" -eq "$prev" ]; then
-    echo                                     # newline after final size
+    printf "\r✓ - dump complete %s bytes\n" "$size"
     break
   fi
   prev=$size
@@ -65,6 +67,6 @@ while (<>) {
 PERL
 )
 end=$(date +%s%3N)
-printf "✓ - root password: %s (Perl %.3f s)\n" "$pw_perl" "$(bc <<< "scale=3; ($end-$start)/1000")"
+printf "✓ - root password: %s (chunked %.3f s)\n" "$pw_perl" "$(bc <<< "scale=3; ($end-$start)/1000")"
 
 rm -f "$DUMP"
