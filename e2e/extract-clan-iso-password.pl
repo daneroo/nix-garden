@@ -15,6 +15,7 @@ $| = 1;
 
 # Configuration
 my $VMID = 997;
+my $DEBUG_OUTPUT = 0;  # set to 1 to enable debug output
 my $JSONLike_Regexp = qr/^\s*\{.*\}\s*$/;  # validate QMP output as valid JSON-like format
 my $DUMP = "/tmp/vm${VMID}.mem";
 my $MAX_WAIT = 60;
@@ -35,26 +36,26 @@ my $pid = open2($socat_out, $socat_in, "socat - UNIX-CONNECT:$SOCK") or die "soc
 
 # Read initial QMP greeting
 my $greeting = <$socat_out>;
-print "DEBUG: QMP greeting: $greeting";
+print "DEBUG: QMP greeting: $greeting" if $DEBUG_OUTPUT;
 
 print $socat_in '{"execute":"qmp_capabilities"}' . "\n";
 my $caps_response = <$socat_out>;
-print "DEBUG: Capabilities response: $caps_response";
+print "DEBUG: Capabilities response: $caps_response" if $DEBUG_OUTPUT;
 if ($caps_response && $caps_response =~ /$JSONLike_Regexp/) {
-    print "✓ - qmp_capabilities\n";
+    print "✓ - qmp_capabilities (valid json)\n";
 } else {
-    print "✗ - qmp_capabilities - invalid response\n";
+    print "✗ - qmp_capabilities - invalid json response\n";
 }
 
 sleep(1);  # avoid handshake race
 
 print $socat_in '{"execute":"dump-guest-memory","arguments":{"protocol":"file:' . $dump_escaped . '","paging":false,"detach":false}}' . "\n";
 my $dump_response = <$socat_out>;
-print "DEBUG: Dump response: $dump_response";
+print "DEBUG: Dump response: $dump_response" if $DEBUG_OUTPUT;
 if ($dump_response && $dump_response =~ /$JSONLike_Regexp/) {
-    print "✓ - dump-guest-memory\n";
+    print "✓ - dump-guest-memory (valid json)\n";
 } else {
-    print "✗ - dump-guest-memory - invalid response\n";
+    print "✗ - dump-guest-memory - invalid json response\n";
 }
 
 close($socat_in);
@@ -78,14 +79,15 @@ for my $i (0 .. $MAX_WAIT * 2) {  # 0.5-s steps
 }
 
 # Debug: check if dump file was created
-system("ls -l $DUMP 2>/dev/null || echo 'DEBUG: dump file not yet created'");
+system("ls -l $DUMP 2>/dev/null || echo 'DEBUG: dump file not yet created'") if $DEBUG_OUTPUT;
 
 
-print "# 3  extract password\n";
+print "- extract password\n";
 
-# 3.1 PCRE method
+# 3.1 PCRE method (full file load)
 my $start = time();
 my $pw_pcre = "";
+print "  \\ - scanning memory dump (PCRE)";
 if (open(my $fh, '<:raw', $DUMP)) {
     local $/;
     my $content = <$fh>;
@@ -95,14 +97,18 @@ if (open(my $fh, '<:raw', $DUMP)) {
     close($fh);
 }
 my $end = time();
-printf "✓ - root password: %s (PCRE %.3f s)\n", $pw_pcre, $end - $start;
+printf "\r  ✓ - root password: %s (PCRE %.3f s)\n", $pw_pcre, $end - $start;
 
-# 3.2 Perl stream method  
+# 3.2 Perl stream method (with progress)
 $start = time();
 my $pw_perl = "";
 if (open(my $fh, '<:raw', $DUMP)) {
     local $/ = \32_000_000;  # 32 MB blocks
+    my $chunk_count = 0;
     while (my $chunk = <$fh>) {
+        my $spin_char = $spinner[$chunk_count % 4];
+        printf "\r  %s - scanning chunk %d (Perl)", $spin_char, $chunk_count + 1;
+        $chunk_count++;
         if ($chunk =~ /"pass"\s*:\s*"([a-z]+-[a-z]+-[a-z]+)"/s) {
             $pw_perl = $1;
             last;
@@ -111,7 +117,7 @@ if (open(my $fh, '<:raw', $DUMP)) {
     close($fh);
 }
 $end = time();
-printf "✓ - root password: %s (Perl %.3f s)\n", $pw_perl, $end - $start;
+printf "\r  ✓ - root password: %s (Perl %.3f s)\n", $pw_perl, $end - $start;
 
 # Cleanup
 unlink($DUMP); 
