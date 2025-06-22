@@ -16,9 +16,10 @@ echo "- MAX_WAIT: $MAX_WAIT"
 echo ""
 
 echo "# 1  qmp_capabilities + dump-guest-memory"
+# NOTE: Both QMP commands must be sent through same connection for session continuity
 {
   echo '{"execute":"qmp_capabilities"}'
-  sleep 1                                   # keep: avoids the handshake race
+  sleep 1  # avoid handshake race
   echo '{"execute":"dump-guest-memory",'\
 '"arguments":{"protocol":"file:'${DUMP//\//\\/}'",'\
 '"paging":false,"detach":false}}'
