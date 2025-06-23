@@ -126,42 +126,25 @@ elixir -e '\''[t,mac,ip]=System.argv(); System.cmd("curl", ["-sX","POST","https:
 
 ## Clan ISO password extraction
 
+- Assumes we provisioned VMID:997 with a booted ISO (clan-nixos-installer-x86_64-linux.iso)
+
+- Working bash script (`extract-clan-iso-password.sh`) that reliably extracts random passwords from NixOS installer VMs
+- Perl conversion (`extract-clan-iso-password.pl`) for learning purposes - grew from 70 to 167 lines
+- QMP protocol understanding - session continuity requirements, proper response handling
+- Multiple extraction methods with performance comparison:
+  - Strings method: ~38s (reference)
+  - PCRE grep: ~6-8s 
+  - Perl chunked: ~4s (fastest)
+- Clean output formatting with progress indicators and validation
+- Protocol optimization attempts - tried ID-based completion detection, learned socat connection limitations
+- Reliable automation that works in test loops on Proxmox infrastructure
+
 ```bash
-VMID=997
-SOCK=/var/run/qemu-server/${VMID}.qmp
-DUMP=/tmp/vm${VMID}.mem
-MAX_WAIT=60            # seconds to wait for the dump to finish
+scp -p e2e/extract-clan-iso-password.sh root@hilbert:
+scp -p e2e/extract-clan-iso-password.pl root@hilbert:
 
-echo "# 1  qmp_capabilities + dump-guest-memory"
-{
-  echo '{"execute":"qmp_capabilities"}'
-  sleep 1                                   # keep: avoids the handshake race
-  echo '{"execute":"dump-guest-memory",'\
-'"arguments":{"protocol":"file:'${DUMP//\//\\/}'",'\
-'"paging":false,"detach":false}}'
-} | socat - UNIX-CONNECT:"$SOCK" >/dev/null
-
-echo -n "# 2  waiting for dump "
-prev=0
-for ((i=0; i<MAX_WAIT*2; i++)); do          # 0.5-s steps → MAX_WAIT seconds
-  size=$(stat -c%s "$DUMP" 2>/dev/null || echo 0)
-  printf "\r# 2  waiting for dump %s bytes" "$size"
-  if [ "$size" -ne 0 ] && [ "$size" -eq "$prev" ]; then
-    echo                                     # newline after final size
-    break
-  fi
-  prev=$size
-  sleep 0.5
-done
-
-echo "# 3  extract password"
-start=$(date +%s%3N)                        # milliseconds since epoch
-pw=$(strings -n 3 "$DUMP" |
-     grep -Eo '"pass"[[:space:]]*:[[:space:]]*"[a-z]+-[a-z]+-[a-z]+"' |
-     head -n1 | cut -d'"' -f4)
-end=$(date +%s%3N)
-printf "# 3  done in %.3f s\n" "$(bc <<< "scale=3; ($end-$start)/1000")"
-
-echo "root password: $pw"
-rm -f "$DUMP"
+# ssh hilbert and run the script
+./extract-clan-iso-password.sh
+# or
+./extract-clan-iso-password.pl
 ```
