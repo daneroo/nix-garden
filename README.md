@@ -31,6 +31,14 @@ This repository should contain:
   - (direnv, use flakes)
   - updating, checking for updates and planning
 
+## Elixir..?
+
+- Elixir orchestration rewrite to replace bash script complexity (e2e, bit later coordination and monitoring)
+- Phoenix LiveView UI evolution for real-time infrastructure monitoring
+- Composable primitives for VM lifecycle, QMP operations, network discovery
+- Production monitoring system with persistent state management
+- Escape from console formatting hell - no more VT100 codes and UTF-8 symbol wrestling
+
 ## TODO
 
 - [Colmena: for deployment](https://github.com/zhaofengli/colmena)
