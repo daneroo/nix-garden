@@ -1,0 +1,19 @@
+Sheet 1: As measured from iPad Air 4
+Router →,Bell Giga,,,UniFi U6-LR Wall,,,UniFi U6-LR Ceiling,,
+Spot ↓,Signal dBm,Down ↓Mbps,Up ↑ Mbps,Signal dBm,Down ↓Mbps,Up ↑ Mbps,Signal dBm,Down ↓Mbps,Up ↑ Mbps
+Carport (1F),-63,48,22,-64,41,60,,,
+Kitchen (1F),-71,267,67,-75,153,149,,,
+Living (1F),-67,276,153,-58,59,69,,,
+Office (1F),-64,437,282,-75,139,140,,,
+TV (B),-48,623,498,-55,341,391,,,
+Office (B),-29,648,634,-41,326,394,,,
+
+Sheet 1: As measured from Pixel 6
+Router →,Bell Giga,,,UniFi U6-LR Wall,,,UniFi U6-LR Ceiling,,
+Spot ↓,Signal dBm,Down ↓Mbps,Up ↑ Mbps,Signal dBm,Down ↓Mbps,Up ↑ Mbps,Signal dBm,Down ↓Mbps,Up ↑ Mbps
+Carport (1F),-76,88,49,-68,37,61,,,
+Kitchen (1F),-74,106,72,-62,36,87,,,
+Living (1F),-64,288,246,-60,64,80,,,
+Office (1F),-65,322,298,-71,208,268,,,
+TV (B),-58,922,364,-53,363,391,,,
+Office (B),-29,926,397,-32,378,395,,,

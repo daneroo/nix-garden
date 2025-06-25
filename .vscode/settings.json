@@ -5,13 +5,16 @@
     "disko",
     "fastfetch",
     "fleek",
+    "iperf",
     "keymap",
+    "miperf",
     "MYIP",
     "nixfmt",
     "nixos",
     "nixpkgs",
     "pkgs",
     "socat",
+    "Termux",
     "virtualisation"
   ]
 }
