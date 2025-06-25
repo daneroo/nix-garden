@@ -48,3 +48,18 @@ https://gist.github.com/daneroo/f172382fe6027a20c4d910541f1ff708
 | Office 1F      |        |    |      |         |    |      |
 | Pool (outside) |        |    |      |         |    |      |
 | TV (basement)  |        |    |      |         |    |      |
+
+## Python Vizualization
+
+```bash
+ uv run plot.py
+```
+
+## HTML Vizualization
+
+- deployeld to netlify (drop) - <https://wifidan.netlify.app/>
+- <https://app.netlify.com/sites/wifidan/deploys>
+
+```bash
+open plot-html/index.html
+```
