@@ -1,8 +1,8 @@
 # WiFi
 
-Automating measurement taking for Throughput on IpadOS (iPad-Air-4) and Android (Pixel-6)
+Automating measurement taking for Throughput on iPadOS (iPad-Air-4) and Android (Pixel-6)
 
-The stock iperf3 apps on android and ipados are not very good. So we just put together a simple script that runs iperf3 on the device and then reads the output. with [Ish](https://ish.app/) and [Temux](https://wiki.termux.com/wiki/Main_Page).
+The stock iperf3 apps on Android and iPadOS are not very good. So we just put together a simple script that runs iperf3 on the device and then reads the output. with [Ish](https://ish.app/) and [Temux](https://wiki.termux.com/wiki/Main_Page).
 
 Here is an install script that should work on both devices.
 
@@ -38,6 +38,7 @@ https://gist.github.com/daneroo/f172382fe6027a20c4d910541f1ff708
 
 ## AP Placement Measurements
 
+I actually took the data in Numbers - `UniFi-WiFi-Placement.numbers (iCould)`.
 
 | Spot ↓         | Signal | Up | Down | Signal  | Up | Down |
 |----------------|--------|----|------|---------|----|------|
@@ -49,13 +50,13 @@ https://gist.github.com/daneroo/f172382fe6027a20c4d910541f1ff708
 | Pool (outside) |        |    |      |         |    |      |
 | TV (basement)  |        |    |      |         |    |      |
 
-## Python Vizualization
+## Python Visualization
 
 ```bash
  uv run plot.py
 ```
 
-## HTML Vizualization
+## HTML Visualization
 
 - deployeld to netlify (drop) - <https://wifidan.netlify.app/>
 - <https://app.netlify.com/sites/wifidan/deploys>

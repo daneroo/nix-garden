@@ -9,7 +9,7 @@ Usage:
     uv run plot.py
 
 Data Format:
-    Expected CSV format: UniFi-WiFi-Placement-Normalized-2025-06-24.csv
+    Expected CSV format: {FILENAME_PREFIX}.csv
     Columns:
         Spot        - Measurement location (e.g., "Kitchen (1F)", "Office (B)")
         Router      - Router model being tested (e.g., "Bell Giga", "UniFi U6-LR Wall")
@@ -35,6 +35,9 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# File naming constant
+FILENAME_PREFIX = "UniFi-WiFi-Placement-2025-06-24"
+
 
 def main():
     """Main function to run the WiFi performance analysis and plotting."""
@@ -45,7 +48,9 @@ def main():
 
 def load_and_clean_data():
     """Load CSV data and clean column names."""
-    df = pd.read_csv("UniFi-WiFi-Placement-Normalized-2025-06-24.csv")
+    csv_filename = f"{FILENAME_PREFIX}.csv"
+    df = pd.read_csv(csv_filename)
+    print(f"✓ Read data from: {csv_filename}")
     # Clean column names (remove special characters)
     df.columns = ["Spot", "Router", "Client", "Signal_dBm", "Down_Mbps", "Up_Mbps"]
     return df
@@ -53,20 +58,20 @@ def load_and_clean_data():
 
 def data_validation(df):
     """Validate data quality and completeness."""
-    print(f"Dataset contains {len(df)} measurements")
+    print(f"  ✓ Dataset contains {len(df)} measurements")
 
     # Discover all unique values from the data
     all_spots = sorted(df["Spot"].unique())
     all_routers = sorted(df["Router"].unique())
     all_clients = sorted(df["Client"].unique())
 
-    print(f"Unique spots: {all_spots}")
-    print(f"Unique routers: {all_routers}")
-    print(f"Unique clients: {all_clients}")
+    print(f"  ✓ Unique spots: {all_spots}")
+    print(f"  ✓ Unique routers: {all_routers}")
+    print(f"  ✓ Unique clients: {all_clients}")
 
     # Signal_dBm should all be negative (stronger signal = closer to 0)
     signal_min, signal_max = df["Signal_dBm"].min(), df["Signal_dBm"].max()
-    print(f"Signal strength range: {signal_min} to {signal_max} dBm")
+    print(f"  ✓ Signal strength range: {signal_min} to {signal_max} dBm")
     assert signal_max <= 0, (
         f"Found positive signal strength: {signal_max} dBm (should be negative)"
     )
@@ -77,14 +82,16 @@ def data_validation(df):
     # Download and Upload speeds should be positive
     down_min, down_max = df["Down_Mbps"].min(), df["Down_Mbps"].max()
     up_min, up_max = df["Up_Mbps"].min(), df["Up_Mbps"].max()
-    print(f"Download speed range: {down_min} to {down_max} Mbps")
-    print(f"Upload speed range: {up_min} to {up_max} Mbps")
+    print(f"  ✓ Download speed range: {down_min} to {down_max} Mbps")
+    print(f"  ✓ Upload speed range: {up_min} to {up_max} Mbps")
     assert down_min > 0, f"Found non-positive download speed: {down_min} Mbps"
     assert up_min > 0, f"Found non-positive upload speed: {up_min} Mbps"
 
     # Validate completeness: each router/client pair should have data for each spot
     expected_combinations = len(all_spots) * len(all_routers) * len(all_clients)
-    print(f"Expected combinations (spots × routers × clients): {expected_combinations}")
+    print(
+        f"  ✓ Expected combinations (spots × routers × clients): {expected_combinations}"
+    )
 
     for router in all_routers:
         for client in all_clients:
@@ -99,8 +106,8 @@ def data_validation(df):
                         f"Missing data for Router='{router}', Client='{client}', Spot='{spot}'"
                     )
 
-    print("✓ Data validation passed!")
-    print("✓ Complete data validation passed!")
+    print("  ✓ Data validation passed!")
+    print("  ✓ Complete data validation passed!")
 
 
 def make_plot(df):
@@ -206,6 +213,12 @@ def make_plot(df):
 
     plt.title("WiFi Performance and Signal Strength by Spot")
     plt.tight_layout()
+
+    # Save as PNG file
+    png_filename = f"{FILENAME_PREFIX}.png"
+    plt.savefig(png_filename, dpi=300, bbox_inches="tight")
+    print(f"✓ Plot saved as: {png_filename}")
+
     plt.show()
 
 
