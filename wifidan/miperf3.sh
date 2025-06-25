@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# This script was installed on my mobile devices using the following command:
+# curl -L https://bit.ly/miperf3-inst | sh
+
 # Take iperf3 measurements on mobile devices
 # Ish- https://ish.app/
 # Temux- https://wiki.termux.com/wiki/Main_Page
