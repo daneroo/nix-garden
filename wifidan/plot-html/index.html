@@ -365,25 +365,27 @@
         hovertemplate: "%{x}<br>RSSI: %{y} dBm<extra></extra>",
       });
 
-      // Layout matching Python version
+      // Layout with mobile responsiveness
       const layout = {
         title: {
           text: "WiFi Performance by Location and Router",
-          font: { size: 16 },
+          font: { size: window.innerWidth < 768 ? 14 : 16 },
         },
-        width: 1000,
-        height: 600,
+        // Remove fixed width for responsiveness
+        height: window.innerWidth < 768 ? 500 : 600,
         xaxis: {
           title: "Location",
           tickmode: "array",
           tickvals: spotOrder.map((_, i) => i),
           ticktext: spotOrder,
-          tickangle: -45,
+          tickangle: window.innerWidth < 768 ? -90 : -45,
+          tickfont: { size: window.innerWidth < 768 ? 10 : 12 },
         },
         yaxis: {
           title: "Throughput (Mbps)",
           side: "left",
           range: [0, 1000],
+          titlefont: { size: window.innerWidth < 768 ? 12 : 14 },
         },
         yaxis2: {
           title: "Signal Strength (dBm)",
@@ -392,14 +394,22 @@
           range: [-80, -20],
           tickmode: "linear",
           dtick: 10,
+          titlefont: { size: window.innerWidth < 768 ? 12 : 14 },
         },
         legend: {
-          x: 0.02,
-          y: 0.98,
-          bgcolor: "rgba(255,255,255,0.8)",
+          x: window.innerWidth < 768 ? 0 : 0.02,
+          y: window.innerWidth < 768 ? -0.3 : 0.98,
+          bgcolor: "rgba(255,255,255,0.9)",
+          orientation: window.innerWidth < 768 ? "h" : "v",
+          font: { size: window.innerWidth < 768 ? 10 : 12 },
         },
         plot_bgcolor: "white",
-        margin: { l: 80, r: 80, t: 80, b: 120 },
+        margin: {
+          l: window.innerWidth < 768 ? 60 : 80,
+          r: window.innerWidth < 768 ? 60 : 80,
+          t: window.innerWidth < 768 ? 60 : 80,
+          b: window.innerWidth < 768 ? 180 : 120,
+        },
       };
 
       // Create the plot
@@ -409,5 +419,45 @@
         modeBarButtonsToRemove: ["pan2d", "lasso2d", "select2d"],
       });
     </script>
+
+    <div
+      style="
+        margin-top: 30px;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        max-width: 1000px;
+      "
+    >
+      <h2 style="color: #2d3748; margin-top: 0">About This Analysis</h2>
+      <p>
+        This chart compares WiFi performance between two routers across
+        different locations in a residential setting:
+      </p>
+      <ul>
+        <li><strong>Bell Giga</strong> (orange) - ISP-provided router</li>
+        <li>
+          <strong>UniFi U6-LR Wall</strong> (blue) - Dedicated access point
+        </li>
+      </ul>
+      <p>
+        <strong>Key Findings:</strong> The Bell Giga router consistently
+        outperformed the UniFi access point in both throughput and signal
+        strength across all measurement locations.
+      </p>
+      <p>
+        <strong>Interactive Features:</strong> Click legend items to show/hide
+        data series. The chart displays throughput ranges (shaded areas),
+        average speeds (dashed lines), and signal strength (dotted lines with
+        dots).
+      </p>
+      <p style="font-size: 0.9em; color: #666; margin-bottom: 0">
+        Data collected using mobile devices (iPad Air 4, Pixel 6) with iperf3
+        across 6 locations.
+        <a href="https://github.com/daneroo/wifidan" style="color: #007acc"
+          >View source code</a
+        >
+      </p>
+    </div>
   </body>
 </html>
