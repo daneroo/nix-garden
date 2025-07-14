@@ -5,11 +5,6 @@ nix fmt flake.nix
 nix flake update
 ```
 
-## TODO: Merge 2025-07-14
-
-- [x] remove all references to branch (after merge) `feature/nixos-25-05-installer`
-- [ ] make analogous script for colima/tart
-
 These are experiments with Nix; on NixOS, Ubuntu and on MacOS
 
 I am embarking on my Nix/NixOS journey, and I need to make a wholistic plan.
@@ -47,7 +42,7 @@ This repository should contain:
 
 ## TODO
 
-- [Colmena: for deployment](https://github.com/zhaofengli/colmena)
+- [ ] make analogous e2e script for colima/tart
 - [Clan.lol](https://clan.lol/)
 - Explain the bootstrap process - and shorten it!
   - utimately - right from an off-the shelf installer (NixOS - Or ubuntu?)
