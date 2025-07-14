@@ -11,7 +11,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Configuration
 PROXMOX_HOST="hilbert"
 VMID="997"
-ISO_FILENAME="my-nixos-25.05.20250618.9ba04bd-x86_64-linux.iso"
+ISO_FILENAME="my-nixos-25.05.20250712.650e572-x86_64-linux.iso"
 
 # ISO_FILENAME="clan-nixos÷-installer-x86_64-linux.iso"
 # SSH options for convenience
