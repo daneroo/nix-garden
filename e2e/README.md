@@ -6,7 +6,7 @@ These scripts validate all the components provisioning a minimal NixOS system.
 
 - `./e2e/provision-install-verify-proxmox.sh`
   - names the iso image file e.g. `my-nixos-25.05.20250605.4792576-x86_64-linux.iso`
-- `build-installer-isos-with-docker.sh` - (9min for both architectures)
+- `./e2e/build-installer-isos-with-docker.sh` - (9min for both architectures)
   - uses a pinned tag for base nix image e.g. `nixos/nix:2.28.3`
     - these images work, but the digest is different from the native nix build
 

@@ -7,7 +7,6 @@
 - `README.md` - Updated documentation with new NixOS 25.05 build process and commands
 - `host/minimal/configuration.nix` - Existing minimal host config (unchanged per PRD)
 - `disko/` - Existing disko configurations (unchanged per PRD)
-- `scripts/disko-format-install/` - Bootstrap scripts (unchanged - still work with new ISOs)
 
 ### Notes
 
@@ -59,8 +58,7 @@
   - [ ] 5.2 Update README.md bootstrap workflow documentation
   - [ ] 5.3 Update any build commands and examples in documentation
   - [ ] 5.4 Remove old `minimal-iso/` directory and files
-  - [ ] 5.5 Validate `scripts/disko-format-install/` still works with new ISOs
-  - [ ] 5.6 Commit changes and merge feature branch to main
+  - [ ] 5.5 Commit changes and merge feature branch to main
 
 ## Current Status: IMPLEMENTATION COMPLETE, VALIDATION PENDING
 
