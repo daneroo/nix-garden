@@ -1,3 +1,6 @@
 .cache/
 result
+# My images
+my-nixos*iso
+# docker built images
 nu-nixos*iso

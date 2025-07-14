@@ -11,8 +11,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Configuration
 PROXMOX_HOST="hilbert"
 VMID="997"
-# ISO_FILENAME="my-nixos-25.05.20250605.4792576-x86_64-linux.iso"
-ISO_FILENAME="clan-nixos-installer-x86_64-linux.iso"
+ISO_FILENAME="my-nixos-25.05.20250618.9ba04bd-x86_64-linux.iso"
+
+# ISO_FILENAME="clan-nixos÷-installer-x86_64-linux.iso"
 # SSH options for convenience
 # - ConnectTimeout=10: Prevent hanging by timing out after 10 seconds
 # - StrictHostKeyChecking=no: Don't verify host keys (for automation)
@@ -20,12 +21,24 @@ ISO_FILENAME="clan-nixos-installer-x86_64-linux.iso"
 # - LogLevel=ERROR: Suppress warnings about unverified host keys
 SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
 
+# Check if VMID already exists
+echo "## Checking if VMID $VMID already exists..."
+# awk finds VMID in first column, grep -q . checks if any output was produced
+if ssh root@$PROXMOX_HOST "qm list | awk '\$1 == $VMID'" | grep -q .; then
+    echo "✗ ERROR: VMID $VMID already exists on $PROXMOX_HOST"
+    echo "  Please choose a different VMID or delete the existing VM first"
+    echo "  To delete: ssh root@$PROXMOX_HOST 'qm stop $VMID && qm destroy $VMID'"
+    exit 1
+fi
+echo "✓ VMID $VMID is available"
+echo ""
+
 # Execute local script on remote host with named parameters
 # - $(...) captures command output into variable
 # - ssh runs remote bash with script as input
 # - tee /dev/tty shows output AND captures it
 # - PIPESTATUS[0] gets SSH exit code
-REMOTE_OUTPUT=$(ssh root@$PROXMOX_HOST 'bash -s --' "--iso" "$ISO_FILENAME" "--vmid" "$VMID" < "$SCRIPT_DIR/local-script-for-remote-execution.sh" | tee /dev/tty)
+REMOTE_OUTPUT=$(ssh root@$PROXMOX_HOST 'bash -s --' "--iso" "$ISO_FILENAME" "--vmid" "$VMID" < "$SCRIPT_DIR/provision-on-proxmox.sh" | tee /dev/tty)
 SSH_EXIT_CODE=${PIPESTATUS[0]}
 
 if [ $SSH_EXIT_CODE -ne 0 ]; then
@@ -55,6 +68,16 @@ if [ -z "$VM_IP" ]; then
     exit 1
 fi
 echo "- VM_IP: ${VM_IP}"
+
+# Extract ISO_SHA256 from captured output
+# - grep finds the line with ISOSHA256
+# - sed removes everything before the hash
+ISO_SHA256=$(echo "$REMOTE_OUTPUT" | grep "ISOSHA256:" | sed 's/.*ISOSHA256: //')
+if [ -z "$ISO_SHA256" ]; then
+    echo "✗ ERROR: Could not find ISOSHA256 in remote output"
+    exit 1
+fi
+echo "- ISO_SHA256: ${ISO_SHA256}"
 
 echo ""
 echo "## SSHing into VM"
@@ -128,14 +151,69 @@ echo "Disk Usage: $(df -h / /tmp)"
 echo "Memory Usage: $(free -h)"
 echo "Uptime: $(uptime)"
 EOF
-fi
 
-echo ""
-echo "To connect to the VM (installer):"
-echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR nixos@${VM_IP}"
-echo "To connect to the VM (installed for daniel):"
-echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR daniel@${VM_IP}"
-echo ""
+    echo ""
+    echo "### Rebuilding ISO from within installed system"
+    echo ""
+    ssh $SSH_OPTS daniel@${VM_IP} << EOF || echo "✗ WARNING: ISO rebuild verification failed"
+# TODO: Update to use main branch once feature is merged
+echo "Building ISO from GitHub repo..."
+nix build --quiet github:daneroo/nix-garden/feature/nixos-25-05-installer#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
+
+echo "Extracting new ISO SHA256..."
+NEW_ISO_SHA256=\$(sha256sum ./result/iso/*.iso | awk '{print \$1}')
+echo "NEW_ISO_SHA256: \$NEW_ISO_SHA256"
+
+echo "Comparing with original ISO SHA256: $ISO_SHA256"
+if [ "\$NEW_ISO_SHA256" = "$ISO_SHA256" ]; then
+    echo "✓ SHAs match - reproducible build achieved!"
+else
+    echo "✗ SHAs differ - manual intervention required"
+    echo "  Original: $ISO_SHA256"
+    echo "  New:      \$NEW_ISO_SHA256"
+    echo "  To converge: manually copy new ISO to $PROXMOX_HOST and re-run this script"
+fi
+EOF
+
+    echo ""
+    echo "### Copying built ISO from VM"
+    echo ""
+    echo "Copying ISO from daniel@${VM_IP}:result/iso/nixos-*-x86_64-linux.iso"
+    if scp $SSH_OPTS daniel@${VM_IP}:result/iso/nixos-*-x86_64-linux.iso .; then
+        echo "✓ ISO copied successfully to current directory"
+        ls -la nixos-*-x86_64-linux.iso
+        
+        # Rename to expected filename format (add "my-" prefix)
+        echo "Renaming ISO to expected format..."
+        BUILT_ISO_NAME=$(ls nixos-*-x86_64-linux.iso)
+        mv "$BUILT_ISO_NAME" "my-$BUILT_ISO_NAME"
+        echo "✓ ISO renamed to: my-$BUILT_ISO_NAME"
+        ls -la "my-$BUILT_ISO_NAME"
+    else
+        echo "✗ ERROR: Failed to copy built ISO from VM"
+        echo "  Manual copy required: scp $SSH_OPTS daniel@${VM_IP}:result/iso/nixos-*-x86_64-linux.iso ."
+    fi
+
+    echo ""
+    echo "### Connection Information"
+    echo ""
+    echo "To connect to the VM (installer):"
+    echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR nixos@${VM_IP}"
+    echo "To connect to the VM (installed for daniel):"
+    echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR daniel@${VM_IP}"
+    echo ""
+else
+    echo ""
+    echo "✗ WARNING: System verification skipped - VM not responding"
+    echo ""
+    echo "### Connection Information (for manual troubleshooting)"
+    echo ""
+    echo "To connect to the VM (installer):"
+    echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR nixos@${VM_IP}"
+    echo "To connect to the VM (installed for daniel):"
+    echo "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR daniel@${VM_IP}"
+    echo ""
+fi
 
 
 echo "## Completion"

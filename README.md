@@ -1,8 +1,22 @@
 # NixOS First Steps
 
+```bash
+nix fmt flake.nix
+nix flake update
+```
+
+## TODO: Merge 2025-07-14
+
+- [ ] remove all references to branch (after merge) feature/nixos-25-05-installer
+- [ ] remove extraneous files:
+  - minimal-iso/
+  - host/minimal/generated/
+
+- [ ] make analogous script for colima/tart
+
 These are experiments with Nix; on NixOS, Ubuntu and on MacOS
 
-I am embarking on my Mix/NixOS journey, and I need to make a wholistic plan.
+I am embarking on my Nix/NixOS journey, and I need to make a wholistic plan.
 So far I have done learning experiments, enough to decide that this is the way forward for me.
 I chose nix to eventually replace:
 
@@ -31,13 +45,9 @@ This repository should contain:
   - (direnv, use flakes)
   - updating, checking for updates and planning
 
-## Elixir..?
+## MCP NixOS
 
-- Elixir orchestration rewrite to replace bash script complexity (e2e, bit later coordination and monitoring)
-- Phoenix LiveView UI evolution for real-time infrastructure monitoring
-- Composable primitives for VM lifecycle, QMP operations, network discovery
-- Production monitoring system with persistent state management
-- Escape from console formatting hell - no more VT100 codes and UTF-8 symbol wrestling
+- [mcp-nixos](https://mcp-nixos.io/)
 
 ## TODO
 
@@ -201,138 +211,6 @@ sudo nix-env -iA nixpkgs.btrfs-progs
 
 ### NixOS
 
-#### Modernizing with NixOS 25.05 Installer Framework (In Progress)
-
-We are transitioning from the legacy custom ISO approach to NixOS 25.05's new installer framework built on `nixos-generators` and `nixos-install-tools`.
-
-#### New NixOS 25.05 Approach (Target)
-
-Key Improvements:
-
-- Unified Framework: Built on official `nixos-generators` integration  
-- Enhanced Tool Collection: `nixos-install-tools` package bundles disko, parted, e2fsprogs, etc.
-- Better Integration: Enhanced disko and nixos-anywhere support
-- Modern Build Process: Uses `system.build.images` and new build commands
-
-Planned Workflow:
-
-```bash
-# On a working NixOS, of the right architecture, build the installer image
-git clone https://github.com/daneroo/nix-garden.git
-cd nix-garden
-# Build installer images (new approach - produces nixos-25.05.xxx-*.iso files)
-# x86_64
-nix build .#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
-# nix --extra-experimental-features 'nix-command flakes' build github:daneroo/nix-garden/feature/nixos-25-05-installer#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
-# copy the artifact
-cp result/iso/nixos-25.05.20250605.4792576-x86_64-linux.iso my-nixos-25.05.20250605.4792576-x86_64-linux.iso
-# checksum
-sha256sum my-nixos-25.05.20250605.4792576-x86_64-linux.iso
-# copy to our registry!
-chmod 644 my-nixos-25.05.20250605.4792576-x86_64-linux.iso
-scp -p ./my-nixos-25.05.20250605.4792576-x86_64-linux.iso daniel@galois:Downloads/iso/
-
-# aarch64
-nix build .#nixosConfigurations.installer-aarch64.config.system.build.images.iso-installer
-# copy the artifact
-cp result/iso/nixos-25.05.20250605.4792576-aarch64-linux.iso my-nixos-25.05.20250605.4792576-aarch64-linux.iso
-# checksum
-sha256sum my-nixos-25.05.20250605.4792576-aarch64-linux.iso
-chmod 644 my-nixos-25.05.20250605.4792576-aarch64-linux.iso
-scp -p ./my-nixos-25.05.20250605.4792576-aarch64-linux.iso daniel@galois:Downloads/iso/
-
-## Now boot these images on a new machine: 8GB if you want to build the iso in the installer!
-```
-
-Bootstrap Workflow:
-
-```bash
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.{2|73}.xx
-
-# List the targets!
-nix flake show github:daneroo/nix-garden?dir=scripts/disko-format-install --all-systems
-# force update the cache - if necessary (cache busting)
-# nix flake update --flake github:daneroo/nix-garden?dir=scripts/disko-format-install
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-arm64
-nix run github:daneroo/nix-garden?dir=scripts/disko-format-install minimal-amd64
-
-# or while I'm on the branch
-# but that still won;t work because scripts/disko-format refers to main branch
-DISKO_AUTO_CONFIRM=true nix run --impure github:daneroo/nix-garden/feature/nixos-25-05-installer?dir=scripts/disko-format-install minimal-amd64
-# So...
-# we'll duplicate it here
-FLAKE_URI="github:daneroo/nix-garden/feature/nixos-25-05-installer"
-nix flake show ${FLAKE_URI} --json | jq '.nixosConfigurations | keys'
-TARGET_HOST="minimal-amd64"
-FLAKE_OUTPUT_REF="${FLAKE_URI}#${TARGET_HOST}"
-sudo nix run github:nix-community/disko -- --mode disko --flake ${FLAKE_OUTPUT_REF}
-# Test if the configuration can be built (without installing)
-nix build ${FLAKE_URI}#nixosConfigurations.minimal-amd64.config.system.build.toplevel --dry-run
-sudo nixos-install --flake ${FLAKE_OUTPUT_REF} --no-root-passwd
-sudo nixos-install --flake ${FLAKE_OUTPUT_REF} --no-root-passwd --verbose
-```
-
-Disko Integration:
-
-Our own `./scripts/disko-format-install` script combines disko disk formatting and nixos-install into a single operation. The manual steps it performs are:
-
-- Disko examples: <https://github.com/nix-community/disko/tree/master/example>
-
-```bash
-# Show the available configs in the flake (top of this repo) that we can use
-nix flake show github:daneroo/nix-garden
-# nix-shell -p jq # if not already installed
-# nix flake update github:daneroo/nix-garden # if necessary (caching)
-nix flake show github:daneroo/nix-garden --json | jq '.nixosConfigurations | keys'
-
-# First: disko formats the disk (destructive operation)
-sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-arm64
-sudo nix run github:nix-community/disko -- --mode disko --flake github:daneroo/nix-garden#minimal-amd64
-
-# Then: nixos-install installs the system to the formatted disk
-sudo nixos-install --flake github:daneroo/nix-garden#minimal-arm64 --no-root-passwd
-sudo nixos-install --flake github:daneroo/nix-garden#minimal-amd64 --no-root-passwd
-```
-
-### Migration Notes - Legacy Custom Minimal ISO
-
-Note: This section documents the legacy approach. The `minimal-iso/` directory will be removed once the NixOS 25.05 implementation is complete.
-
-Note: see also [nix-generators (image builders)](https://github.com/nix-community/nixos-generators)
-
-```bash
-nix run github:nix-community/nixos-generators -- --help
-```
-
-This is how we built our own custom iso, it's purpose is to be able to boot and install on a new machine.
-It is derived from the NixOS [cd-dvd/installation-cd-minimal.nix](https://github.com/NixOS/nixpkgs/blob/24.05/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix), and in addition:
-
-The image are renamed with `my-` prefix but otherwise keep the name of the artifact from the derivation. i.e.
-
-```bash
-❯ (cd ~/Downloads/iso/; sha256sum my-nixos-24.05.20240531.63dacb4-*.iso)
-e8c39ae1f8239220d0e1b7371bb421083bb24442991f620450632e6f045bd64b  my-nixos-24.05.20240531.63dacb4-aarch64-linux.iso
-fd90bfe1c177c676bb9f1497b7face1324b918fa1d35c988f862166c7bde4d17  my-nixos-24.05.20240531.63dacb4-x86_64-linux.iso
-```
-
-- enable flakes
-- enable ssh
-- show ip on console (when logged in as a terminal ([ -t 1]))
-
-```bash
-cd minimal-iso
-nix build .#nixosConfigurations.x86_64Iso.config.system.build.isoImage
-# or
-nix build .#nixosConfigurations.aarch64Iso.config.system.build.isoImage
-
-# Actually I can even build without cloning (if the VM has enough memory i.e. 8GB (aarch64) / 16GB (x86_64))
-nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.x86_64Iso.config.system.build.isoImage'
-nix build 'github:daneroo/nix-garden?dir=minimal-iso#nixosConfigurations.aarch64Iso.config.system.build.isoImage'
-
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.2.92
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null nixos@192.168.69.5
-```
-
 ## Updating Configuration (WIP)
 
 ```bash
@@ -347,30 +225,6 @@ sudo nixos-rebuild switch --flake .#minimal-arm64 --no-write-lock-file
 nix flake show github:daneroo/nix-garden
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-amd64 --no-write-lock-file
 sudo nixos-rebuild switch --flake github:daneroo/nix-garden#minimal-arm64 --no-write-lock-file
-```
-
-## ARM VM on proxmox
-
-ARM64 success: Attach the ISO as a VirtIO disk (--virtio1 path/to/iso) instead of CD-ROM media, plus add --arch aarch64, remove vmgenid (not supported), use VirtIO storage instead of SCSI (to avoid PCIe bus issues), and add --efidisk0 for proper UEFI variables - ARM64 UEFI firmware boots ISOs better when they're presented as regular disks rather than optical media.
-
-```bash
-root@hilbert:~# cat /etc/pve/nodes/hilbert/qemu-server/103.conf
-agent: 1
-arch: aarch64
-bios: ovmf
-boot: order=virtio1;virtio0;net0
-cores: 4
-efidisk0: local-zfs:vm-103-disk-1,efitype=4m,size=64M
-memory: 8192
-meta: creation-qemu=7.2.10,ctime=1750456615
-name: nix2505-aarch64
-net0: virtio=C6:FA:15:F7:73:F4,bridge=vmbr0,firewall=1
-numa: 0
-ostype: l26
-smbios1: uuid=ee5fa8f6-ef5b-4029-9ada-a8ed5ac0e7de
-sockets: 1
-virtio0: local-zfs:vm-103-disk-0,size=64G
-virtio1: pve-storage_backups-isos:iso/nu-nixos-25.05.20250605.4792576-aarch64-linux.iso,size=1503020K
 ```
 
 ## References
