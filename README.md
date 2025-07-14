@@ -8,9 +8,6 @@ nix flake update
 ## TODO: Merge 2025-07-14
 
 - [ ] remove all references to branch (after merge) feature/nixos-25-05-installer
-- [ ] remove extraneous files:
-  - minimal-iso/
-  - host/minimal/generated/
 
 - [ ] make analogous script for colima/tart
 
