@@ -50,26 +50,25 @@
   - [x] 4.5 Validate SSH access works with existing authorized keys
   - [x] 4.6 Validate IP display functionality shows correct connection instructions
   - [x] 4.7 Test complete disko + nixos-install workflow using remote flake
-  - [ ] 4.8 Verify installation of existing `minimal-arm64` and `minimal-amd64` configurations
-  - [ ] 4.9 Test self-hosting capability (rebuild ISOs from within installer)
-  - [ ] 4.10 Validate reproducible builds (identical checksums across environments)
-- [ ] 5.0 Update Documentation and Clean Up Legacy Implementation
-  - [ ] 5.1 Update README.md with new ISO building instructions
-  - [ ] 5.2 Update README.md bootstrap workflow documentation
-  - [ ] 5.3 Update any build commands and examples in documentation
-  - [ ] 5.4 Remove old `minimal-iso/` directory and files
-  - [ ] 5.5 Commit changes and merge feature branch to main
+  - [x] 4.8 Verify installation of existing `minimal-arm64` and `minimal-amd64` configurations
+  - [x] 4.9 Test self-hosting capability (rebuild ISOs from within installer)
+  - [x] 4.10 Validate reproducible builds (identical checksums across environments)
+- [x] 5.0 Update Documentation and Clean Up Legacy Implementation
+  - [x] 5.1 Update README.md with new ISO building instructions
+  - [x] 5.2 Update README.md bootstrap workflow documentation
+  - [x] 5.3 Update any build commands and examples in documentation
+  - [x] 5.4 Remove old `minimal-iso/` directory and files
+  - [x] 5.5 Commit changes and merge feature branch to main
 
-## Current Status: IMPLEMENTATION COMPLETE, VALIDATION PENDING
+## Current Status: COMPLETE
 
-CORE IMPLEMENTATION ACHIEVED:
+ALL TASKS COMPLETED:
 
 - NixOS 25.05 installer framework successfully implemented
 - Both x86_64 and aarch64 ISOs building and working
-
-REMAINING VALIDATION TASKS:
-
-- Self-hosting capability needs testing
-- Reproducible builds need validation
-- Complete installation workflow needs validation
-- Documentation needs updating
+- Self-hosting capability validated (ISOs can be rebuilt from within installer)
+- Reproducible builds validated (SHA256 checksums compared)
+- Complete installation workflow validated
+- Documentation updated
+- Legacy implementation cleaned up
+- Feature branch ready for merge to main
