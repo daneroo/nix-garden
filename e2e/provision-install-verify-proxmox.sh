@@ -89,7 +89,9 @@ ssh $SSH_OPTS nixos@${VM_IP} << 'EOF'
 echo "OS Release: $(cat /etc/os-release | grep PRETTY_NAME)"
 echo "System Info: $(uname -a)"
 
-FLAKE_URI="github:daneroo/nix-garden/feature/nixos-25-05-installer"
+# When working on a feature branch, change this to your branch name
+# Example: FLAKE_URI="github:daneroo/nix-garden/feature/your-branch-name"
+FLAKE_URI="github:daneroo/nix-garden"
 TARGET_HOST="minimal-amd64"
 FLAKE_OUTPUT_REF="${FLAKE_URI}#${TARGET_HOST}"
 echo "Flake URI: ${FLAKE_URI}"
@@ -156,9 +158,10 @@ EOF
     echo "### Rebuilding ISO from within installed system"
     echo ""
     ssh $SSH_OPTS daniel@${VM_IP} << EOF || echo "✗ WARNING: ISO rebuild verification failed"
-# TODO: Update to use main branch once feature is merged
+# When working on a feature branch, change the branch name in the URI
+# Example: github:daneroo/nix-garden/feature/your-branch-name#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
 echo "Building ISO from GitHub repo..."
-nix build --quiet github:daneroo/nix-garden/feature/nixos-25-05-installer#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
+nix build --quiet github:daneroo/nix-garden#nixosConfigurations.installer-x86_64.config.system.build.images.iso-installer
 
 echo "Extracting new ISO SHA256..."
 NEW_ISO_SHA256=\$(sha256sum ./result/iso/*.iso | awk '{print \$1}')
