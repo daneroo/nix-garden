@@ -13,6 +13,7 @@ SCSIHW="virtio-scsi-single"
 ISO_STORAGE="pve-storage_backups-isos"
 ISO_PATH="/pve-storage/backups-isos/template/iso"
 VM_NAME="ubuntu2404"
+VM_USER="daniel"
 SUBNET_PREFIX="192.168.2"
 SSH_PUBKEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
 

@@ -3,15 +3,19 @@ set -euo pipefail
 
 # -- Constants --------------------------------------------------------------
 
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Source shared constants (VM_USER, SSH_PUBKEY, ISO_PATH, etc.)
+# Same file prepended to on-proxmox scripts — single source of truth
+# shellcheck source=on-proxmox-common.sh
+source "$SCRIPT_DIR/on-proxmox-common.sh"
+
 readonly PROXMOX_HOST="hilbert"
-readonly VM_USER="daniel"
 readonly PASSWORD_HASH='$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80'
 readonly ISO_FILENAME="ubuntu-24.04.4-live-server-amd64.iso"
 readonly IMG_FILENAME="noble-server-cloudimg-amd64.img"
 readonly SEED_FILENAME="ubuntu-rdp-seed-$(date +%s).iso"  # ISO mode only
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 readonly SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o BatchMode=yes -o PasswordAuthentication=no"
-readonly ISO_PATH="/pve-storage/backups-isos/template/iso"
 readonly DESKTOP_PACKAGES="xfce4 xrdp qemu-guest-agent"
 readonly DESKTOP_SESSION="startxfce4"
 readonly RDP_PORT="3389"
@@ -30,7 +34,6 @@ VM_IP=""
 
 main() {
     parse_args "$@"
-    validate_config
     print_banner
     provision_vm
     extract_ip
@@ -83,40 +86,6 @@ parse_args() {
     done
 }
 
-# -- Config validation ------------------------------------------------------
-# SSH key and password hash appear in three places that must stay in sync:
-#   - provision.sh (this file): PASSWORD_HASH
-#   - on-proxmox-common.sh:    SSH_PUBKEY
-#   - on-proxmox-iso-seed.yaml: password + authorized-keys
-
-validate_config() {
-    local common="$SCRIPT_DIR/on-proxmox-common.sh"
-    local seed="$SCRIPT_DIR/on-proxmox-iso-seed.yaml"
-
-    # Extract SSH key from common.sh and seed YAML
-    local common_key seed_key
-    common_key=$(grep '^SSH_PUBKEY=' "$common" | sed 's/^SSH_PUBKEY="//' | sed 's/"$//')
-    seed_key=$(grep 'ssh-ed25519' "$seed" | sed 's/.*- "//' | sed 's/"$//' | xargs)
-
-    [[ "$common_key" != "$seed_key" ]] && {
-        echo "✗ SSH key mismatch between on-proxmox-common.sh and on-proxmox-iso-seed.yaml"
-        echo "  common: $common_key"
-        echo "  seed:   $seed_key"
-        exit 1
-    }
-
-    # Extract password hash from seed YAML (between quotes)
-    local seed_hash
-    seed_hash=$(grep 'password:' "$seed" | sed 's/.*password: "//' | sed 's/"$//')
-
-    [[ "$PASSWORD_HASH" != "$seed_hash" ]] && {
-        echo "✗ Password hash mismatch between provision.sh and on-proxmox-iso-seed.yaml"
-        exit 1
-    }
-
-    echo "✓ Config validated (SSH key + password hash consistent)"
-}
-
 # -- Provision --------------------------------------------------------------
 # The on-proxmox scripts run on Proxmox via SSH stdin piping:
 #   { cat common.sh; cat img.sh; } | ssh root@host 'bash -s --' ...
@@ -158,11 +127,15 @@ provision_iso() {
     echo "- Seed:  $SEED_FILENAME"
     echo ""
 
-    # Build cloud-init seed ISO on Proxmox from on-proxmox-iso-seed.yaml
+    # Expand template variables (VM_USER, PASSWORD_HASH, SSH_PUBKEY) in seed YAML
+    local seed_content
+    seed_content=$(VM_USER="$VM_USER" PASSWORD_HASH="$PASSWORD_HASH" SSH_PUBKEY="$SSH_PUBKEY" \
+        envsubst '${VM_USER} ${PASSWORD_HASH} ${SSH_PUBKEY}' < "$SCRIPT_DIR/on-proxmox-iso-seed.yaml")
+
     echo "## Building seed ISO on $PROXMOX_HOST..."
     ssh root@$PROXMOX_HOST "
         cat > /tmp/user-data << 'USERDATA'
-$(cat "$SCRIPT_DIR/on-proxmox-iso-seed.yaml")
+${seed_content}
 USERDATA
         echo '' > /tmp/meta-data
         genisoimage -output '$ISO_PATH/$SEED_FILENAME' \

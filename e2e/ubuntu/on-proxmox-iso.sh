@@ -9,9 +9,10 @@
 #   ISO_STORAGE                  - Proxmox storage ID for ISO files (iso mode)
 #   ISO_PATH                     - filesystem path to ISO/image directory
 #   VM_NAME                      - VM display name in Proxmox
+#   VM_USER                      - username for cloud-init and SSH access
 #   SUBNET_PREFIX                - e.g. "192.168.2" for ping sweep IP resolution
 #   SSH_PUBKEY                   - authorized SSH key for VM access
-for var in CORES MEMORY DISK_SIZE_GB NETWORK STORAGE SCSIHW ISO_STORAGE ISO_PATH VM_NAME SUBNET_PREFIX SSH_PUBKEY; do
+for var in CORES MEMORY DISK_SIZE_GB NETWORK STORAGE SCSIHW ISO_STORAGE ISO_PATH VM_NAME VM_USER SUBNET_PREFIX SSH_PUBKEY; do
     [[ -z "${!var:-}" ]] && { echo "✗ Missing $var — on-proxmox-common.sh not prepended?"; exit 1; }
 done
 
