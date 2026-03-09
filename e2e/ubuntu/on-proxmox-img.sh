@@ -2,7 +2,15 @@
 # Runs on Proxmox via: { cat common.sh; cat img.sh; } | ssh root@host 'bash -s --' ...
 # Requires: on-proxmox-common.sh prepended (provides constants + helpers)
 
-# -- Guard: verify common.sh was prepended ---------------------------------
+# -- Guard: verify on-proxmox-common.sh was prepended ----------------------
+# These variables must be provided by on-proxmox-common.sh (prepended via cat):
+#   CORES, MEMORY, DISK_SIZE_GB  - VM hardware sizing
+#   NETWORK, STORAGE, SCSIHW     - Proxmox storage/network config
+#   ISO_STORAGE                  - Proxmox storage ID for ISO files (iso mode)
+#   ISO_PATH                     - filesystem path to ISO/image directory
+#   VM_NAME                      - VM display name in Proxmox
+#   SUBNET_PREFIX                - e.g. "192.168.2" for ping sweep IP resolution
+#   SSH_PUBKEY                   - authorized SSH key for VM access
 for var in CORES MEMORY DISK_SIZE_GB NETWORK STORAGE SCSIHW ISO_STORAGE ISO_PATH VM_NAME SUBNET_PREFIX SSH_PUBKEY; do
     [[ -z "${!var:-}" ]] && { echo "✗ Missing $var — on-proxmox-common.sh not prepended?"; exit 1; }
 done
