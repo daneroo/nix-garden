@@ -29,6 +29,7 @@ VM_IP=""
 # -- Main ------------------------------------------------------------------
 
 main() {
+    parse_args "$@"
     print_banner
     provision_vm
     extract_ip
@@ -39,6 +40,46 @@ main() {
     reboot_vm
     verify_rdp
     print_summary
+}
+
+# -- CLI --------------------------------------------------------------------
+
+show_usage() {
+    echo "Usage: $0 [--mode img|iso] [--vmid <ID>]"
+    echo ""
+    echo "Options:"
+    echo "  --mode, -m    Provisioning mode: img (cloud image) or iso (installer)"
+    echo "                Default: img"
+    echo "  --vmid        Virtual Machine ID (integer). Default: 996"
+    echo "  --help, -h    Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                     # cloud image, VM 996"
+    echo "  $0 --mode iso          # ISO installer, VM 996"
+    echo "  $0 --vmid 997          # cloud image, VM 997"
+    echo "  $0 --mode iso --vmid 5 # ISO installer, VM 5"
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --mode|-m)
+                MODE="$2"
+                [[ "$MODE" != "img" && "$MODE" != "iso" ]] && {
+                    echo "✗ Invalid mode: $MODE (must be img or iso)"; exit 1; }
+                shift 2 ;;
+            --vmid)
+                VM_ID="$2"
+                [[ ! "$VM_ID" =~ ^[0-9]+$ ]] && {
+                    echo "✗ Invalid vmid: $VM_ID (must be integer)"; exit 1; }
+                shift 2 ;;
+            --help|-h)
+                show_usage; exit 0 ;;
+            *)
+                echo "✗ Unknown option: $1"
+                show_usage; exit 1 ;;
+        esac
+    done
 }
 
 # -- Provision --------------------------------------------------------------
