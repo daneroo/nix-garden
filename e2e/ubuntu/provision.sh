@@ -97,6 +97,7 @@ print_banner() {
     echo "# Ubuntu RDP Provision"
     echo "- Host:  $PROXMOX_HOST"
     echo "- VM_ID: $VM_ID"
+    echo "- User:  $VM_USER"
     echo "- Mode:  $MODE"
     echo ""
 }
@@ -107,19 +108,17 @@ provision_vm() {
     else
         provision_iso
     fi
-
-    # PIPESTATUS[0] is the ssh exit code (not tee's) from the pipeline above
-    local ssh_exit=${PIPESTATUS[0]}
-    [[ $ssh_exit -ne 0 ]] && { echo "✗ Remote script failed ($ssh_exit)"; exit $ssh_exit; }
 }
 
 provision_cloud_image() {
     echo "## Provisioning VM from cloud image..."
+    # set -o pipefail ensures SSH failures propagate through the pipe to tee
     REMOTE_OUTPUT=$({ cat "$SCRIPT_DIR/on-proxmox-common.sh"
                       cat "$SCRIPT_DIR/on-proxmox-img.sh"
                     } | ssh root@$PROXMOX_HOST 'bash -s --' \
         "--img" "$IMG_FILENAME" \
-        "--vmid" "$VM_ID" | tee /dev/tty)
+        "--vmid" "$VM_ID" | tee /dev/tty) || {
+        echo "✗ Remote script failed"; exit 1; }
 }
 
 provision_iso() {
@@ -152,7 +151,8 @@ USERDATA
                     } | ssh root@$PROXMOX_HOST 'bash -s --' \
         "--iso" "$ISO_FILENAME" \
         "--vmid" "$VM_ID" \
-        "--seed" "$SEED_FILENAME" | tee /dev/tty)
+        "--seed" "$SEED_FILENAME" | tee /dev/tty) || {
+        echo "✗ Remote script failed"; exit 1; }
 }
 
 # -- Post-provision ---------------------------------------------------------

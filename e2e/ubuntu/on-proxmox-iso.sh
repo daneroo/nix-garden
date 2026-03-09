@@ -27,9 +27,9 @@ main() {
 
     command -v jq >/dev/null || { echo "✗ jq not found"; exit 1; }
 
+    assert_vm_absent
     validate_files
     extract_kernel
-    assert_vm_absent
     create_vm
     echo ""; qm config "$VM_ID"; echo ""
     start_vm

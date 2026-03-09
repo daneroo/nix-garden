@@ -24,8 +24,8 @@ main() {
     echo "- IMG:   $IMG_FILENAME"
     echo "- VM_ID: $VM_ID"
 
-    validate_image
     assert_vm_absent
+    validate_image
     create_vm
     import_disk
     configure_cloud_init
