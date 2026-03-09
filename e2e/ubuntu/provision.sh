@@ -1,37 +1,85 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Configuration
-PROXMOX_HOST="hilbert"
+# -- Constants --------------------------------------------------------------
+
+readonly PROXMOX_HOST="hilbert"
+readonly VM_USER="daniel"
+readonly PASSWORD_HASH='$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80'
+readonly ISO_FILENAME="ubuntu-24.04.4-live-server-amd64.iso"
+readonly IMG_FILENAME="noble-server-cloudimg-amd64.img"
+readonly SEED_FILENAME="ubuntu-rdp-seed-$(date +%s).iso"  # ISO mode only
+readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o BatchMode=yes -o PasswordAuthentication=no"
+readonly ISO_PATH="/pve-storage/backups-isos/template/iso"
+readonly DESKTOP_PACKAGES="xfce4 xrdp qemu-guest-agent"
+readonly DESKTOP_SESSION="startxfce4"
+readonly RDP_PORT="3389"
+
+# -- Defaults (overridable via CLI: --mode, --vmid, --help) -----------------
+
 VM_ID="996"
 MODE="img"  # "img" = cloud image (fast), "iso" = installer (fallback)
-ISO_FILENAME="ubuntu-24.04.4-live-server-amd64.iso"
-IMG_FILENAME="noble-server-cloudimg-amd64.img"
-SEED_FILENAME="ubuntu-rdp-seed-$(date +%s).iso"   # ISO mode only
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o BatchMode=yes -o PasswordAuthentication=no"
-ISO_PATH="/pve-storage/backups-isos/template/iso"
+# -- Shared state (set by provision_vm, read by post-provision steps) -------
 
-echo "# Ubuntu RDP Provision"
-echo "- Host:  $PROXMOX_HOST"
-echo "- VM_ID: $VM_ID"
-echo "- Mode:  $MODE"
-echo ""
+REMOTE_OUTPUT=""
+VM_IP=""
 
-if [[ "$MODE" == "img" ]]; then
-    # -- Cloud image: Proxmox handles cloud-init natively --
+# -- Main ------------------------------------------------------------------
+
+main() {
+    print_banner
+    provision_vm
+    extract_ip
+    wait_for_ssh
+    wait_for_cloud_init
+    configure_user
+    install_desktop
+    reboot_vm
+    verify_rdp
+    print_summary
+}
+
+# -- Provision --------------------------------------------------------------
+# The on-proxmox scripts (img/iso) run on Proxmox via SSH stdin piping.
+# Their stdout is captured in REMOTE_OUTPUT (tee /dev/tty shows progress
+# in real-time). Both scripts emit "VM_IP: <addr>" which extract_ip() parses.
+
+print_banner() {
+    echo "# Ubuntu RDP Provision"
+    echo "- Host:  $PROXMOX_HOST"
+    echo "- VM_ID: $VM_ID"
+    echo "- Mode:  $MODE"
+    echo ""
+}
+
+provision_vm() {
+    if [[ "$MODE" == "img" ]]; then
+        provision_cloud_image
+    else
+        provision_iso
+    fi
+
+    # PIPESTATUS[0] is the ssh exit code (not tee's) from the pipeline above
+    local ssh_exit=${PIPESTATUS[0]}
+    [[ $ssh_exit -ne 0 ]] && { echo "✗ Remote script failed ($ssh_exit)"; exit $ssh_exit; }
+}
+
+provision_cloud_image() {
     echo "## Provisioning VM from cloud image..."
     REMOTE_OUTPUT=$(ssh root@$PROXMOX_HOST 'bash -s --' \
         "--img" "$IMG_FILENAME" \
         "--vmid" "$VM_ID" \
         < "$SCRIPT_DIR/on-proxmox-img.sh" | tee /dev/tty)
-else
-    # -- ISO installer: build seed ISO, extract kernel, direct boot --
+}
+
+provision_iso() {
     echo "- ISO:   $ISO_FILENAME"
     echo "- Seed:  $SEED_FILENAME"
     echo ""
 
+    # Build cloud-init seed ISO on Proxmox from on-proxmox-iso-seed.yaml
     echo "## Building seed ISO on $PROXMOX_HOST..."
     ssh root@$PROXMOX_HOST "
         cat > /tmp/user-data << 'USERDATA'
@@ -52,87 +100,107 @@ USERDATA
         "--vmid" "$VM_ID" \
         "--seed" "$SEED_FILENAME" \
         < "$SCRIPT_DIR/on-proxmox-iso.sh" | tee /dev/tty)
-fi
+}
 
-SSH_EXIT_CODE=${PIPESTATUS[0]}
-[[ $SSH_EXIT_CODE -ne 0 ]] && { echo "✗ Remote script failed ($SSH_EXIT_CODE)"; exit $SSH_EXIT_CODE; }
+# -- Post-provision ---------------------------------------------------------
+# All steps below run from Mac, operating on the VM over SSH using VM_IP.
 
-# -- Extract IP --
-VM_IP=$(echo "$REMOTE_OUTPUT" | grep "VM_IP:" | sed 's/.*VM_IP: //')
-[[ -z "$VM_IP" ]] && { echo "✗ Could not find VM_IP in output"; exit 1; }
-echo ""
-echo "- VM_IP: $VM_IP"
+extract_ip() {
+    # Parse "- VM_IP: x.x.x.x" from the on-proxmox script's captured output
+    VM_IP=$(echo "$REMOTE_OUTPUT" | grep "VM_IP:" | sed 's/.*VM_IP: //')
+    [[ -z "$VM_IP" ]] && { echo "✗ Could not find VM_IP in output"; exit 1; }
+    echo ""
+    echo "- VM_IP: $VM_IP"
+}
 
-# -- Wait for SSH --
-echo ""
-echo "## Waiting for SSH..."
-MAX_ATTEMPTS=60  # 60 * 5s = 5 min max
-for ATTEMPT in $(seq 1 $MAX_ATTEMPTS); do
-    if ssh $SSH_OPTS daniel@${VM_IP} 'echo ok' > /dev/null 2>&1; then
-        echo "✓ SSH up"
-        break
-    fi
-    [[ $ATTEMPT -eq $MAX_ATTEMPTS ]] && { echo "✗ SSH never came up"; exit 1; }
-    sleep 5
-done
+wait_for_ssh() {
+    echo ""
+    echo "## Waiting for SSH..."
+    local max=60  # 60 * 5s = 5 min
+    for attempt in $(seq 1 $max); do
+        if ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'echo ok' > /dev/null 2>&1; then
+            echo "✓ SSH up"
+            return
+        fi
+        sleep 5
+    done
+    echo "✗ SSH never came up"; exit 1
+}
 
-# -- Wait for cloud-init to finish (holds apt lock) --
-echo ""
-echo "## Waiting for cloud-init..."
-ssh $SSH_OPTS daniel@${VM_IP} 'cloud-init status --wait' 2>/dev/null || true
-echo "✓ Cloud-init done"
+wait_for_cloud_init() {
+    echo ""
+    echo "## Waiting for cloud-init..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'cloud-init status --wait' 2>/dev/null || true
+    echo "✓ Cloud-init done"
+}
 
-# -- Install desktop + RDP over SSH --
-echo ""
-echo "## Installing xfce4 + xrdp..."
-ssh $SSH_OPTS daniel@${VM_IP} << 'EOF'
+configure_user() {
+    echo ""
+    echo "## Configuring user ${VM_USER}..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
 set -e
-# Set password for RDP login (cloud image mode has no password set)
-# Use pre-hashed password (same SHA-512 hash as on-proxmox-iso-seed.yaml/nix config)
-echo 'daniel:$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80' | sudo chpasswd -e
-echo 'daniel ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/daniel > /dev/null
+echo '${VM_USER}:${PASSWORD_HASH}' | sudo chpasswd -e
+echo '${VM_USER} ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/${VM_USER} > /dev/null
+EOF
+    echo "✓ User configured"
+}
+
+install_desktop() {
+    echo ""
+    echo "## Installing ${DESKTOP_PACKAGES}..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
+set -e
 sudo apt-get update
 sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 xrdp qemu-guest-agent
-echo "startxfce4" > ~/.xsession
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ${DESKTOP_PACKAGES}
+echo "${DESKTOP_SESSION}" > ~/.xsession
 sudo systemctl enable --now xrdp
-sudo ufw allow 3389/tcp 2>/dev/null || true
+sudo ufw allow ${RDP_PORT}/tcp 2>/dev/null || true
 EOF
-echo "✓ Desktop + RDP installed"
+    echo "✓ Desktop + RDP installed"
+}
 
-# -- Reboot to apply kernel/lib updates --
-echo ""
-echo "## Rebooting..."
-ssh $SSH_OPTS daniel@${VM_IP} 'sudo reboot' 2>/dev/null || true
-sleep 15
-for i in $(seq 1 30); do
-    if ssh $SSH_OPTS daniel@${VM_IP} 'echo ok' > /dev/null 2>&1; then
-        echo "✓ Back up after reboot"
-        break
-    fi
-    sleep 5
-done
+reboot_vm() {
+    echo ""
+    echo "## Rebooting..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'sudo reboot' 2>/dev/null || true
+    sleep 15
+    for i in $(seq 1 30); do
+        if ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'echo ok' > /dev/null 2>&1; then
+            echo "✓ Back up after reboot"
+            return
+        fi
+        sleep 5
+    done
+    echo "✗ VM never came back after reboot"; exit 1
+}
 
-# -- Verify RDP --
-echo ""
-echo "## Verifying RDP..."
-ssh $SSH_OPTS daniel@${VM_IP} << 'EOF'
-echo "- xrdp: $(systemctl is-active xrdp)"
-echo "- port: $(ss -tlnp | grep 3389 || echo '3389 not listening')"
-echo "- OS:   $(grep PRETTY_NAME /etc/os-release | cut -d= -f2)"
+# -- Verify + Summary -------------------------------------------------------
+
+verify_rdp() {
+    echo ""
+    echo "## Verifying RDP..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
+echo "- xrdp: \$(systemctl is-active xrdp)"
+echo "- port: \$(ss -tlnp | grep ${RDP_PORT} || echo '${RDP_PORT} not listening')"
+echo "- OS:   \$(grep PRETTY_NAME /etc/os-release | cut -d= -f2)"
 EOF
+}
 
-echo ""
-echo "## Done"
-echo ""
-echo "SSH:  ssh daniel@${VM_IP}"
-echo "RDP:  ${VM_IP}:3389   (user: daniel)"
-echo ""
-# Generate .rdp file for one-click connection
-RDP_FILE="$SCRIPT_DIR/connect-vm${VM_ID}-${VM_IP}.rdp"
-cat > "$RDP_FILE" << EOF
+print_summary() {
+    local rdp_file="$SCRIPT_DIR/connect-vm${VM_ID}-${VM_IP}.rdp"
+    cat > "$rdp_file" << EOF
 full address:s:${VM_IP}
-username:s:daniel
+username:s:${VM_USER}
 EOF
-echo "macOS:  open $RDP_FILE"
-echo ""
+
+    echo ""
+    echo "## Done"
+    echo ""
+    echo "SSH:    ssh ${VM_USER}@${VM_IP}"
+    echo "RDP:    ${VM_IP}:${RDP_PORT}  (user: ${VM_USER})"
+    echo "macOS:  open $rdp_file"
+    echo ""
+}
+
+main "$@"
