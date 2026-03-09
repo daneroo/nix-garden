@@ -76,7 +76,8 @@ We bypass GRUB entirely:
 
 ## Files
 
-- `provision.sh` -- runs on Mac. Orchestrator: detects mode, provisions VM, waits for SSH, installs desktop
+- `provision.sh` -- runs on Mac. Orchestrator: parses CLI, provisions VM, waits for SSH, installs desktop
+- `on-proxmox-common.sh` -- shared constants (VM sizing, paths, SSH key) and helpers (start_vm, ping sweep)
 - `on-proxmox-img.sh` -- runs on Proxmox. Cloud image: import disk, configure cloud-init, boot
 - `on-proxmox-iso.sh` -- runs on Proxmox. ISO: extract kernel, direct boot, wait for install, reconfigure for disk boot
 - `on-proxmox-iso-seed.yaml` -- cloud-init autoinstall config, built into seed ISO (ISO mode only)

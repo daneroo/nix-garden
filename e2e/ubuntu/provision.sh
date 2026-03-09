@@ -30,6 +30,7 @@ VM_IP=""
 
 main() {
     parse_args "$@"
+    validate_config
     print_banner
     provision_vm
     extract_ip
@@ -82,10 +83,46 @@ parse_args() {
     done
 }
 
+# -- Config validation ------------------------------------------------------
+# SSH key and password hash appear in three places that must stay in sync:
+#   - provision.sh (this file): PASSWORD_HASH
+#   - on-proxmox-common.sh:    SSH_PUBKEY
+#   - on-proxmox-iso-seed.yaml: password + authorized-keys
+
+validate_config() {
+    local common="$SCRIPT_DIR/on-proxmox-common.sh"
+    local seed="$SCRIPT_DIR/on-proxmox-iso-seed.yaml"
+
+    # Extract SSH key from common.sh and seed YAML
+    local common_key seed_key
+    common_key=$(grep '^SSH_PUBKEY=' "$common" | sed 's/^SSH_PUBKEY="//' | sed 's/"$//')
+    seed_key=$(grep 'ssh-ed25519' "$seed" | sed 's/.*- "//' | sed 's/"$//' | xargs)
+
+    [[ "$common_key" != "$seed_key" ]] && {
+        echo "✗ SSH key mismatch between on-proxmox-common.sh and on-proxmox-iso-seed.yaml"
+        echo "  common: $common_key"
+        echo "  seed:   $seed_key"
+        exit 1
+    }
+
+    # Extract password hash from seed YAML (between quotes)
+    local seed_hash
+    seed_hash=$(grep 'password:' "$seed" | sed 's/.*password: "//' | sed 's/"$//')
+
+    [[ "$PASSWORD_HASH" != "$seed_hash" ]] && {
+        echo "✗ Password hash mismatch between provision.sh and on-proxmox-iso-seed.yaml"
+        exit 1
+    }
+
+    echo "✓ Config validated (SSH key + password hash consistent)"
+}
+
 # -- Provision --------------------------------------------------------------
-# The on-proxmox scripts (img/iso) run on Proxmox via SSH stdin piping.
-# Their stdout is captured in REMOTE_OUTPUT (tee /dev/tty shows progress
-# in real-time). Both scripts emit "VM_IP: <addr>" which extract_ip() parses.
+# The on-proxmox scripts run on Proxmox via SSH stdin piping:
+#   { cat common.sh; cat img.sh; } | ssh root@host 'bash -s --' ...
+# Common constants (VM sizing, paths, SSH key) are in on-proxmox-common.sh.
+# Output is captured in REMOTE_OUTPUT (tee /dev/tty shows progress in
+# real-time). Both scripts emit "- VM_IP: <addr>" which extract_ip() parses.
 
 print_banner() {
     echo "# Ubuntu RDP Provision"
@@ -109,10 +146,11 @@ provision_vm() {
 
 provision_cloud_image() {
     echo "## Provisioning VM from cloud image..."
-    REMOTE_OUTPUT=$(ssh root@$PROXMOX_HOST 'bash -s --' \
+    REMOTE_OUTPUT=$({ cat "$SCRIPT_DIR/on-proxmox-common.sh"
+                      cat "$SCRIPT_DIR/on-proxmox-img.sh"
+                    } | ssh root@$PROXMOX_HOST 'bash -s --' \
         "--img" "$IMG_FILENAME" \
-        "--vmid" "$VM_ID" \
-        < "$SCRIPT_DIR/on-proxmox-img.sh" | tee /dev/tty)
+        "--vmid" "$VM_ID" | tee /dev/tty)
 }
 
 provision_iso() {
@@ -136,11 +174,12 @@ USERDATA
     echo ""
 
     echo "## Provisioning VM from ISO..."
-    REMOTE_OUTPUT=$(ssh root@$PROXMOX_HOST 'bash -s --' \
+    REMOTE_OUTPUT=$({ cat "$SCRIPT_DIR/on-proxmox-common.sh"
+                      cat "$SCRIPT_DIR/on-proxmox-iso.sh"
+                    } | ssh root@$PROXMOX_HOST 'bash -s --' \
         "--iso" "$ISO_FILENAME" \
         "--vmid" "$VM_ID" \
-        "--seed" "$SEED_FILENAME" \
-        < "$SCRIPT_DIR/on-proxmox-iso.sh" | tee /dev/tty)
+        "--seed" "$SEED_FILENAME" | tee /dev/tty)
 }
 
 # -- Post-provision ---------------------------------------------------------
