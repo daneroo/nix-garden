@@ -70,12 +70,26 @@ echo "## Installing xfce4 + xrdp (this takes a few minutes)..."
 ssh $SSH_OPTS daniel@${VM_IP} << 'EOF'
 set -e
 sudo apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y xfce4 xrdp
 echo "startxfce4" > ~/.xsession
 sudo systemctl enable --now xrdp
 sudo ufw allow 3389/tcp 2>/dev/null || true
 EOF
 echo "✓ Desktop + RDP installed"
+
+# -- Reboot to apply kernel/lib updates --
+echo ""
+echo "## Rebooting..."
+ssh $SSH_OPTS daniel@${VM_IP} 'sudo reboot' 2>/dev/null || true
+sleep 15
+for i in $(seq 1 30); do
+    if ssh $SSH_OPTS daniel@${VM_IP} 'echo ok' > /dev/null 2>&1; then
+        echo "✓ Back up after reboot"
+        break
+    fi
+    sleep 5
+done
 
 # -- Verify RDP --
 echo ""

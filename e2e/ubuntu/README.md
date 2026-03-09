@@ -4,10 +4,12 @@ Fully automated provisioning of an Ubuntu 24.04 VM with xfce4 desktop and xrdp.
 
 ## TODO
 
+- [ ] Bake cloud image — skip installer, boot from pre-built `.img` in seconds
+  - Cloud image already on Proxmox: `noble-server-cloudimg-amd64.img` (Ubuntu 24.04)
+  - `ssh root@hilbert 'wget -P /pve-storage/backups-isos/template/iso/ https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img'`
 - [ ] GNOME + Wayland (replace xfce4/xrdp)
 - [ ] GNOME Remote Desktop (built-in RDP on Wayland, no xrdp)
 - [ ] RustDesk (Wayland-native via PipeWire)
-- [ ] Bake cloud image — skip installer, boot from pre-built `.img` in seconds
 - [ ] Cosmic desktop as alternative to GNOME
 - [ ] Fedora/Bluefin — Kickstart instead of autoinstall
 - [ ] Omarchy — Arch-based, needs its own approach
