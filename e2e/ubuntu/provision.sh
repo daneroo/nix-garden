@@ -35,7 +35,7 @@ else
     echo "## Building seed ISO on $PROXMOX_HOST..."
     ssh root@$PROXMOX_HOST "
         cat > /tmp/user-data << 'USERDATA'
-$(cat "$SCRIPT_DIR/user-data")
+$(cat "$SCRIPT_DIR/on-proxmox-iso-seed.yaml")
 USERDATA
         echo '' > /tmp/meta-data
         genisoimage -output '$ISO_PATH/$SEED_FILENAME' \
@@ -88,7 +88,7 @@ echo "## Installing xfce4 + xrdp..."
 ssh $SSH_OPTS daniel@${VM_IP} << 'EOF'
 set -e
 # Set password for RDP login (cloud image mode has no password set)
-# Use pre-hashed password (same SHA-512 hash as user-data/nix config)
+# Use pre-hashed password (same SHA-512 hash as on-proxmox-iso-seed.yaml/nix config)
 echo 'daniel:$6$K9VVOhEK7yygNC1T$PIirqGGbEqN6T4foCBTabahTNZfR.PDGqJUpzfAsHUxKs3vcSrv4my55.7nhgo6EQXeSgL025IjUQS.0AkIL80' | sudo chpasswd -e
 echo 'daniel ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/daniel > /dev/null
 sudo apt-get update
