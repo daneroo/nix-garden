@@ -66,7 +66,7 @@ create_vm() {
         --net0 "$NETWORK" \
         --scsihw "$SCSIHW" \
         --agent 1 \
-        --serial0 socket --vga serial0
+        --serial0 socket --vga std
     echo "✓ VM $VM_ID created"
 }
 

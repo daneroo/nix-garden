@@ -16,14 +16,18 @@ readonly ISO_FILENAME="ubuntu-24.04.4-live-server-amd64.iso"
 readonly IMG_FILENAME="noble-server-cloudimg-amd64.img"
 readonly SEED_FILENAME="ubuntu-rdp-seed-$(date +%s).iso"  # ISO mode only
 readonly SSH_OPTS="-o ConnectTimeout=20 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o BatchMode=yes -o PasswordAuthentication=no"
-readonly DESKTOP_PACKAGES="xfce4 xrdp qemu-guest-agent"
-readonly DESKTOP_SESSION="startxfce4"
 readonly RDP_PORT="3389"
 
-# -- Defaults (overridable via CLI: --mode, --vmid, --help) -----------------
+# -- Defaults (overridable via CLI: --mode, --vmid, --wm, --help) ----------
 
 VM_ID="996"
 MODE="img"  # "img" = cloud image (fast), "iso" = installer (fallback)
+WM="gnome"  # "gnome", "kde", "xfce", "none"
+
+# -- Desktop config (resolved from WM by resolve_desktop) ------------------
+
+DESKTOP_PACKAGES=""
+DESKTOP_SESSION=""
 
 # -- Shared state (set by provision_vm, read by post-provision steps) -------
 
@@ -40,28 +44,32 @@ main() {
     wait_for_ssh
     wait_for_cloud_init
     configure_user
-    install_desktop
-    reboot_vm
-    verify_rdp
+    if [[ "$WM" != "none" ]]; then
+        install_desktop
+        reboot_vm
+        verify_rdp
+    fi
     print_summary
 }
 
 # -- CLI --------------------------------------------------------------------
 
 show_usage() {
-    echo "Usage: $0 [--mode img|iso] [--vmid <ID>]"
+    echo "Usage: $0 [--mode img|iso] [--wm gnome|kde|xfce|none] [--vmid <ID>]"
     echo ""
     echo "Options:"
     echo "  --mode, -m    Provisioning mode: img (cloud image) or iso (installer)"
     echo "                Default: img"
+    echo "  --wm          Desktop environment: gnome, kde, xfce, none"
+    echo "                Default: gnome"
     echo "  --vmid        Virtual Machine ID (integer). Default: 996"
     echo "  --help, -h    Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0                     # cloud image, VM 996"
-    echo "  $0 --mode iso          # ISO installer, VM 996"
-    echo "  $0 --vmid 997          # cloud image, VM 997"
-    echo "  $0 --mode iso --vmid 5 # ISO installer, VM 5"
+    echo "  $0                          # cloud image, GNOME, VM 996"
+    echo "  $0 --wm xfce               # cloud image, xfce, VM 996"
+    echo "  $0 --wm none               # cloud image, no desktop (SSH only)"
+    echo "  $0 --mode iso --wm kde      # ISO installer, KDE, VM 996"
 }
 
 parse_args() {
@@ -71,6 +79,11 @@ parse_args() {
                 MODE="$2"
                 [[ "$MODE" != "img" && "$MODE" != "iso" ]] && {
                     echo "✗ Invalid mode: $MODE (must be img or iso)"; exit 1; }
+                shift 2 ;;
+            --wm)
+                WM="$2"
+                [[ ! "$WM" =~ ^(gnome|kde|xfce|none)$ ]] && {
+                    echo "✗ Invalid wm: $WM (must be gnome, kde, xfce, or none)"; exit 1; }
                 shift 2 ;;
             --vmid)
                 VM_ID="$2"
@@ -84,6 +97,28 @@ parse_args() {
                 show_usage; exit 1 ;;
         esac
     done
+    resolve_desktop
+}
+
+# -- Desktop resolution -----------------------------------------------------
+# Maps --wm choice to packages and X11 session command.
+# All desktops include xrdp (X11-only) and qemu-guest-agent.
+
+resolve_desktop() {
+    [[ "$WM" == "none" ]] && return
+
+    local base="xrdp qemu-guest-agent"
+    case $WM in
+        gnome)
+            DESKTOP_PACKAGES="$base ubuntu-desktop-minimal"
+            DESKTOP_SESSION="gnome-session" ;;
+        kde)
+            DESKTOP_PACKAGES="$base kde-plasma-desktop"
+            DESKTOP_SESSION="startplasma-x11" ;;
+        xfce)
+            DESKTOP_PACKAGES="$base xfce4"
+            DESKTOP_SESSION="startxfce4" ;;
+    esac
 }
 
 # -- Provision --------------------------------------------------------------
@@ -94,11 +129,12 @@ parse_args() {
 # real-time). Both scripts emit "- VM_IP: <addr>" which extract_ip() parses.
 
 print_banner() {
-    echo "# Ubuntu RDP Provision"
+    echo "# Ubuntu VM Provision"
     echo "- Host:  $PROXMOX_HOST"
     echo "- VM_ID: $VM_ID"
     echo "- User:  $VM_USER"
     echo "- Mode:  $MODE"
+    echo "- WM:    $WM"
     echo ""
 }
 
@@ -200,28 +236,128 @@ EOF
 
 install_desktop() {
     echo ""
-    echo "## Installing ${DESKTOP_PACKAGES}..."
+    echo "## Installing desktop ($WM)..."
+    install_packages
+    switch_to_networkmanager
+    configure_xrdp_session
+    configure_xrdp_service
+    echo "✓ Desktop + RDP installed"
+}
+
+# Install desktop packages and start guest agent immediately.
+install_packages() {
     ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
 set -e
-sudo apt-get update
-sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y ${DESKTOP_PACKAGES}
+echo "- apt-get update (suppressing output)..."
+sudo apt-get update -qq > /dev/null
+echo "- apt-get upgrade (suppressing output)..."
+sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq > /dev/null
+echo "- apt-get install ${DESKTOP_PACKAGES} (suppressing output)..."
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ${DESKTOP_PACKAGES} > /dev/null
+sudo systemctl enable --now qemu-guest-agent
+EOF
+}
+
+# Cloud images use systemd-networkd, but desktop packages pull in
+# NetworkManager which takes over on reboot. Switch netplan renderer to
+# NetworkManager (what Ubuntu Desktop uses). The IP will change once on
+# reboot (different DHCP client-id); reboot_vm re-resolves via guest agent.
+# Not applied until reboot (netplan apply would kill this SSH session).
+switch_to_networkmanager() {
+    echo "- Switching netplan to NetworkManager..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << 'EOF'
+set -e
+sudo install -m 600 /dev/null /etc/netplan/01-network-manager-all.yaml
+sudo tee /etc/netplan/01-network-manager-all.yaml > /dev/null << 'NETPLAN'
+network:
+  version: 2
+  renderer: NetworkManager
+NETPLAN
+sudo tee /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg > /dev/null << 'CLOUDINIT'
+network: {config: disabled}
+CLOUDINIT
+sudo rm -f /etc/netplan/50-cloud-init.yaml
+sudo systemctl disable systemd-networkd 2>/dev/null || true
+EOF
+}
+
+# Configure xrdp session files. GNOME needs environment variables to render
+# properly (without these: black screen or broken wallpaper). Also disables
+# Wayland in GDM (xrdp is X11-only) and suppresses polkit color-manager
+# auth dialogs that appear over xrdp.
+configure_xrdp_session() {
+    echo "- Configuring xrdp session ($WM)..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
+set -e
+cat > ~/.xsessionrc << 'XSESSIONRC'
+export GNOME_SHELL_SESSION_MODE=ubuntu
+export XDG_CURRENT_DESKTOP=ubuntu:GNOME
+export XDG_SESSION_DESKTOP=ubuntu-xorg
+export XDG_CONFIG_DIRS=/etc/xdg/xdg-ubuntu:/etc/xdg
+XSESSIONRC
 echo "${DESKTOP_SESSION}" > ~/.xsession
+
+if [ -f /etc/gdm3/custom.conf ]; then
+    sudo sed -i 's/#\?WaylandEnable=.*/WaylandEnable=false/' /etc/gdm3/custom.conf
+fi
+
+sudo mkdir -p /etc/polkit-1/localauthority/50-local.d
+sudo tee /etc/polkit-1/localauthority/50-local.d/45-allow-colord.pkla > /dev/null << 'POLKIT'
+[Allow Colord all Users]
+Identity=unix-user:*
+Action=org.freedesktop.color-manager.create-device;org.freedesktop.color-manager.create-profile;org.freedesktop.color-manager.delete-device;org.freedesktop.color-manager.delete-profile;org.freedesktop.color-manager.modify-device;org.freedesktop.color-manager.modify-profile
+ResultAny=no
+ResultInactive=no
+ResultActive=yes
+POLKIT
+EOF
+}
+
+# Enable xrdp service. Adds xrdp user to ssl-cert group so it can read
+# its TLS key (Ubuntu 24.04 ships a symlink to the snakeoil cert).
+configure_xrdp_service() {
+    echo "- Enabling xrdp..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
+set -e
+sudo adduser xrdp ssl-cert
 sudo systemctl enable --now xrdp
 sudo ufw allow ${RDP_PORT}/tcp 2>/dev/null || true
 EOF
-    echo "✓ Desktop + RDP installed"
 }
 
 reboot_vm() {
     echo ""
-    echo "## Rebooting..."
-    ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'sudo reboot' 2>/dev/null || true
+    echo "## Rebooting (previous IP: ${VM_IP})..."
+    local old_ip="$VM_IP"
+    timeout 30 ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'sudo reboot' 2>/dev/null || true
+    echo "- Waiting 15s for reboot..."
     sleep 15
-    for i in $(seq 1 30); do
-        if ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'echo ok' > /dev/null 2>&1; then
-            echo "✓ Back up after reboot"
-            return
+
+    # The NetworkManager switch changes the DHCP client-id, so the IP may
+    # change on this reboot. Query guest agent (installed in DESKTOP_PACKAGES)
+    # to find the new IP.
+    for i in $(seq 1 40); do
+        # Guest agent first (fast, finds new IP if it changed)
+        local new_ip
+        new_ip=$(ssh -o ConnectTimeout=5 root@${PROXMOX_HOST} \
+            "qm guest cmd ${VM_ID} network-get-interfaces 2>/dev/null" 2>/dev/null \
+            | grep -o '"ip-address" : "[0-9.]*"' | grep -v 127.0.0.1 \
+            | head -1 | grep -o '[0-9.]*' || true)
+        if [[ -n "$new_ip" ]]; then
+            [[ "$new_ip" != "$old_ip" ]] && echo "  ⚠ VM_IP changed: ${old_ip} → ${new_ip}"
+            VM_IP="$new_ip"
+            echo "  - $i/40: guest-agent → ${VM_IP}, trying SSH..."
+            if timeout 5 ssh $SSH_OPTS ${VM_USER}@${VM_IP} 'echo ok' > /dev/null 2>&1; then
+                echo "✓ Back up after reboot (${VM_IP})"
+                return
+            fi
+        else
+            echo "  - $i/40: guest-agent not ready, trying ${old_ip}..."
+            # Fallback: try old IP (guest agent may not be up yet)
+            if timeout 5 ssh $SSH_OPTS ${VM_USER}@${old_ip} 'echo ok' > /dev/null 2>&1; then
+                echo "✓ Back up after reboot (${old_ip})"
+                return
+            fi
         fi
         sleep 5
     done
@@ -241,18 +377,20 @@ EOF
 }
 
 print_summary() {
-    local rdp_file="$SCRIPT_DIR/connect-vm${VM_ID}-${VM_IP}.rdp"
-    cat > "$rdp_file" << EOF
-full address:s:${VM_IP}
-username:s:${VM_USER}
-EOF
-
     echo ""
     echo "## Done"
     echo ""
     echo "SSH:    ssh ${VM_USER}@${VM_IP}"
-    echo "RDP:    ${VM_IP}:${RDP_PORT}  (user: ${VM_USER})"
-    echo "macOS:  open $rdp_file"
+
+    if [[ "$WM" != "none" ]]; then
+        local rdp_file="$SCRIPT_DIR/connect-vm${VM_ID}-${VM_IP}.rdp"
+        cat > "$rdp_file" << EOF
+full address:s:${VM_IP}
+username:s:${VM_USER}
+EOF
+        echo "RDP:    ${VM_IP}:${RDP_PORT}  (user: ${VM_USER})"
+        echo "macOS:  open $rdp_file"
+    fi
     echo ""
 }
 
