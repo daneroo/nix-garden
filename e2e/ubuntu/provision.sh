@@ -220,12 +220,16 @@ wget -q "${RUSTDESK_DEB_URL}" -O /tmp/rustdesk.deb
 echo "- Installing RustDesk..."
 sudo dpkg -i /tmp/rustdesk.deb > /dev/null 2>&1 || sudo apt-get install -f -y -qq > /dev/null 2>&1
 rm -f /tmp/rustdesk.deb
-sleep 3
-# Stop service before configuring — rustdesk CLI writes to root config,
-# which the service then copies to the gdm user context on next start.
+sleep 5  # wait for service to start and initialize config files
+
+# --password works with service stopped (writes to root config).
+# --option requires the IPC socket (service must be running) and only writes to root config.
+# Write direct-server directly to both configs to ensure the gdm subprocess picks it up.
 sudo systemctl stop rustdesk
 sudo rustdesk --password ${RUSTDESK_PASSWORD}
-sudo rustdesk --option direct-server Y
+for conf in /root/.config/rustdesk/RustDesk2.toml /var/lib/gdm3/.config/rustdesk/RustDesk2.toml; do
+    sudo sed -i '/^\[options\]/a direct-server = '"'"'Y'"'" "\$conf"
+done
 sudo systemctl start rustdesk
 sleep 3
 echo "- RustDesk: \$(systemctl is-active rustdesk)"
@@ -239,9 +243,25 @@ verify_desktop() {
     echo ""
     echo "## Verifying desktop..."
     ssh $SSH_OPTS ${VM_USER}@${VM_IP} << 'EOF'
-echo "- RustDesk: $(systemctl is-active rustdesk)"
-echo "- RustDesk direct (21118): $(ss -tlnp | grep -q 21118 && echo listening || echo NOT listening)"
+set -e
 echo "- OS:       $(grep PRETTY_NAME /etc/os-release | cut -d= -f2)"
+echo "- RustDesk: $(systemctl is-active rustdesk)"
+
+# lsof is required: ss -tlnp misses IPv6-bound sockets like RustDesk's TCP 21118
+if sudo lsof -i TCP:21118 -P -n 2>/dev/null | grep -q LISTEN; then
+    echo "- TCP 21118: listening (direct connection ready)"
+else
+    echo "✗ TCP 21118: NOT listening — direct RustDesk connection will fail"
+    exit 1
+fi
+
+# Verify password is set
+pw=$(sudo cat /var/lib/gdm3/.config/rustdesk/RustDesk.toml 2>/dev/null | grep '^password' | cut -d= -f2 | tr -d " '")
+if [[ -z "$pw" ]]; then
+    echo "✗ RustDesk password not set"
+    exit 1
+fi
+echo "- Password:  set"
 EOF
 }
 
