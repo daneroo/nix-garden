@@ -33,6 +33,14 @@ Connect from macOS via RustDesk directly by LAN IP.
 
 ---
 
+## Prerequisites
+
+Cloud image must be present on the Proxmox host before provisioning:
+
+```bash
+ssh root@hilbert 'wget -P /pve-storage/backups-isos/template/iso/ https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img'
+```
+
 ## History / dead ends
 
 ### xrdp
