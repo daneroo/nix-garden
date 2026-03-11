@@ -143,12 +143,12 @@ install_packages() {
 set -e
 echo "- apt-get update..."
 sudo apt-get update -qq > /dev/null
-echo "- apt-get upgrade..."
+echo "- apt-get upgrade (output suppressed)..."
 sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -y -qq > /dev/null
-echo "- Installing qemu-guest-agent..."
+echo "- Installing qemu-guest-agent (output suppressed)..."
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq qemu-guest-agent > /dev/null
-sudo systemctl enable --now qemu-guest-agent
-echo "- Installing ubuntu-desktop-minimal..."
+sudo systemctl start qemu-guest-agent
+echo "- Installing ubuntu-desktop-minimal (output suppressed)..."
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ubuntu-desktop-minimal > /dev/null
 EOF
 }
@@ -215,24 +215,61 @@ install_rustdesk() {
     echo "## Installing RustDesk..."
     ssh $SSH_OPTS ${VM_USER}@${VM_IP} << EOF
 set -e
-echo "- Downloading RustDesk..."
-wget -q "${RUSTDESK_DEB_URL}" -O /tmp/rustdesk.deb
-echo "- Installing RustDesk..."
-sudo dpkg -i /tmp/rustdesk.deb > /dev/null 2>&1 || sudo apt-get install -f -y -qq > /dev/null 2>&1
-rm -f /tmp/rustdesk.deb
-sleep 5  # wait for service to start and initialize config files
 
-# --password works with service stopped (writes to root config).
-# --option requires the IPC socket (service must be running) and only writes to root config.
-# Write direct-server directly to both configs to ensure the gdm subprocess picks it up.
+echo "- Downloading rustdesk.deb..."
+wget -q "${RUSTDESK_DEB_URL}" -O /tmp/rustdesk.deb
+echo "- Installing rustdesk.deb (official method: apt install -fy)..."
+sudo apt install -fy /tmp/rustdesk.deb > /dev/null 2>&1
+rm -f /tmp/rustdesk.deb
+echo "- RustDesk installed: \$(rustdesk --version 2>/dev/null || echo unknown)"
+
+# The service starts automatically on install. Give it time to initialize
+# and create config files in /root/.config/rustdesk/ before we stop it.
+echo "- Waiting 10s for RustDesk service to initialize..."
+sleep 10
+echo "- Service state: \$(systemctl is-active rustdesk)"
+
+echo "- Stopping RustDesk to configure..."
 sudo systemctl stop rustdesk
+echo "- Service state after stop: \$(systemctl is-active rustdesk)"
+
+# 1. Set password in root's config.
+#    rustdesk --password writes to /root/.config/rustdesk/RustDesk.toml.
+#    Prints "Connection refused" (no IPC socket) but still writes; exit code 0.
+echo "- Setting password in root config..."
 sudo rustdesk --password ${RUSTDESK_PASSWORD}
-for conf in /root/.config/rustdesk/RustDesk2.toml /var/lib/gdm3/.config/rustdesk/RustDesk2.toml; do
-    sudo sed -i '/^\[options\]/a direct-server = '"'"'Y'"'" "\$conf"
-done
+echo "- Verifying password in root config..."
+sudo grep -q '^password = .\+' /root/.config/rustdesk/RustDesk.toml \
+    && echo "  password: set" || { echo "  ✗ password NOT set in root config"; exit 1; }
+
+# 2. Enable direct LAN connections (TCP 21118) in root's config.
+#    rustdesk --option requires a running IPC socket, so we write directly.
+echo "- Enabling direct-server in root config..."
+sudo grep -q 'direct-server' /root/.config/rustdesk/RustDesk2.toml 2>/dev/null \
+    || echo "direct-server = 'Y'" | sudo tee -a /root/.config/rustdesk/RustDesk2.toml > /dev/null
+echo "- Verifying direct-server in root config..."
+sudo grep -q 'direct-server' /root/.config/rustdesk/RustDesk2.toml \
+    && echo "  direct-server: set" || { echo "  ✗ direct-server NOT set in root config"; exit 1; }
+
+# 3. Copy root's config to gdm user.
+#    Direct connections (TCP 21118) are served by a subprocess running as gdm,
+#    which reads from /var/lib/gdm3/.config/rustdesk/ — a completely separate
+#    config from root's. The root service does NOT propagate its config to gdm.
+#    Copy both files so gdm has the password and direct-server option.
+echo "- Copying config to gdm user (serves direct connections on TCP 21118)..."
+sudo mkdir -p /var/lib/gdm3/.config/rustdesk
+sudo cp /root/.config/rustdesk/RustDesk.toml /var/lib/gdm3/.config/rustdesk/RustDesk.toml
+sudo cp /root/.config/rustdesk/RustDesk2.toml /var/lib/gdm3/.config/rustdesk/RustDesk2.toml
+sudo chown gdm:gdm /var/lib/gdm3/.config/rustdesk/RustDesk*.toml
+echo "- Verifying gdm config..."
+sudo grep -q '^password = .\+' /var/lib/gdm3/.config/rustdesk/RustDesk.toml \
+    && echo "  password: set" || { echo "  ✗ password NOT set in gdm config"; exit 1; }
+sudo grep -q 'direct-server' /var/lib/gdm3/.config/rustdesk/RustDesk2.toml \
+    && echo "  direct-server: set" || { echo "  ✗ direct-server NOT set in gdm config"; exit 1; }
+
+echo "- Starting RustDesk..."
 sudo systemctl start rustdesk
-sleep 3
-echo "- RustDesk: \$(systemctl is-active rustdesk)"
+echo "- Service state: \$(systemctl is-active rustdesk)"
 EOF
     echo "✓ RustDesk installed"
 }
@@ -247,7 +284,13 @@ set -e
 echo "- OS:       $(grep PRETTY_NAME /etc/os-release | cut -d= -f2)"
 echo "- RustDesk: $(systemctl is-active rustdesk)"
 
-# lsof is required: ss -tlnp misses IPv6-bound sockets like RustDesk's TCP 21118
+# lsof is required: ss -tlnp misses IPv6-bound sockets like RustDesk's TCP 21118.
+# Wait up to 30s — gdm subprocess needs time to initialize after service start.
+echo "- Waiting for TCP 21118..."
+for i in $(seq 1 10); do
+    sudo lsof -i TCP:21118 -P -n 2>/dev/null | grep -q LISTEN && break
+    sleep 3
+done
 if sudo lsof -i TCP:21118 -P -n 2>/dev/null | grep -q LISTEN; then
     echo "- TCP 21118: listening (direct connection ready)"
 else

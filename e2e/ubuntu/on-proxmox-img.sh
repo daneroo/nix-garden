@@ -70,11 +70,19 @@ create_vm() {
     qm create "$VM_ID" \
         --name "$VM_NAME" \
         --memory "$MEMORY" --cores "$CORES" \
-        --machine q35 \
         --net0 "$NETWORK" \
         --scsihw "$SCSIHW" \
         --agent 1 \
-        --serial0 socket --vga std
+        --vga virtio \
+        --serial0 socket
+    # --vga virtio:     virtio-gpu virtual display; better 2D performance and Wayland
+    #                   support than 'std' (Bochs VGA). Visible in Proxmox noVNC console.
+    #                   Alternatives: 'std' (basic, compatible), 'none' (no display at all)
+    # --serial0 socket: serial console via 'qm terminal <vmid>' on the Proxmox host.
+    #                   The cloud image kernel logs boot output to ttyS0 (serial), so
+    #                   this is the only way to see pre-SSH boot messages or a login prompt.
+    #                   Side effect: Proxmox web UI Console tab defaults to serial (xterm.js)
+    #                   instead of noVNC when serial0 is present — select noVNC explicitly.
     echo "✓ VM $VM_ID created"
 }
 

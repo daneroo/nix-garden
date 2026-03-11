@@ -2,10 +2,10 @@
 
 ## Objective
 
-Fully automated, repeatable provisioning of an Ubuntu 24.04 VM with GNOME desktop and RustDesk
-remote access. No hardware dependencies. Works on any Proxmox host.
-
-Connect from macOS via RustDesk directly by LAN IP.
+- [x] Fully automated, repeatable provisioning of an Ubuntu 24.04 VM with GNOME desktop and RustDesk
+      remote access.
+- [x] No hardware dependencies. Works on any Proxmox host.
+- [x] Connect from macOS via RustDesk directly by LAN IP.
 
 ## Usage
 
@@ -26,13 +26,6 @@ Connect from macOS via RustDesk directly by LAN IP.
 - NetworkManager replaces systemd-networkd (desktop default); VM IP may change on reboot, re-resolved via qemu-guest-agent
 - RustDesk installed after reboot; service stopped before password/options are set, then restarted
 
-## Files
-
-- `provision.sh` — runs on macOS; orchestrates the full provisioning
-- `on-proxmox-img.sh` — runs on Proxmox (piped via SSH); creates the VM from cloud image
-
----
-
 ## Prerequisites
 
 Cloud image must be present on the Proxmox host before provisioning:
@@ -40,6 +33,22 @@ Cloud image must be present on the Proxmox host before provisioning:
 ```bash
 ssh root@hilbert 'wget -P /pve-storage/backups-isos/template/iso/ https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img'
 ```
+
+## Files
+
+- `provision.sh` — runs on macOS; orchestrates the full provisioning
+- `on-proxmox-img.sh` — runs on Proxmox (piped via SSH); creates the VM from cloud image
+
+## RustDesk config race
+
+`sudo rustdesk --password` works with the service stopped (writes to root's config file).
+`sudo rustdesk --option` requires the IPC socket (service running) and only reaches root's
+config — the gdm subprocess that does the actual serving never picks it up.
+
+Fix: stop service, set password via CLI, write `direct-server = 'Y'` directly to both config
+files (`/root/.config/rustdesk/RustDesk2.toml` and `/var/lib/gdm3/.config/rustdesk/RustDesk2.toml`),
+then restart. The service starts automatically on install; wait 10s before stopping to ensure
+the gdm subprocess has had time to create its config files.
 
 ## History / dead ends
 
@@ -64,9 +73,3 @@ Approach abandoned. No hardware dependency is the requirement.
 
 Script previously supported gnome/kde/xfce/none. xfce has no Wayland support; kde untested;
 none is not the goal. Removed. GNOME only.
-
-### RustDesk config race
-
-`sudo rustdesk --password` and `--option` silently fail if the service is running — they write
-to root's config but the server subprocess runs as the gdm user. Fix: stop service before
-configuring, start after.
