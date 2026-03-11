@@ -24,7 +24,9 @@
 - Cloud image import — no installer, boots in ~3.5 min
 - GNOME (`ubuntu-desktop-minimal`) installed over SSH
 - NetworkManager replaces systemd-networkd (desktop default); VM IP may change on reboot, re-resolved via qemu-guest-agent
+- GDM forced to X11 (`WaylandEnable=false`) — RustDesk does not support Wayland login screens
 - RustDesk installed after reboot; service stopped before password/options are set, then restarted
+- GNOME user session runs Wayland natively; RustDesk uses AV1 codec for the session
 
 ## Prerequisites
 
@@ -38,6 +40,11 @@ ssh root@hilbert 'wget -P /pve-storage/backups-isos/template/iso/ https://cloud-
 
 - `provision.sh` — runs on macOS; orchestrates the full provisioning
 - `on-proxmox-img.sh` — runs on Proxmox (piped via SSH); creates the VM from cloud image
+
+## Known limitations
+
+- **GDM→GNOME session handoff**: RustDesk connection resets twice during login (GDM X11 → GNOME Wayland transition). Reconnect automatically or manually — the GNOME session works well once established.
+- **GDM login screen is X11**: Required by RustDesk (official limitation). The GNOME user session runs Wayland with AV1 codec and good performance.
 
 ## RustDesk config race
 

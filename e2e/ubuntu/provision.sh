@@ -135,7 +135,21 @@ install_desktop() {
     echo "## Installing desktop (GNOME)..."
     install_packages
     switch_to_networkmanager
+    configure_gdm_x11
     echo "✓ Desktop installed"
+}
+
+# RustDesk does not support the Wayland login screen (official docs:
+# "Login screen using Wayland is not supported"). Force GDM to use X11.
+# Without this, GDM defaults to Wayland on VMs with only a virtual GPU,
+# and RustDesk cannot capture the login screen.
+configure_gdm_x11() {
+    echo "- Configuring GDM to use X11 (required by RustDesk)..."
+    ssh $SSH_OPTS ${VM_USER}@${VM_IP} << 'EOF'
+set -e
+sudo sed -i 's/^#WaylandEnable=false/WaylandEnable=false/' /etc/gdm3/custom.conf
+echo "- GDM WaylandEnable: $(grep 'WaylandEnable' /etc/gdm3/custom.conf)"
+EOF
 }
 
 install_packages() {
