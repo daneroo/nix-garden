@@ -1,0 +1,58 @@
+{ pkgs, ... }:
+
+{
+  imports = [
+    ./hardware-configuration.nix
+  ];
+
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  networking.hostName = "hardy";
+  networking.networkmanager.enable = true;
+
+  time.timeZone = "America/Toronto";
+  i18n.defaultLocale = "en_CA.UTF-8";
+
+  services.xserver.enable = true;
+  services.displayManager.gdm.enable = true;
+  services.desktopManager.gnome.enable = true;
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
+  };
+
+  services.printing.enable = true;
+
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+
+  users.users.daniel = {
+    isNormalUser = true;
+    description = "Daniel Lauzon";
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+    ];
+  };
+
+  nix = {
+    settings.experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
+  };
+
+  nixpkgs.config.allowUnfree = true;
+
+  programs.firefox.enable = true;
+  programs.git.enable = true;
+
+  system.stateVersion = "26.05";
+}
