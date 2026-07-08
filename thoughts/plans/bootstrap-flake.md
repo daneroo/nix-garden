@@ -48,8 +48,8 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
     - [x] Add the SSH public key to GitHub.
     - [ ] Verify SSH auth to GitHub.
   - [x] Create or connect the GitHub remote.
-  - [ ] Make the initial commit.
-  - [ ] Push the repo.
+  - [x] Make the initial commit.
+  - [x] Push the repo.
 
 - [ ] Phase 2+: rebuild from remote
   - [ ] Document clone-and-rebuild, including direct URL patterns if useful.
