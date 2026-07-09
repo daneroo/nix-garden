@@ -4,6 +4,7 @@
 docs/
   bootstrap.md
   file-layout.md
+  performance.md
   throttling.md
 
 thoughts/

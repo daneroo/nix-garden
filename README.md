@@ -19,6 +19,7 @@ See `docs/bootstrap.md` for the fresh-start path.
 docs/
   bootstrap.md
   file-layout.md
+  performance.md
   throttling.md
 
 thoughts/

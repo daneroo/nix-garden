@@ -11,6 +11,7 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
   - [x] Authenticate Codex.
   - [x] Capture repo layout convention in README and docs.
   - [x] Capture C436F throttling context in `docs/throttling.md`.
+  - [x] Capture C436F performance measurements in `docs/performance.md`.
 
 - [ ] Phase 1: first pushable and rebuildable repo
   - [x] Add the smallest NixOS host output for `hardy`.
