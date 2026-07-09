@@ -21,6 +21,7 @@
         gh
         ghostty
         git
+        just
         vim
       ];
     in

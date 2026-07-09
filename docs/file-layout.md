@@ -7,6 +7,10 @@ docs/
   performance.md
   throttling.md
 
+scripts/
+  bootstrap-apply.sh
+  pre-commit.sh
+
 thoughts/
   BACKLOG.md
   plans/
@@ -18,6 +22,7 @@ thoughts/
 ```
 
 - `docs/`: stable explanations, runbooks, and machine facts worth carrying forward.
+- `scripts/`: reviewed helper scripts for bootstrap, operations, and local checks.
 - `thoughts/BACKLOG.md`: items that are not yet planned.
 - `thoughts/plans/`: active plans with status, goal, and nested checkbox bullets.
 - `thoughts/plans/archive/`: completed plans worth preserving.

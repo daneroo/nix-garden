@@ -24,10 +24,14 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
     - `_1password-gui`
     - `gh`
     - `codex`
+    - `just`
+  - [ ] Add a `Justfile` for check, preview, build, and apply.
   - [x] Preserve the current generated hardware config.
   - [x] Preserve the current NixOS state version.
   - [x] Generate `flake.lock`.
   - [x] Add `.gitignore` for local/editor/build outputs.
+  - [ ] Add one-time bootstrap path from default install to flake-managed baseline.
+  - [ ] Add a pre-commit-equivalent target for local checks.
   - [ ] Validate the flake:
     - [x] Run `nix flake check`.
     - [x] Build the system with `nixos-rebuild build --flake .#hardy`.
