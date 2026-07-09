@@ -30,8 +30,9 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
   - [x] Preserve the current NixOS state version.
   - [x] Generate `flake.lock`.
   - [x] Add `.gitignore` for local/editor/build outputs.
-  - [ ] Add one-time bootstrap path from default install to flake-managed baseline.
-  - [ ] Add a pre-commit-equivalent target for local checks.
+  - [x] Add one-time bootstrap path from default install to flake-managed baseline.
+  - [x] Add a pre-commit-equivalent target for local checks.
+  - [x] Add a self-documenting default `just` target.
   - [ ] Validate the flake:
     - [x] Run `nix flake check`.
     - [x] Build the system with `nixos-rebuild build --flake .#hardy`.

@@ -9,6 +9,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
 
   networking.hostName = "hardy";
+  networking.domain = "imetrical.com";
   networking.networkmanager.enable = true;
 
   time.timeZone = "America/Toronto";

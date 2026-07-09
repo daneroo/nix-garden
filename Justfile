@@ -2,6 +2,16 @@ set dotenv-load := false
 
 flake := ".#hardy"
 
+default:
+    @echo "Targets:"
+    @echo "  just bootstrap   one-time first apply from a default install"
+    @echo "  just pre-flight  check, preview, and build without switching"
+    @echo "  just apply       run pre-flight, ask, then switch"
+    @echo "  just check       run nix flake check"
+    @echo "  just preview     show what would be built/downloaded"
+    @echo "  just build       build without switching"
+    @echo "  just pre-commit  local checks before commit"
+
 bootstrap:
     ./scripts/bootstrap-apply.sh
 
@@ -9,15 +19,21 @@ pre-commit:
     ./scripts/pre-commit.sh
 
 check:
+    @echo "== check: nix flake check =="
     nix flake check
 
 preview:
+    @echo "== preview: nixos-rebuild dry-build =="
     nixos-rebuild dry-build --flake {{flake}}
 
 build:
+    @echo "== build: nixos-rebuild build =="
     nixos-rebuild build --flake {{flake}}
 
-apply: check preview build
+pre-flight: check preview build
+
+apply: pre-flight
+    @echo "== apply: nixos-rebuild switch =="
     @printf 'Apply {{flake}} to this machine? [y/N] '; \
     read answer; \
     case "$answer" in \

@@ -26,18 +26,12 @@ just bootstrap
 Normal loop:
 
 ```sh
-just check
-just preview
-just build
-```
-
-Apply the config:
-
-```sh
+just
+just pre-flight
 just apply
 ```
 
-`just apply` runs check, preview, and build first, then asks before switching.
+`just apply` runs pre-flight, asks, then switches.
 
 ## Layout
 
