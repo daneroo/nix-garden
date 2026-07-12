@@ -4,10 +4,12 @@
 
 ## Notes
 
+**Note: 2026-03-11** : I deleted the working vm (clan-one) and the `pxmx-clan` experiment repo (was never pushed anywhere)
+
 - [ ] The generated flake `my-clan`, or `pxmx-clan` must the root of it's own got repo.
   - can use --flake (local-ref) of $CLAN
 - [ ] I seem to have to be on the same architecture as the target system (x86_64)
-- [x] My `own minimal-iso`  produces extraneous output when ssh'ing to execute commands.
+- [x] My `own minimal-iso` produces extraneous output when ssh'ing to execute commands.
 - [ ] Try to create an installer iso with a loopback device?
 - [ ] docker x86_64: seccomp stuff
 
