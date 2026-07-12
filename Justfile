@@ -113,5 +113,5 @@ _diff:
 [private]
 _verify:
     @echo "== verify: running system matches ./result =="
-    test "$$(readlink -f /run/current-system)" = "$$(readlink -f ./result)"
+    test "$(readlink -f /run/current-system)" = "$(readlink -f ./result)"
     sudo -n true
