@@ -11,8 +11,7 @@ local commands or constraints.
 - Document and thought filenames use lowercase kebab-case. Uppercase is reserved
   for notable indexes or control files such as `README.md` and `BACKLOG.md`.
 - The shared workflow may require invariants while allowing local mechanisms.
-  The required quality gate is `just pre-commit` here and `bun run ci` in
-  Prosodio.
+  The required quality gate is `just check` here and `bun run ci` in Prosodio.
 - Prettier owns Markdown formatting and `markdownlint-cli2`, configured with
   `markdownlint/style/prettier`, owns structural linting in both repos. Local
   command surfaces may differ while preserving that split. Both current repos

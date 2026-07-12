@@ -24,8 +24,8 @@ through the same mechanism.
 - What command should verify formatting without writing files?
 - Should the check operate on tracked Nix files, the whole repository, or a
   formatter-managed file set?
-- How should the check join `just pre-commit` without duplicating formatter
-  selection or file discovery?
+- How should the check join `just check` without duplicating formatter selection
+  or file discovery?
 - Should editor formatting invoke `nix fmt`, the formatter binary, or another
   repository command?
 - Does introducing a formatter justify a `devShell`, tree-wide formatter

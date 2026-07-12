@@ -6,10 +6,10 @@ internal command taxonomy.
 ## Contract
 
 - `just plan` checks Git and flake state, optionally updates locked inputs, then
-  verifies, builds, and compares desired with running without activating.
+  calls `just check` before building and comparing desired with running.
 - `just apply` replans without updates, confirms, switches, and verifies.
-- Bare `just` documents only `plan`, `apply`, and `pre-commit`; private helpers
-  keep commands visible and report concise failures with an obvious next step.
+- Bare `just` documents only `plan`, `apply`, and `check`; private helpers keep
+  commands visible and report concise failures with an obvious next step.
 - Move `hardy` to locked `nixos-unstable` and remove repetitive sudo
   authentication while retaining explicit activation confirmation.
 

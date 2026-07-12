@@ -32,8 +32,7 @@ workflow core.
 Each adopting repository names one required quality-gate command in its local
 instructions. Plans and agents must run that gate after edits and before
 commits; the implementation remains repository-specific. For nix-garden the gate
-is `just pre-commit`, backed by `scripts/pre-commit.sh`. For Prosodio it is
-`bun run ci`.
+is `just check`. For Prosodio it is `bun run ci`.
 
 The shared workflow defines the invariant, not a universal command. A copied or
 generated workflow must preserve the adopting repository's local command and

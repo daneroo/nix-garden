@@ -50,7 +50,7 @@ That target runs check, preview, build, asks for confirmation, then switches.
 Before committing:
 
 ```sh
-just pre-commit
+just check
 ```
 
 This target is the place to grow Markdown, Nix, and other repo checks over time.

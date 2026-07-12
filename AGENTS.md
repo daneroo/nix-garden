@@ -8,7 +8,7 @@ first managed host.
 
 ## Quality
 
-- `just pre-commit` — required after edits and before commits; see
+- `just check` — required after edits and before commits; see
   [docs/workspace.md](docs/workspace.md).
 - `just pre-flight` — check, preview, and build before changing the running
   system.

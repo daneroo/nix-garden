@@ -14,7 +14,6 @@ docs/
 
 scripts/
   bootstrap-apply.sh
-  pre-commit.sh
 
 thoughts/
   BACKLOG.md

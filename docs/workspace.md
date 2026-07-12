@@ -2,8 +2,8 @@
 
 ## Quality Gate
 
-`just pre-commit` is the required repository quality gate after edits and before
-commits. `scripts/pre-commit.sh` is the source of truth for its current checks.
+`just check` is the required repository quality gate after edits and before
+commits.
 
 Grow this one command as formatting, linting, and tests are adopted. Automated
 CI should run the same gate rather than maintain a separate definition.
