@@ -1,7 +1,9 @@
-set default-list
 set dotenv-load := false
 
 flake := ".#hardy"
+
+default:
+    @just --list
 
 # Check, build, and compare desired with running; optionally update inputs.
 plan:

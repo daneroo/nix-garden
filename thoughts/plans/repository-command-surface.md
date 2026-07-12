@@ -4,6 +4,21 @@ Status: planned
 
 Goal: make updates to `hardy` a clear `plan` then `apply` reconciliation loop.
 
+Acceptance:
+
+- `just plan` works with the locked inputs and reports only the intended
+  passwordless-sudo closure change before the first activation.
+- After the passwordless-sudo activation, `/run/current-system` matches the
+  planned result, `sudo -n true` succeeds, and `sshd` and `NetworkManager`
+  remain enabled and active.
+- The later `nixos-unstable` plan reports the expected channel/package movement,
+  including a changed `codex --version`; unexpected service, boot, user, or
+  network policy changes stop the migration.
+- `just apply` replans without updating inputs, asks for explicit activation
+  confirmation, switches to the planned result, and verifies the active system.
+- `just check` passes before any commit, and the recovery path documents how to
+  boot or switch back to the previous generation.
+
 - [ ] Implement the documented public Just surface and private helpers without
       adding scripts. `[tier: med]`
 - [ ] Make `plan` precheck Git and flake state, optionally update inputs, call
