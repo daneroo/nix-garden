@@ -1,7 +1,27 @@
-set default-list := true
+set default-list
 set dotenv-load := false
 
 flake := ".#hardy"
+
+# Check, build, and compare desired with running; optionally update inputs.
+plan:
+    just _git-state
+    just _maybe-update
+    just check
+    just _build
+    just _diff
+
+# Replan without updates, confirm, switch, and verify.
+apply:
+    just _plan-locked
+    @echo "== apply: sudo nixos-rebuild switch --flake {{ flake }} =="
+    @printf 'Apply {{ flake }} to this machine? [y/N] '; \
+    read answer; \
+    case "$answer" in \
+      y|Y|yes|YES) sudo nixos-rebuild switch --flake {{ flake }} ;; \
+      *) echo 'apply aborted'; exit 1 ;; \
+    esac
+    just _verify
 
 # Check pre-commit invariants: shell, formatting, Markdown, and flake.
 check: _shell-check _fmt-check _lint-md _flake-check
@@ -10,15 +30,52 @@ check: _shell-check _fmt-check _lint-md _flake-check
 fmt:
     bunx prettier --write .
 
-# Verify, build, confirm, and switch hardy.
-apply: _pre-flight
-    @echo "== apply: sudo nixos-rebuild switch --flake {{flake}} =="
-    @printf 'Apply {{flake}} to this machine? [y/N] '; \
-    read answer; \
-    case "$answer" in \
-      y|Y|yes|YES) sudo nixos-rebuild switch --flake {{flake}} ;; \
-      *) echo 'apply aborted'; exit 1 ;; \
+[private]
+[script('bash')]
+_git-state:
+    set -euo pipefail
+    echo '== git: git status --short =='
+    git rev-parse --is-inside-work-tree >/dev/null
+    if [[ ! -e /run/current-system ]]; then
+      echo 'plan requires NixOS with /run/current-system; run it on hardy' >&2
+      exit 1
+    fi
+    status="$(git status --short)"
+    if [[ -z "$status" ]]; then
+      echo 'working tree clean'
+      exit 0
+    fi
+    printf '%s\n' "$status"
+    if grep -q '^??' <<<"$status"; then
+      echo 'warning: Nix excludes untracked files from this Git flake'
+    fi
+    printf 'Continue with this working tree? [Y/n] '
+    read -r answer
+    case "$answer" in
+      n|N|no|NO) echo 'plan aborted'; exit 1 ;;
     esac
+
+[private]
+[script('bash')]
+_maybe-update:
+    set -euo pipefail
+    printf 'Update locked inputs before planning? [y/N] '
+    read -r answer
+    case "$answer" in
+      y|Y|yes|YES)
+        echo '== update: nix flake update =='
+        nix flake update
+        echo '== update result: git diff -- flake.lock =='
+        git diff -- flake.lock
+        ;;
+    esac
+
+[private]
+_plan-locked:
+    just _git-state
+    just check
+    just _build
+    just _diff
 
 [private]
 _shell-check:
@@ -42,17 +99,20 @@ _flake-check:
     nix flake check
 
 [private]
-_pre-flight: check _preview _build
-
-[private]
-_preview:
-    @echo "== preview: nixos-rebuild dry-build --flake {{flake}} =="
-    nixos-rebuild dry-build --flake {{flake}}
-
-[private]
 _build:
-    @echo "== build: nixos-rebuild build --flake {{flake}} =="
-    nixos-rebuild build --flake {{flake}}
+    @echo "== build: nixos-rebuild build --flake {{ flake }} =="
+    nixos-rebuild build --flake {{ flake }}
+
+[private]
+_diff:
+    @echo "== diff: nix store diff-closures /run/current-system ./result =="
+    nix store diff-closures /run/current-system ./result
+
+[private]
+_verify:
+    @echo "== verify: running system matches ./result =="
+    test "$$(readlink -f /run/current-system)" = "$$(readlink -f ./result)"
+    sudo -n true
 
 [private]
 bootstrap:
