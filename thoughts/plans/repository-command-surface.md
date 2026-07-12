@@ -1,6 +1,6 @@
 # Repository command surface
 
-Status: active
+Status: done
 
 Goal: make updates to `hardy` a clear `plan` then `apply` reconciliation loop.
 

@@ -6,8 +6,10 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
-- [ ] repository-command-surface — make system changes legible and safe; plan:
-      [repository-command-surface](plans/repository-command-surface.md)
+- [ ] herdr-workflow — package and validate Herdr on `hardy`, including
+      persistence, remote attach, clipboard behavior, and agent integrations;
+      ticket: [herdr-workflow](tickets/herdr-workflow.md); plan:
+      [herdr-workflow](plans/herdr-workflow.md)
 
 ## Fleet and Recovery
 
@@ -87,8 +89,6 @@ direction: [homelab-platform](design/homelab-platform.md).
       and push.
 - [ ] remote-access — configure and verify SSH access suitable for development
       and recovery without weakening host security.
-- [ ] herdr-workflow — package and validate Herdr on `hardy`, including
-      persistence, remote attach, clipboard behavior, and agent integrations.
 
 ## Repository Workflow
 
@@ -114,6 +114,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-12 repository-command-surface — implemented and exercised the
+  `plan`/`apply` workflow, passwordless sudo, and the locked unstable migration;
+  plan: [repository-command-surface](plans/repository-command-surface.md)
 - 2026-07-12 migrate-to-nix-garden — consolidated both repository histories and
   made nix-garden the verified live fleet repository; plan:
   [migrate-to-nix-garden](plans/archive/migrate-to-nix-garden.md)
