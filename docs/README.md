@@ -11,6 +11,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 - [workspace.md](workspace.md) — quality gate and safe system-change commands.
 - [markdown.md](markdown.md) — documentation authoring conventions.
 - [bootstrap.md](bootstrap.md) — fresh-install and rebuild path.
+- [reconciliation.md](reconciliation.md) — desired-versus-actual convergence for
+  stateful systems.
 
 ## Hardware
 

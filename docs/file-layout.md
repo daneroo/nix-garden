@@ -7,6 +7,7 @@ docs/
   file-layout.md
   markdown.md
   performance.md
+  reconciliation.md
   throttling.md
   workflow.md
   workspace.md
