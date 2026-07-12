@@ -1,6 +1,6 @@
 # Migrate to nix-garden
 
-Status: active
+Status: done
 
 Goal: make `nix-garden` the live fleet repository while preserving the complete
 history and recoverability of both repositories.
@@ -53,7 +53,7 @@ delete, merge, push, or archive repositories.
       preview, apply, verify, commit, and push it from nix-garden.
 - [x] Pull that commit on Galois and verify both machines agree.
 - [x] Push nix-garden only after local validation.
-- [ ] Archive `daneroo/nix-hardy` only after the pushed nix-garden clone is
+- [x] Archive `daneroo/nix-hardy` only after the pushed nix-garden clone is
       proven; do not delete either local source during this plan.
 
 Hardy proof evidence, 2026-07-12:
@@ -80,3 +80,5 @@ Hardy proof evidence, 2026-07-12:
   `origin/main`, `just pre-commit` passed, both imported repository histories
   remained reachable, and evaluation confirmed the declared `codex`, `jq`, and
   `btop` packages.
+- After archival, the clean legacy nix-hardy checkouts were removed from Galois
+  and Hardy; both histories remain reachable through nix-garden.
