@@ -6,9 +6,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
-- [ ] migrate-to-nix-garden — preserve both histories, archive the earlier
-      experiment tree, and make this repository the live root of `nix-garden`;
-      plan: [migrate-to-nix-garden](plans/migrate-to-nix-garden.md)
 - [ ] legacy-harvest — turn useful legacy findings into focused backlog items,
       then delete `legacy/` from the working tree; Git retains the history.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
@@ -118,3 +115,12 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] hardy-hardware-notes — decide whether to keep or consolidate the inherited
       performance and throttling notes for `hardy`; ticket:
       [hardy-hardware-notes](tickets/hardy-hardware-notes.md)
+
+## Closed (newest first)
+
+One line per closed item — this section doubles as the ticket archive index.
+Prune old lines freely; Git keeps everything.
+
+- 2026-07-12 migrate-to-nix-garden — consolidated both repository histories and
+  made nix-garden the verified live fleet repository; plan:
+  [migrate-to-nix-garden](plans/archive/migrate-to-nix-garden.md)

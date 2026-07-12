@@ -84,8 +84,9 @@ Goal: <one line>.
 ```
 
 Keep the checkboxes current while executing. When complete, record the outcome
-in the backlog's `## Closed` section. Delete the plan or move it to
-`thoughts/plans/archive/` while it remains a useful exemplar or reference.
+in the backlog's `## Closed` section and harvest durable facts into `docs/` when
+appropriate. Daniel decides whether to delete the completed plan or move it to
+`thoughts/plans/archive/`; do not choose its disposition automatically.
 
 Plan coding tasks for delegation and routing, not only sequencing. Give each
 task enough context to execute without reconstructing the design: boundaries,
