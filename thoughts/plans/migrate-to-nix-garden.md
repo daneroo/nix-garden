@@ -44,7 +44,7 @@ delete, merge, push, or archive repositories.
 - [x] Run the complete nix-garden quality gate and inspect flake outputs.
 - [x] Verify both histories and representative renamed files remain reachable.
 - [x] Audit links, executable bits, ignored files, and instructions.
-- [ ] Clone the consolidated remote fresh and repeat checks.
+- [x] Clone the consolidated remote fresh and repeat checks.
 - [ ] On `hardy`, clone nix-garden beside the old nix-hardy checkout; do not
       mutate or delete the recovery checkout.
 - [ ] From the fresh nix-garden clone on `hardy`, run the gate and pre-flight,
@@ -52,6 +52,6 @@ delete, merge, push, or archive repositories.
 - [ ] Use Codex on `hardy` to make one small meaningful configuration change;
       preview, apply, verify, commit, and push it from nix-garden.
 - [ ] Pull that commit on Galois and verify both machines agree.
-- [ ] Push nix-garden only after local validation.
+- [x] Push nix-garden only after local validation.
 - [ ] Archive `daneroo/nix-hardy` only after the pushed nix-garden clone is
       proven; do not delete either local source during this plan.
