@@ -82,8 +82,9 @@ Goal: <one line>.
 - [ ] step `[tier: low | med | high]`
 ```
 
-Create a dedicated branch before executing a plan unless Daniel explicitly
-chooses the current branch.
+Create and commit tickets and plans on `main`. Before executing a plan, create a
+branch named after its slug unless a more specific name is useful or Daniel
+explicitly chooses the current branch.
 
 Keep the checkboxes current while executing. When complete, record the outcome
 in the backlog's `## Closed` section and harvest durable facts into `docs/` when
