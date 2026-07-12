@@ -37,13 +37,13 @@ delete, merge, push, or archive repositories.
 - [x] Replace temporary `nix-hardy` repository references with `nix-garden`;
       retain `hardy` only as the host name.
 - [x] Keep nix-garden's existing `origin` as the canonical remote.
-- [ ] Commit post-merge naming and link cleanup separately from the merge.
+- [x] Commit post-merge naming and link cleanup separately from the merge.
 
 ## Verify and Cut Over
 
-- [ ] Run the complete nix-garden quality gate and inspect flake outputs.
-- [ ] Verify both histories and representative renamed files remain reachable.
-- [ ] Audit links, executable bits, ignored files, and instructions.
+- [x] Run the complete nix-garden quality gate and inspect flake outputs.
+- [x] Verify both histories and representative renamed files remain reachable.
+- [x] Audit links, executable bits, ignored files, and instructions.
 - [ ] Clone the consolidated remote fresh and repeat checks.
 - [ ] On `hardy`, clone nix-garden beside the old nix-hardy checkout; do not
       mutate or delete the recovery checkout.
