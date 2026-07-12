@@ -23,6 +23,8 @@
         ghostty
         git
         just
+        jq
+        btop
         vim
       ];
     in

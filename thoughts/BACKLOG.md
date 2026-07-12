@@ -73,6 +73,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] Decide whether to add Home Manager later.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
 - [ ] Decide whether to track NixOS release branches or `nixos-unstable`.
+- [ ] nixpkgs-unstable — evaluate moving to `nixos-unstable` or mixing unstable
+      packages for fresher developer tools, especially Codex.
 - [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
       program modules after real host/feature boundaries emerge.
 - [ ] development-environments — harvest useful nixvana lessons into development
