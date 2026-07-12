@@ -18,6 +18,8 @@ delete, merge, push, or archive repositories.
 - [ ] Create explicit local recovery refs for both pre-migration heads.
 - [ ] Inventory ignored/untracked nix-garden artifacts; do not move caches,
       generated ISOs, or unknown local state by accident.
+- [ ] Do not import the public test-VM password hash into the live root; the
+      test VM is gone, so no live credential rotation is required.
 
 ## Archive the Earlier Tree
 
