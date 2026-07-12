@@ -56,6 +56,10 @@
     };
   };
 
+  # Temporary for agent-driven work on non-production hardy. Require passwords
+  # again before this host carries important workloads.
+  security.sudo.wheelNeedsPassword = false;
+
   nix = {
     settings.experimental-features = [
       "nix-command"
