@@ -42,10 +42,13 @@ default install may not have them enabled yet.
 After bootstrap, normal iteration should be:
 
 ```sh
+just plan
 just apply
 ```
 
-That target runs check, preview, build, asks for confirmation, then switches.
+`plan` checks, optionally updates inputs, builds, and compares desired with
+running. `apply` replans without updates, asks for confirmation, switches, and
+verifies.
 
 Before committing:
 

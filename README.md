@@ -31,11 +31,18 @@ Normal loop:
 
 ```sh
 just
-just pre-flight
+just check
+just plan
 just apply
 ```
 
-`just apply` runs pre-flight, asks, then switches.
+Bare `just` lists the public commands. `plan` optionally updates inputs, checks,
+builds, and compares desired with running. `apply` replans without updates,
+asks, switches, and verifies.
+
+`bootstrap` is a special one-time bridge. It requires `just` from the initial
+bootstrap shell and defensively enables the Nix features the normal system
+already provides.
 
 ## Documentation
 
