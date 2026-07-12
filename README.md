@@ -1,10 +1,13 @@
 # nix-hardy
 
-Reproducible NixOS setup for `hardy`, an ASUS Chromebook Flip C436F / Google Helios with MrChromebox firmware.
+Reproducible NixOS setup for `hardy`, an ASUS Chromebook Flip C436F / Google
+Helios with MrChromebox firmware.
 
-v0.1 goal: rebuild `hardy` from a flake, push the repo, and make iteration from another machine practical.
+v0.1 goal: rebuild `hardy` from a flake, push the repo, and make iteration from
+another machine practical.
 
-Proof target: wipe, clone this repo, run `just bootstrap`, and return to this baseline.
+Proof target: wipe, clone this repo, run `just bootstrap`, and return to this
+baseline.
 
 Initial bootstrap shell:
 
@@ -33,27 +36,7 @@ just apply
 
 `just apply` runs pre-flight, asks, then switches.
 
-## Layout
+## Documentation
 
-```text
-docs/
-  bootstrap.md
-  file-layout.md
-  performance.md
-  throttling.md
-
-thoughts/
-  BACKLOG.md
-  plans/
-    feature.md
-    archive/
-      done-feature-to-preserve.md
-  design/
-    concept-to-keep.md
-```
-
-- `docs/`: stable explanations, runbooks, and machine facts.
-- `thoughts/BACKLOG.md`: items that are not yet planned.
-- `thoughts/plans/`: active plans with status, goal, and nested checkbox bullets.
-- `thoughts/plans/archive/`: completed plans worth preserving.
-- `thoughts/design/`: pre-planning concepts that may later become active plans.
+See [AGENTS.md](AGENTS.md) for working instructions and [docs/](docs/) for
+reference — bootstrap, workflow, workspace, and hardware notes.

@@ -2,7 +2,8 @@
 
 Status: planning
 
-Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, be pushed to GitHub, and make it easy to get files in and out of the machine.
+Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`,
+be pushed to GitHub, and make it easy to get files in and out of the machine.
 
 - [x] Phase 0: already done
   - [x] Use `nix-hardy` as the clean NixOS repo.
@@ -15,7 +16,8 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
 
 - [ ] Phase 1: first pushable and rebuildable repo
   - [x] Add the smallest NixOS host output for `hardy`.
-  - [x] Put the bootstrap tools in system packages so a rebuild makes the box usable:
+  - [x] Put the bootstrap tools in system packages so a rebuild makes the box
+        usable:
     - `git`
     - `ghostty`
     - `curl`
@@ -25,12 +27,14 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
     - `gh`
     - `codex`
     - `just`
+    - `bun`
   - [ ] Add a `Justfile` for check, preview, build, and apply.
   - [x] Preserve the current generated hardware config.
   - [x] Preserve the current NixOS state version.
   - [x] Generate `flake.lock`.
   - [x] Add `.gitignore` for local/editor/build outputs.
-  - [x] Add one-time bootstrap path from default install to flake-managed baseline.
+  - [x] Add one-time bootstrap path from default install to flake-managed
+        baseline.
   - [x] Add a pre-commit-equivalent target for local checks.
   - [x] Add a self-documenting default `just` target.
   - [ ] Validate the flake:
@@ -47,6 +51,7 @@ Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`, 
       - `1password`
       - `gh`
       - `codex`
+      - `bun`
   - [x] Configure repo-local git identity.
   - [x] Rename initial branch to `main`.
   - [ ] Authenticate `gh`.

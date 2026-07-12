@@ -10,6 +10,9 @@ default:
     @echo "  just check       run nix flake check"
     @echo "  just preview     show what would be built/downloaded"
     @echo "  just build       build without switching"
+    @echo "  just fmt         format supported repository files"
+    @echo "  just fmt-check   verify formatting without writing"
+    @echo "  just lint-md     lint Markdown structure"
     @echo "  just pre-commit  local checks before commit"
 
 bootstrap:
@@ -17,6 +20,15 @@ bootstrap:
 
 pre-commit:
     ./scripts/pre-commit.sh
+
+fmt:
+    bunx prettier --write .
+
+fmt-check:
+    bunx prettier --check .
+
+lint-md:
+    bunx markdownlint-cli2 "*.md" "**/*.md" "**/**/*.md" "**/**/**/*.md"
 
 check:
     @echo "== check: nix flake check =="

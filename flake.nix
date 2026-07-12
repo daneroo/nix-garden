@@ -15,6 +15,7 @@
       };
       bootstrapPackages = with pkgs; [
         _1password-gui
+        bun
         codex
         curl
         fresh-editor
