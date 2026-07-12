@@ -6,14 +6,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
-- [ ] legacy-harvest — turn useful legacy findings into focused backlog items,
-      then delete `legacy/` from the working tree; Git retains the history.
-- [ ] nix-formatting — choose and integrate the repository's Nix formatter and
-      formatting check; high priority; ticket:
-      [nix-formatting](tickets/nix-formatting.md)
-- [ ] shared-repo-workflow — test and extract the reusable docs/thoughts
-      workflow, then share the settled convention with Prosodio; ticket:
-      [shared-repo-workflow](tickets/shared-repo-workflow.md)
+- [ ] repository-command-surface — make system changes legible and safe; plan:
+      [repository-command-surface](plans/repository-command-surface.md)
 
 ## Fleet and Recovery
 
@@ -69,9 +63,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 - [ ] Decide whether to add Home Manager later.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
-- [ ] Decide whether to track NixOS release branches or `nixos-unstable`.
-- [ ] nixpkgs-unstable — evaluate moving to `nixos-unstable` or mixing unstable
-      packages for fresher developer tools, especially Codex.
+- [ ] nix-formatting — choose and integrate the repository's Nix formatter and
+      formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
 - [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
       program modules after real host/feature boundaries emerge.
 - [ ] development-environments — harvest useful nixvana lessons into development
@@ -99,16 +92,16 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Repository Workflow
 
+- [ ] legacy-harvest — harvest useful legacy findings, then delete `legacy/`;
+      Git retains the history.
+- [ ] shared-repo-workflow — settle the shared docs/thoughts convention with
+      Prosodio; ticket: [shared-repo-workflow](tickets/shared-repo-workflow.md)
 - [ ] concise-agent-docs — make agent-facing instructions in nix-garden and
       Prosodio substantially shorter and easier to scan; ticket:
       [concise-agent-docs](tickets/concise-agent-docs.md)
 - [ ] shared-workflow-skill — explore packaging the settled repository workflow
       as a personal, harness-neutral Agent Skill shared through Git; ticket:
       [shared-workflow-skill](tickets/shared-workflow-skill.md)
-- [ ] repository-command-surface — rationalize, justify, and refine the roles of
-      `Justfile`, `scripts/`, package-managed commands, and a possible Nix
-      `devShell`; ticket:
-      [repository-command-surface](tickets/repository-command-surface.md)
 
 ## Documentation
 
