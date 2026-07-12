@@ -3,7 +3,7 @@ set dotenv-load := false
 
 flake := ".#hardy"
 
-# Verify the repository.
+# Check pre-commit invariants: shell, formatting, Markdown, and flake.
 check: _shell-check _fmt-check _lint-md _flake-check
 
 # Format supported repository files.
