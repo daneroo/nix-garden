@@ -3,16 +3,18 @@
 Goal: make a fresh `hardy` install reproducible from this repo with as little
 hand work as possible.
 
-The real proof is destructive: wipe the machine, clone this repo, run
-`just bootstrap`, and return to the known-good baseline.
+The real proof is destructive: wipe the machine, clone this repo, run the
+bootstrap script, and return to the known-good baseline.
 
 ## Current Manual Bootstrap
 
 This is the command that started the repo:
 
 ```sh
-export NIXPKGS_ALLOW_UNFREE=1
-nix-shell -p git ghostty curl vim fresh-editor _1password-gui gh codex just --arg config '{ allowUnfree = true; }'
+nix-shell -p git
+git clone https://github.com/daneroo/nix-garden.git
+cd nix-garden
+./scripts/bootstrap-apply.sh
 ```
 
 Manual steps completed on this install:
@@ -32,12 +34,12 @@ After v0.1, a fresh install should be able to reach this workflow:
 ```sh
 git clone https://github.com/daneroo/nix-garden.git
 cd nix-garden
-just bootstrap
+./scripts/bootstrap-apply.sh
 ```
 
-`just bootstrap` is the one-time bridge from default ISO install to the
-flake-managed baseline. It passes the flake feature flags explicitly because the
-default install may not have them enabled yet.
+The script is the one-time bridge from default ISO install to the flake-managed
+baseline. It passes the flake feature flags explicitly because the default
+install may not have them enabled yet.
 
 After bootstrap, normal iteration should be:
 

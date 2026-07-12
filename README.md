@@ -7,14 +7,16 @@ with MrChromebox firmware.
 v0.1 goal: rebuild `hardy` from a flake, push the repo, and make iteration from
 another machine practical.
 
-Proof target: wipe, clone this repo, run `just bootstrap`, and return to this
-baseline.
+Proof target: wipe, clone this repo, run the bootstrap script, and return to
+this baseline.
 
 Initial bootstrap shell:
 
 ```sh
-export NIXPKGS_ALLOW_UNFREE=1
-nix-shell -p git ghostty curl vim fresh-editor _1password-gui gh codex just --arg config '{ allowUnfree = true; }'
+nix-shell -p git
+git clone https://github.com/daneroo/nix-garden.git
+cd nix-garden
+./scripts/bootstrap-apply.sh
 ```
 
 See `docs/bootstrap.md` for the fresh-start path.
@@ -24,7 +26,7 @@ See `docs/bootstrap.md` for the fresh-start path.
 First apply:
 
 ```sh
-just bootstrap
+./scripts/bootstrap-apply.sh
 ```
 
 Normal loop:
@@ -40,9 +42,8 @@ Bare `just` lists the public commands. `plan` optionally updates inputs, checks,
 builds, and compares desired with running. `apply` replans without updates,
 asks, switches, and verifies.
 
-`bootstrap` is a special one-time bridge. It requires `just` from the initial
-bootstrap shell and defensively enables the Nix features the normal system
-already provides.
+The bootstrap script is a one-time bridge. It assumes only Nix and Git and
+defensively enables the Nix features the normal system already provides.
 
 ## Documentation
 

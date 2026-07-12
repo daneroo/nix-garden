@@ -113,7 +113,3 @@ _verify:
     @echo "== verify: running system matches ./result =="
     test "$$(readlink -f /run/current-system)" = "$$(readlink -f ./result)"
     sudo -n true
-
-[private]
-bootstrap:
-    ./scripts/bootstrap-apply.sh
