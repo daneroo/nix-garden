@@ -4,7 +4,8 @@ Backlog -> plan -> implement -> done. Everything in `thoughts/` is transient
 except `BACKLOG.md`.
 
 Files in `thoughts/` use lowercase kebab-case. Keep the backlog readable in one
-pass; move detail into a ticket when an entry grows beyond a few lines.
+pass; move detail into a ticket when an entry grows beyond a few lines. See
+[markdown.md](markdown.md) for documentation filenames.
 
 ## Shared Convention
 
@@ -23,9 +24,8 @@ this convention across repositories. The skill should point to the shared
 template and perform the synchronization workflow; it should not make installed
 skill copies or harness-specific instruction files the canonical source.
 
-Document filenames use lowercase kebab-case. Reserve uppercase filenames for
-widely recognized repository indexes or control files such as `README.md` and
-`BACKLOG.md`; uppercase is a signal and should remain sparse.
+Filename casing under `docs/` is a per-repository choice, not part of the shared
+workflow core.
 
 ## Required Invariants
 
@@ -80,19 +80,25 @@ Status: planned | active | done
 Goal: <one line>.
 
 - [ ] step
-- [ ] step
+- [ ] step `[tier: low | med | high]`
 ```
 
 Keep the checkboxes current while executing. When complete, record the outcome
 in the backlog's `## Closed` section. Delete the plan or move it to
 `thoughts/plans/archive/` while it remains a useful exemplar or reference.
 
-Plan coding tasks for delegation and routing, not only sequencing. Each task
-should provide enough context to select an appropriate subagent model class and
-effort level without reconstructing the design. State its boundaries,
-dependencies, risk or ambiguity, acceptance criteria, and verification where
-they are not obvious. Recommend model or effort when useful, but let the
-executor reassess when implementation reveals new complexity.
+Plan coding tasks for delegation and routing, not only sequencing. Give each
+task enough context to execute without reconstructing the design: boundaries,
+dependencies, risk, acceptance, and verification.
+
+- `[tier: low]` — mechanical, local, and fully specified.
+- `[tier: med]` — scoped implementation or refactor with a written contract.
+- `[tier: high]` — architectural, cross-cutting, stateful, destructive, or
+  otherwise judgment-heavy; keep with the coordinating agent by default.
+
+Use the tier to choose an appropriate model class and effort. The executor may
+raise the tier when new complexity appears. The coordinating agent owns
+integration and final verification.
 
 ## Supporting Notes
 

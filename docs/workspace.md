@@ -3,8 +3,7 @@
 ## Quality Gate
 
 `just pre-commit` is the required repository quality gate after edits and before
-commits. It runs `scripts/pre-commit.sh`, which currently checks shell syntax
-and evaluates the flake with `nix flake check`.
+commits. `scripts/pre-commit.sh` is the source of truth for its current checks.
 
 Grow this one command as formatting, linting, and tests are adopted. Automated
 CI should run the same gate rather than maintain a separate definition.

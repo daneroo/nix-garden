@@ -7,20 +7,15 @@ Chromebook Flip C436F / Google Helios with MrChromebox firmware.
 
 ## Quality
 
-- `just pre-commit` — the required quality gate after edits and before commits.
+- `just pre-commit` — required after edits and before commits; see
+  [docs/workspace.md](docs/workspace.md).
 - `just pre-flight` — check, preview, and build before changing the running
   system.
 
 ## Execution
 
-- When planning, shape coding tasks so model class and effort can be selected
-  per task. State the relevant context, boundaries, dependencies, risk,
-  acceptance criteria, and verification.
-- For coding tasks, use judgment to select an appropriate lower-power subagent
-  model and effort level. Reassess the plan's recommendation when execution
-  reveals additional complexity or risk.
-- Keep integration, architectural judgment, and final verification with the
-  coordinating agent.
+- Follow the planning and delegation rules in
+  [docs/workflow.md](docs/workflow.md#plans).
 
 ## Layout
 

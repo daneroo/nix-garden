@@ -28,6 +28,7 @@ fmt-check:
     bunx prettier --check .
 
 lint-md:
+    # The shorter Prosodio glob missed nested thoughts files here; keep explicit depths.
     bunx markdownlint-cli2 "*.md" "**/*.md" "**/**/*.md" "**/**/**/*.md"
 
 check:
