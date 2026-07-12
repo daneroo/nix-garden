@@ -5,7 +5,7 @@ unpleasant for humans to read.
 
 ## Goal
 
-Make `AGENTS.md` and linked workflow docs in nix-hardy and Prosodio concise
+Make `AGENTS.md` and linked workflow docs in nix-garden and Prosodio concise
 enough to scan and remember.
 
 ## Rules

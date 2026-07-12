@@ -1,8 +1,7 @@
 # Homelab Platform
 
-Working vision for the configuration and operational control plane for Daniel's
-homelab. `hardy` is the first host. This temporary `nix-hardy` repository will
-be imported into `nix-garden`, the permanent fleet-wide source of truth.
+Working vision for `nix-garden`, the configuration and operational control plane
+for Daniel's homelab. `hardy` is the first managed host.
 
 ## Goals
 

@@ -1,6 +1,6 @@
 # shared-workflow-skill — Explore a Shared Agent Skill
 
-After the repository workflow has been exercised and refined in nix-hardy and
+After the repository workflow has been exercised and refined in nix-garden and
 Prosodio, evaluate packaging its reusable procedure as a personal,
 harness-neutral Agent Skill.
 
@@ -39,7 +39,7 @@ blindly overwriting local commands and safety constraints.
 ## Pilot
 
 - Create the smallest useful skill in a personal Git repository.
-- Install it project-locally in nix-hardy and Prosodio.
+- Install it project-locally in nix-garden and Prosodio.
 - Exercise it with Codex and at least one other harness.
 - Test adoption, drift detection, update, and rollback.
 - Keep each repository's checked-in workflow readable and authoritative without

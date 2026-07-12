@@ -16,7 +16,7 @@ local commands or constraints.
 - Prettier owns Markdown formatting and `markdownlint-cli2`, configured with
   `markdownlint/style/prettier`, owns structural linting in both repos. Local
   command surfaces may differ while preserving that split. Both current repos
-  use `bunx`; nix-hardy installs Bun itself through Nixpkgs.
+  use `bunx`; nix-garden installs Bun itself through Nixpkgs.
 - Repo-local workflow documentation remains understandable and authoritative
   without an installed skill.
 

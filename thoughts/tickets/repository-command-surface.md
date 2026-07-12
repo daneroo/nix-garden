@@ -1,7 +1,7 @@
 # repository-command-surface — Rationalize Repository Tooling
 
 Decide and document the smallest coherent command surface for developing,
-checking, bootstrapping, and applying nix-hardy across macOS and NixOS.
+checking, bootstrapping, and applying nix-garden across macOS and NixOS.
 
 ## Why This Needs a Decision
 
@@ -57,7 +57,7 @@ freshly rebuilt `hardy`.
 
 - Exercise the current commands on macOS and rebuilt `hardy`.
 - Preserve the observed glob result: `"**/*.md" "*.md"` missed nested design,
-  plan, and ticket files in nix-hardy; do not reduce coverage based only on
+  plan, and ticket files in nix-garden; do not reduce coverage based only on
   expected glob semantics.
 - Note which commands require network access or populate external caches.
 - Compare a minimal `devShell` with the current host-package-plus-Bun approach.

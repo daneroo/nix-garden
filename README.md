@@ -1,7 +1,8 @@
-# nix-hardy
+# nix-garden
 
-Reproducible NixOS setup for `hardy`, an ASUS Chromebook Flip C436F / Google
-Helios with MrChromebox firmware.
+Reproducible configuration and operational control plane for Daniel's homelab.
+The first managed host is `hardy`, an ASUS Chromebook Flip C436F / Google Helios
+with MrChromebox firmware.
 
 v0.1 goal: rebuild `hardy` from a flake, push the repo, and make iteration from
 another machine practical.

@@ -2,7 +2,8 @@
 
 Generated: 2026-07-12T15:14:00-04:00
 
-Review before committing; this report intentionally omits network addresses, keys, serial numbers, and environment variables.
+Review before committing; this report intentionally omits network addresses,
+keys, serial numbers, and environment variables.
 
 ## Identity
 
@@ -64,7 +65,7 @@ TARGET         SOURCE                     FSTYPE OPTIONS
 
 ```text
 NAME          SIZE TYPE FSTYPE MOUNTPOINTS
-nvme0n1     476.9G disk        
+nvme0n1     476.9G disk
 ├─nvme0n1p1     1G part vfat   /boot
 ├─nvme0n1p2 467.1G part btrfs  /home
 │                              /nix/store

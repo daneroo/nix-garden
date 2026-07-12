@@ -30,8 +30,8 @@ Manual steps completed on this install:
 After v0.1, a fresh install should be able to reach this workflow:
 
 ```sh
-git clone <repo-url> nix-hardy
-cd nix-hardy
+git clone https://github.com/daneroo/nix-garden.git
+cd nix-garden
 just bootstrap
 ```
 

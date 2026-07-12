@@ -9,6 +9,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] migrate-to-nix-garden — preserve both histories, archive the earlier
       experiment tree, and make this repository the live root of `nix-garden`;
       plan: [migrate-to-nix-garden](plans/migrate-to-nix-garden.md)
+- [ ] legacy-harvest — turn useful legacy findings into focused backlog items,
+      then delete `legacy/` from the working tree; Git retains the history.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; high priority; ticket:
       [nix-formatting](tickets/nix-formatting.md)
@@ -98,7 +100,7 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Repository Workflow
 
-- [ ] concise-agent-docs — make agent-facing instructions in nix-hardy and
+- [ ] concise-agent-docs — make agent-facing instructions in nix-garden and
       Prosodio substantially shorter and easier to scan; ticket:
       [concise-agent-docs](tickets/concise-agent-docs.md)
 - [ ] shared-workflow-skill — explore packaging the settled repository workflow

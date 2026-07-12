@@ -2,8 +2,9 @@
 
 Canonical repository instructions for agents and humans.
 
-`nix-hardy` is the reproducible NixOS configuration for `hardy`, an ASUS
-Chromebook Flip C436F / Google Helios with MrChromebox firmware.
+`nix-garden` is the reproducible configuration and operational control plane for
+Daniel's homelab. `hardy`, an ASUS Chromebook Flip C436F / Google Helios, is the
+first managed host.
 
 ## Quality
 

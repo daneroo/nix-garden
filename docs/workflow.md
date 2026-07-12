@@ -31,7 +31,7 @@ workflow core.
 
 Each adopting repository names one required quality-gate command in its local
 instructions. Plans and agents must run that gate after edits and before
-commits; the implementation remains repository-specific. For nix-hardy the gate
+commits; the implementation remains repository-specific. For nix-garden the gate
 is `just pre-commit`, backed by `scripts/pre-commit.sh`. For Prosodio it is
 `bun run ci`.
 
