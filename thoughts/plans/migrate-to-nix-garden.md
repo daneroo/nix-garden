@@ -51,7 +51,7 @@ delete, merge, push, or archive repositories.
       apply the same configuration, and verify the running generation.
 - [x] Use Codex on `hardy` to make one small meaningful configuration change;
       preview, apply, verify, commit, and push it from nix-garden.
-- [ ] Pull that commit on Galois and verify both machines agree.
+- [x] Pull that commit on Galois and verify both machines agree.
 - [x] Push nix-garden only after local validation.
 - [ ] Archive `daneroo/nix-hardy` only after the pushed nix-garden clone is
       proven; do not delete either local source during this plan.
@@ -76,3 +76,7 @@ Hardy proof evidence, 2026-07-12:
 - Verified `sshd` and `NetworkManager` enabled and active, NetworkManager
   connected, and `jq`, `btop`, `git`, `gh`, `just`, `bun`, `codex`, `curl`,
   `vim`, `ssh`, `nmcli`, and `nix` available from `/run/current-system/sw/bin`.
+- Galois fast-forwarded to Hardy's pushed commit `806a3f8`; `main` matched
+  `origin/main`, `just pre-commit` passed, both imported repository histories
+  remained reachable, and evaluation confirmed the declared `codex`, `jq`, and
+  `btop` packages.
