@@ -37,6 +37,11 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
         baseline.
   - [x] Add a pre-commit-equivalent target for local checks.
   - [x] Add a self-documenting default `just` target.
+  - [x] Configure key-only SSH for `daniel` from Galois.
+  - [x] Add a read-only host audit script.
+  - [ ] Pull and apply the SSH configuration on `hardy`.
+  - [ ] Run the audit on `hardy`, review its output, and preserve the result.
+  - [ ] Verify direct or reverse-tunnel SSH access from Galois.
   - [ ] Validate the flake:
     - [x] Run `nix flake check`.
     - [x] Build the system with `nixos-rebuild build --flake .#hardy`.

@@ -41,6 +41,19 @@
       "networkmanager"
       "wheel"
     ];
+    openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
+    ];
+  };
+
+  services.openssh = {
+    enable = true;
+    openFirewall = true;
+    settings = {
+      KbdInteractiveAuthentication = false;
+      PasswordAuthentication = false;
+      PermitRootLogin = "no";
+    };
   };
 
   nix = {
