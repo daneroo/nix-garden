@@ -82,6 +82,9 @@ Goal: <one line>.
 - [ ] step `[tier: low | med | high]`
 ```
 
+Create a dedicated branch before executing a plan unless Daniel explicitly
+chooses the current branch.
+
 Keep the checkboxes current while executing. When complete, record the outcome
 in the backlog's `## Closed` section and harvest durable facts into `docs/` when
 appropriate. Daniel decides whether to delete the completed plan or move it to
