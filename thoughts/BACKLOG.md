@@ -65,6 +65,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 - [ ] Decide whether to add Home Manager later.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
+- [ ] flake-pinning — define a practical policy for input pinning, update scope,
+      transitive inputs, and reviewable lock diffs; high priority.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
 - [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
