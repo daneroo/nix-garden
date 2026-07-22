@@ -10,7 +10,7 @@ Acceptance:
       Herdr's internal inputs or advancing the existing `nixpkgs` lock.
 - [x] The planned closure adds `herdr.packages.${system}.default` and no
       unexpected host-policy changes; inspect before activation. `[tier: high]`
-- [x] After Daniel authorizes activation, `herdr --version` reports v0.7.3,
+- [x] After Daniel authorizes activation, `herdr --version` reports v0.7.5,
       `/run/current-system` matches `./result`, and `sshd` and NetworkManager
       remain enabled and active. `[tier: high]`
 - [ ] A Herdr session launches, detaches, reattaches, and exposes the Codex
@@ -24,6 +24,8 @@ Acceptance:
 - [x] Run `just check` and `just plan`; inspect the lock and closure.
       `[tier: high]`
 - [x] Apply only after Daniel confirms the reviewed generation. `[tier: high]`
+- [x] Apply the reviewed v0.7.5 generation after Daniel confirms it, then verify
+      the system package and host health. `[tier: high]`
 - [ ] Verify the baseline Herdr and Codex workflow, then run `just check`.
       `[tier: high]`
 - [ ] Commit and push the execution branch. `[tier: med]`
@@ -41,3 +43,11 @@ Activation evidence, 2026-07-12:
 - [ ] Install and verify the Codex integration hook.
 - [ ] Create, detach, and reattach an isolated proof session without disturbing
       the live default session.
+
+Activation evidence, 2026-07-22:
+
+- [x] `/run/current-system` and `./result` resolved to
+      `/nix/store/gimz66b53vrcx9lfgri7v3yq3qnmd6pd-nixos-system-hardy-26.11.20260719.241313f`.
+- [x] `/run/current-system/sw/bin/herdr --version` reported `herdr 0.7.5`.
+- [x] `sshd` and NetworkManager remained enabled and active; the system was
+      running with zero failed units.
