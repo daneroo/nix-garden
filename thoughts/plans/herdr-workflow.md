@@ -2,11 +2,11 @@
 
 Status: active
 
-Goal: install and verify the upstream Herdr v0.7.3 workflow on `hardy`.
+Goal: install and verify the upstream Herdr v0.7.5 workflow on `hardy`.
 
 Acceptance:
 
-- [x] `flake.nix` pins `github:ogulcancelik/herdr/v0.7.3` without overriding
+- [x] `flake.nix` pins `github:ogulcancelik/herdr/v0.7.5` without overriding
       Herdr's internal inputs or advancing the existing `nixpkgs` lock.
 - [x] The planned closure adds `herdr.packages.${system}.default` and no
       unexpected host-policy changes; inspect before activation. `[tier: high]`
@@ -17,6 +17,10 @@ Acceptance:
       integration without requiring persistent configuration. `[tier: high]`
 
 - [x] Add the upstream Herdr flake input and system package. `[tier: med]`
+- [x] Update the Herdr input from v0.7.3 to v0.7.5 without changing the root
+      `nixpkgs` lock. `[tier: med]`
+- [x] Check and plan the v0.7.5 update; the closure changes only
+      `herdr 0.7.3 -> 0.7.5` (+2.4 MiB). `[tier: high]`
 - [x] Run `just check` and `just plan`; inspect the lock and closure.
       `[tier: high]`
 - [x] Apply only after Daniel confirms the reviewed generation. `[tier: high]`

@@ -2,7 +2,7 @@
   description = "Reproducible system config for hardy";
 
   inputs = {
-    herdr.url = "github:ogulcancelik/herdr/v0.7.3";
+    herdr.url = "github:ogulcancelik/herdr/v0.7.5";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
