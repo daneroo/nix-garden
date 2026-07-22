@@ -15,7 +15,6 @@ docs/
   workspace.md
 
 scripts/
-  collect-basic-facts.sh
   bootstrap-apply.sh
 
 thoughts/

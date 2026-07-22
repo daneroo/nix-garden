@@ -121,6 +121,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-22 legacy-fact-collector — removed the distro-hopping hardware probe;
+  durable Hardy throttling evidence remains in `docs/`.
 - 2026-07-12 repository-command-surface — implemented and exercised the
   `plan`/`apply` workflow, passwordless sudo, and the locked unstable migration;
   plan: [repository-command-surface](plans/repository-command-surface.md)
