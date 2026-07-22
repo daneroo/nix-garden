@@ -5,6 +5,8 @@ docs/
   README.md
   bootstrap.md
   file-layout.md
+  gauss-hardware.md
+  hardy-firmware-history.md
   markdown.md
   performance.md
   reconciliation.md
@@ -13,6 +15,7 @@ docs/
   workspace.md
 
 scripts/
+  collect-basic-facts.sh
   bootstrap-apply.sh
 
 thoughts/

@@ -18,6 +18,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 
 ## Hardware
 
+- [gauss-hardware.md](gauss-hardware.md) — SER8 pre-NixOS hardware and storage
+  baseline.
 - [hardy-firmware-history.md](hardy-firmware-history.md) — C436F firmware
   conversion provenance, retained backup, and power constraint.
 - [throttling.md](throttling.md) — known C436F CPU-clamping behavior and the

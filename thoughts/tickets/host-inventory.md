@@ -9,8 +9,9 @@ roles.
   self-hosting development machine; may run desktop and server workloads;
   currently non-load-bearing. Confirm whether the committed generation is
   applied.
-- `gauss`: Beelink SER8; currently Fedora 43 COSMIC Atomic; disposable and
-  available for desktop, server, virtualization, or reinstall experiments.
+- `gauss`: Beelink SER8; planned second NixOS host on its internal NVMe. Its
+  pre-NixOS hardware and storage baseline is in
+  [gauss-hardware.md](../../docs/gauss-hardware.md).
 - Bluefin iMac: physical iMac with a spare drive available for early testing.
   Confirm hostname, model, architecture, current primary system, and acceptable
   use of the spare drive.
