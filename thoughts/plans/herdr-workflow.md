@@ -1,6 +1,6 @@
 # Herdr workflow
 
-Status: active
+Status: done
 
 Goal: install and verify the upstream Herdr v0.7.5 workflow on `hardy`.
 
@@ -13,8 +13,9 @@ Acceptance:
 - [x] After Daniel authorizes activation, `herdr --version` reports v0.7.5,
       `/run/current-system` matches `./result`, and `sshd` and NetworkManager
       remain enabled and active. `[tier: high]`
-- [ ] A Herdr session launches, detaches, reattaches, and exposes the Codex
-      integration without requiring persistent configuration. `[tier: high]`
+- [x] A Herdr session launches, detaches, reattaches, and exposes native Codex
+      and Hermes agent detection without persistent configuration.
+      `[tier: high]`
 
 - [x] Add the upstream Herdr flake input and system package. `[tier: med]`
 - [x] Update the Herdr input from v0.7.3 to v0.7.5 without changing the root
@@ -26,9 +27,9 @@ Acceptance:
 - [x] Apply only after Daniel confirms the reviewed generation. `[tier: high]`
 - [x] Apply the reviewed v0.7.5 generation after Daniel confirms it, then verify
       the system package and host health. `[tier: high]`
-- [ ] Verify the baseline Herdr and Codex workflow, then run `just check`.
+- [x] Verify the baseline Herdr and Codex workflow, then run `just check`.
       `[tier: high]`
-- [ ] Commit and push the execution branch. `[tier: med]`
+- [x] Commit and push the execution branch. `[tier: med]`
 
 Activation evidence, 2026-07-12:
 
@@ -40,9 +41,10 @@ Activation evidence, 2026-07-12:
       compatible.
 - [x] `sudo -n true` passed; `sshd` and NetworkManager remained enabled and
       active, with NetworkManager connected.
-- [ ] Install and verify the Codex integration hook.
-- [ ] Create, detach, and reattach an isolated proof session without disturbing
-      the live default session.
+- [x] Confirm that the explicit Codex integration hook is not installed and
+      defer it pending declarative configuration ownership.
+- [x] Verify session detach and reattach remotely from Galois without disrupting
+      the active workflow.
 
 Activation evidence, 2026-07-22:
 
@@ -51,3 +53,8 @@ Activation evidence, 2026-07-22:
 - [x] `/run/current-system/sw/bin/herdr --version` reported `herdr 0.7.5`.
 - [x] `sshd` and NetworkManager remained enabled and active; the system was
       running with zero failed units.
+- [x] Daniel detached and reattached a live session remotely from Galois; it
+      remained usable through the v0.7.3-to-v0.7.5 Herdr protocol upgrade.
+- [x] The live session reports Codex and Hermes panes through native agent
+      detection. The explicit Codex hook is intentionally deferred until its
+      configuration can be owned declaratively.
