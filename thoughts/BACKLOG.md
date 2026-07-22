@@ -20,6 +20,8 @@ direction: [homelab-platform](design/homelab-platform.md).
       restore, and verify path while `hardy` is non-load-bearing.
 - [ ] multi-host-layout — evolve from one host to reusable roles and features
       only when the inventory provides a concrete second consumer.
+- [ ] gaussmic-github-key-retirement — remove the temporary GitHub SSH key
+      `gaussmic-2026-07-22-temp` when Gaussmic is retired.
 
 ## Stateful Operations
 
