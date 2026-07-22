@@ -18,6 +18,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 
 ## Hardware
 
+- [hardy-firmware-history.md](hardy-firmware-history.md) — C436F firmware
+  conversion provenance, retained backup, and power constraint.
 - [throttling.md](throttling.md) — known C436F CPU-clamping behavior and the
   current NixOS state.
 - [performance.md](performance.md) — storage and CPU performance observations.

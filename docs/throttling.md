@@ -3,6 +3,9 @@
 Context: `hardy` is an ASUS Chromebook Flip C436F / Google Helios with
 MrChromebox firmware and an Intel Core i5-10210U.
 
+See [hardy-firmware-history.md](hardy-firmware-history.md) for the firmware
+conversion record and hardware-work precautions.
+
 ## Bluefin
 
 The old `homelab-config-garden` notes say the CPU clamp was also present on the
