@@ -67,6 +67,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
 - [ ] flake-pinning — define a practical policy for input pinning, update scope,
       transitive inputs, and reviewable lock diffs; high priority.
+- [ ] reboot-awareness — make `just plan` and `just apply` explicitly report
+      whether the proposed closure changes require a reboot, including the basis
+      for that assessment and post-reboot verification.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
 - [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
