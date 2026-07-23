@@ -25,6 +25,23 @@
 
   services.printing.enable = true;
 
+  # The Chromebook top-row brightness keys arrive as plain F6/F7. ChromeOS's
+  # keyboard-illumination convention is Alt+F6/F7, but neither the firmware nor
+  # GNOME translates that chord here. Limit keyd to the observed internal
+  # keyboard and emit the standard Linux keyboard-illumination events; leave
+  # plain F6/F7 and all modifier roles unchanged until the separate
+  # macOS-equivalence trial.
+  services.keyd = {
+    enable = true;
+    keyboards.internal = {
+      ids = [ "0001:0001:09b4e68d" ];
+      settings.alt = {
+        f6 = "kbdillumdown";
+        f7 = "kbdillumup";
+      };
+    };
+  };
+
   # Never suspend while charging; normal battery suspend behavior is
   # unchanged.
   programs.dconf.enable = true;

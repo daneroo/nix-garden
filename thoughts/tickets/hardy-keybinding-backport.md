@@ -62,12 +62,26 @@ Initial remote inspection from Galois established:
   firmware interface, and `cros_kbd_led_backlight` path are functional.
 - `systemd-backlight@leds:chromeos::kbd_backlight.service` loaded successfully,
   but its saved state in `/var/lib/systemd/backlight` was also zero.
+- Setting and saving `50/100` survived the subsequent 1Password system switch;
+  the hardware and systemd persistence path are therefore working.
 - UPower exposes `org.freedesktop.UPower.KbdBacklight`, so a standard userspace
   control path is available.
 - The kernel separately reports
   `cros-ec-keyb GOOG0007:00: cannot register non-matrix inputs: -95`. That is a
   plausible cause of missing special-key events, but it is not yet proven to be
   the button regression.
+
+Physical `evtest` capture then established:
+
+- Search/Launcher emits `KEY_LEFTMETA`; the keyboard has no Super-labelled key,
+  but it does provide a native Meta event.
+- Left Ctrl and left Alt emit their standard native events.
+- The screen-brightness-down/up keys emit plain `KEY_F6` / `KEY_F7`, both alone
+  and while left Alt is held. The events are present; userspace simply was not
+  translating ChromeOS's Alt+brightness convention into keyboard-illumination
+  events.
+- `keyd monitor` identifies the internal keyboard as `0001:0001:09b4e68d`. Use
+  that exact device instead of a wildcard for the backlight mapping.
 
 Treat illumination and button handling as separate layers. First preserve a
 useful nonzero level across reboot. Then capture the physical backlight chords
@@ -77,10 +91,12 @@ the kernel log alone.
 
 ## Constraint
 
-`hardy` has no physical Cmd/Super key (Chromebook keyboard, ASUS Flip C436F) — a
-fundamentally different problem than `gauss`'s "which key plays which role,"
-which the whole `gauss` mechanism assumed a standard PC keyboard for.
-Re-validate the chosen mechanism there; do not assume it transfers unchanged.
+`hardy` has no physical Cmd/Super-labelled key (Chromebook keyboard, ASUS Flip
+C436F), but its Search/Launcher key has now been observed emitting native
+`KEY_LEFTMETA`. This is still physically different from `gauss`'s standard PC
+keyboard: re-validate which physical positions should provide Cmd-equivalent,
+Option, and native Control rather than copying Gauss's symmetric mapping
+unchanged.
 
 ## Carried-forward facts
 
