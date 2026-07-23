@@ -106,3 +106,49 @@ it was kept.
 - Drop `programs.firefox.enable` from `hosts/hardy/default.nix` and
   `hosts/gauss/default.nix`, or is Firefox intentionally kept installed
   alongside Brave for a reason not yet recorded?
+
+## Modifier mapping (resolved 2026-07-23)
+
+Daniel remaps modifiers on macOS so the physical Alt key (next to Space,
+matching a real MacBook's Cmd position) acts as Cmd, not the Windows-key
+position. The Linux equivalent is the standard xkb option
+`altwin:swap_alt_win` (ships in `xkeyboard-config`, confirmed present at
+`/nix/store/czwchfqv2v6v2gm545mhdj03smk50rw0-xkeyboard-config-2.47/share/X11/xkb/symbols/altwin`):
+physical Alt emits `Super_L`/`Super_R`, physical Super/Win emits `Alt_L`/`Alt_R`.
+This means our existing "Super is the Cmd-equivalent modifier" decision does
+not change — bindings stay `Super+key`; the swap only changes which physical
+key generates that keysym, and it leaves GNOME's native Alt-based shortcuts
+(Alt+Tab, etc.) untouched, since they still respond to an `Alt` keysym, just
+from the other physical key now.
+
+Applied live (mutable, not yet in the flake) via:
+
+```sh
+gsettings set org.gnome.desktop.input-sources xkb-options "['altwin:swap_alt_win']"
+```
+
+Still open: confirm whether NixOS's `services.xserver.xkb.options` actually
+drives this GNOME-Wayland session's layout, or whether the durable encoding
+needs to target the GNOME `input-sources` gsetting/dconf path instead (GNOME
+on Wayland may source its own layout independent of the system X11 xkb
+config) — verify before harvesting into `hosts/gauss/default.nix`.
+
+## Test infrastructure (session-local, not persisted)
+
+No key-injection or screen-capture tooling was installed on `gauss`
+previously. For this session, fetched ephemerally via `nix run`/`nix build`
+(not added to `flake.nix` — these are diagnostic tools, not part of the host
+baseline):
+
+- `wev` — objective keysym/modifier event logging (must have focus on its own
+  window to observe events, so useful for spot-checks, not a global logger).
+- `grim` — screenshot capture, for visual confirmation without needing Daniel
+  to describe UI state.
+- `ydotool`/`ydotoold` — synthetic input injection, so most validation doesn't
+  require Daniel to physically press every candidate chord. `ydotoold` is
+  running as root (`sudo ydotoold --socket-path=/tmp/.ydotool_socket
+  --socket-own=1000:100`), socket owned by `daniel:users`, **not** a
+  persistent systemd service — dies at reboot/logout, nothing written to
+  `hosts/gauss/default.nix`. Confirmed working: `ydotool key 29:1 29:0`
+  (Ctrl press/release) succeeded once the socket ownership was set to the
+  numeric UID:GID (the flag takes `UID:GID`, not names).
