@@ -9,9 +9,18 @@ roles.
   self-hosting development machine; may run desktop and server workloads;
   currently non-load-bearing. Confirm whether the committed generation is
   applied.
-- `gauss`: Beelink SER8; planned second NixOS host on its internal NVMe. Its
-  pre-NixOS hardware and storage baseline is in
-  [gauss-hardware.md](../../docs/gauss-hardware.md).
+- `gauss`: Beelink SER8; second NixOS host, installed 2026-07-23 on its internal
+  NVMe (previously Omarchy, now wiped). AMD Ryzen 7 8845HS, 27 GiB RAM;
+  hardware/storage baseline and install notes in
+  [gauss-hardware.md](../../docs/gauss-hardware.md). Desktop (GNOME, clone of
+  `hardy`) and future virtualization-host roles, per
+  [homelab-platform](../design/homelab-platform.md#two-physical-host-objectives);
+  currently non-load-bearing. Stable LAN IP via DHCP reservation
+  (`gauss.imetrical.com`); Tailscale up with a manually mapped
+  `gauss.ts.imetrical.com` DNS record (not MagicDNS). SSH via the shared
+  `daniel@galois` key; temporary passwordless wheel sudo, matching `hardy`.
+  Open: `gauss-power-profile` storage-throughput regression (see
+  [performance.md](../../docs/performance.md#gauss-unresolved)).
 - Bluefin iMac: physical iMac with a spare drive available for early testing.
   Confirm hostname, model, architecture, current primary system, and acceptable
   use of the spare drive.

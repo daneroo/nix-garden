@@ -1,12 +1,15 @@
 set dotenv-load := false
 
-flake := ".#hardy"
+blessed_hosts := "hardy gauss"
+hostname := `hostname`
+flake := ".#" + hostname
 
 default:
     @just --list
 
 # Check, build, and compare desired with running; optionally update inputs.
 plan:
+    just _host-check
     just _git-state
     just _maybe-update
     just check
@@ -34,12 +37,21 @@ fmt:
 
 [private]
 [script('bash')]
+_host-check:
+    set -euo pipefail
+    if [[ ! " {{ blessed_hosts }} " == *" {{ hostname }} "* ]]; then
+      echo "unrecognized hostname '{{ hostname }}'; blessed hosts: {{ blessed_hosts }}" >&2
+      exit 1
+    fi
+
+[private]
+[script('bash')]
 _git-state:
     set -euo pipefail
     echo '== git: git status --short =='
     git rev-parse --is-inside-work-tree >/dev/null
     if [[ ! -e /run/current-system ]]; then
-      echo 'plan requires NixOS with /run/current-system; run it on hardy' >&2
+      echo 'plan requires NixOS with /run/current-system; run it on the target host' >&2
       exit 1
     fi
     status="$(git status --short)"
@@ -74,6 +86,7 @@ _maybe-update:
 
 [private]
 _plan-locked:
+    just _host-check
     just _git-state
     just check
     just _build

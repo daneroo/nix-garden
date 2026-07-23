@@ -1,5 +1,5 @@
 {
-  description = "Reproducible system config for hardy";
+  description = "Reproducible system config for the homelab fleet";
 
   inputs = {
     herdr.url = "github:ogulcancelik/herdr/v0.7.5";
@@ -16,7 +16,9 @@
       };
       bootstrapPackages = with pkgs; [
         _1password-gui
+        brave
         bun
+        claude-code
         codex
         curl
         fresh-editor
@@ -29,16 +31,31 @@
         btop
         vim
       ];
+      hosts = [
+        "hardy"
+        "gauss"
+      ];
+      mkHost =
+        name:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            (./hosts + "/${name}")
+            {
+              environment.systemPackages = bootstrapPackages;
+              services.tailscale.enable = true;
+              xdg.mime.defaultApplications = {
+                "text/html" = "brave-browser.desktop";
+                "x-scheme-handler/http" = "brave-browser.desktop";
+                "x-scheme-handler/https" = "brave-browser.desktop";
+                "x-scheme-handler/about" = "brave-browser.desktop";
+                "x-scheme-handler/unknown" = "brave-browser.desktop";
+              };
+            }
+          ];
+        };
     in
     {
-      nixosConfigurations.hardy = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          ./hosts/hardy
-          {
-            environment.systemPackages = bootstrapPackages;
-          }
-        ];
-      };
+      nixosConfigurations = nixpkgs.lib.genAttrs hosts mkHost;
     };
 }

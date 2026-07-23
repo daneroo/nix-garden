@@ -60,6 +60,22 @@ just check
 
 This target is the place to grow Markdown, Nix, and other repo checks over time.
 
+## Known Gotchas
+
+`gauss`'s install (2026-07-23) proved `scripts/bootstrap-apply.sh` end to end
+for the first time: a disposable, non-flake install (Calamares) switched to the
+flake-managed config. Two services didn't come up automatically on that first
+switch, even though both were newly enabled by the flake config:
+
+- `sshd.service` was `enabled` but stayed `inactive (dead)`; needed
+  `sudo systemctl start sshd`.
+- `firewall.service` (a oneshot) hadn't re-run to apply `openFirewall`, so
+  `sshd` was unreachable even after starting it; needed
+  `sudo systemctl restart firewall`.
+
+Check both after the first switch on any future host bootstrapped this way,
+before assuming SSH access is broken at the network level.
+
 ## Phases
 
 - Phase 0: manual bootstrap already completed.

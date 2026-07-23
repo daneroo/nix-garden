@@ -41,11 +41,11 @@ as it proves itself.
   problem: consistency with macOS across the compositor, terminal, editor,
   browser, and launcher. `hardy` surfaced a confound rather than an answer — its
   Chromebook keyboard has no Cmd/Super key, so keybinding decisions made there
-  are contaminated by that non-standard layout. Keybinding tuning should move
-  to `gauss`, which has a standard keyboard layout, and settled bindings should
+  are contaminated by that non-standard layout. Keybinding tuning should move to
+  `gauss`, which has a standard keyboard layout, and settled bindings should
   then be backported to `hardy` and verified there.
-- **A virtualization platform.** `gauss` has the strongest hardware in the
-  fleet (8 cores/16 threads, 27 GiB RAM) for driving Incus-based VM/container
+- **A virtualization platform.** `gauss` has the strongest hardware in the fleet
+  (8 cores/16 threads, 27 GiB RAM) for driving Incus-based VM/container
   workflows, explicitly as a blueprint for, and possible eventual replacement
   of, the existing Proxmox hosts.
 

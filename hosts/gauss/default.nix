@@ -8,7 +8,7 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "hardy";
+  networking.hostName = "gauss";
   networking.domain = "imetrical.com";
   networking.networkmanager.enable = true;
 
@@ -25,19 +25,11 @@
 
   services.printing.enable = true;
 
-  # Never suspend while charging; normal battery suspend behavior is
-  # unchanged.
-  programs.dconf.enable = true;
-  programs.dconf.profiles.user.databases = [
-    {
-      settings = {
-        "org/gnome/settings-daemon/plugins/power" = {
-          sleep-inactive-ac-type = "nothing";
-          sleep-inactive-ac-timeout = 0;
-        };
-      };
-    }
-  ];
+  # gauss is an always-on homelab box, not a laptop; never suspend.
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
 
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -70,7 +62,7 @@
     };
   };
 
-  # Temporary for agent-driven work on non-production hardy. Require passwords
+  # Temporary for agent-driven work on non-production gauss. Require passwords
   # again before this host carries important workloads.
   security.sudo.wheelNeedsPassword = false;
 
