@@ -80,13 +80,13 @@ outside this work.
 - [x] Run the generalized `scripts/bootstrap-apply.sh` on `gauss` (flake check,
       build, confirm, then `switch` to `.#gauss`) — first real end-to-end proof
       of the documented bootstrap path. `[tier: med]`
-- [ ] Log in to Claude Code on `gauss` (and Codex, matching the pattern recorded
-      for `hardy`'s bootstrap). `[tier: low]`
-- [ ] **Execution handoff:** open a Herdr session on `gauss` and reattach it
-      from `galois`; confirm native agent detection surfaces Claude Code (and
-      Codex) in the session, same as verified for `hardy`. All remaining steps
-      below run from this `gauss`-side session, not orchestrated remotely.
-      `[tier: med]`
+- [x] Log in to Claude Code on `gauss` (Codex login deferred; not blocking).
+      `[tier: low]`
+- [x] **Execution handoff:** `herdr --remote gauss` from `galois` confirms
+      Claude Code v2.1.214 running in `~/nix-garden` on `gauss`, with native
+      agent detection surfacing it under agents → nix-garden → claude, same
+      pattern verified for `hardy`. Remaining steps below run from that
+      `gauss`-side session. `[tier: med]`
 - [x] Verify (SSH reachability from `galois`, confirmed with the shared key
       after starting `sshd` and applying the firewall's `openFirewall` rule):
       `just check` and `just plan` run clean on `gauss` itself. `[tier: low]`
