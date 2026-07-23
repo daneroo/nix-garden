@@ -171,15 +171,22 @@ Brave: **6/6 core tab/window functions validated** 2026-07-23, all via `keyd`
   Brave's browser-default Ctrl+C/V still works untouched, just doesn't match the
   Super-based scheme; logged as an open gap, not urgent since it already works.
 
-Close window: briefly implemented as `Super+Shift+W` (Ghostty `close_window`,
-Brave `Ctrl+Shift+W` via `keyd`) then **reverted** the same session — Daniel
-correctly caught that Cmd+Shift+W isn't actually a standard macOS convention
-(this ticket's own first draft had already flagged it "(varies)", which got
-missed when implementing). The real macOS pattern is that Cmd+W is _contextual_:
-it closes the current tab when multiple tabs are open, and closes the window
-itself when there's only one tab left — not a distinct chord to replicate.
-Nothing bound; revisit only if a genuine need for a separate close-window action
-surfaces, not as a macOS-equivalence item.
+Close window (as a chord distinct from close-tab): briefly implemented as
+`Super+Shift+W` (Ghostty `close_window`, Brave `Ctrl+Shift+W` via `keyd`) then
+**reverted** the same session — Daniel correctly caught that Cmd+Shift+W isn't
+actually a standard macOS convention (this ticket's own first draft had already
+flagged it "(varies)", which got missed when implementing). The real macOS
+pattern is that Cmd+W is _contextual_: it closes the current tab when multiple
+tabs are open, and closes the window itself when there's only one tab left — not
+a distinct chord to replicate. Nothing bound for that specific idea; revisit
+only if a genuine need for a separate close-window chord surfaces, not as a
+macOS-equivalence item.
+
+Separately, plain `Super+W` **is** bound for every app other than Ghostty and
+Brave (which already have their own specific handling) — a general close-window
+catch-all via `keyd`, Ctrl+W output, see "Brave experiment results" below and
+the `[!bc]*` section in `hosts/gauss/default.nix`'s `keydAppConf`. Best-effort
+per prior-art research, not exhaustively verified against every app.
 
 ## GNOME-level functions (2026-07-23)
 

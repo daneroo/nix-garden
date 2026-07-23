@@ -48,9 +48,9 @@ just plan
 just apply
 ```
 
-`plan` checks, optionally updates inputs, builds, and compares desired with
-running. `apply` replans without updates, asks for confirmation, switches, and
-verifies.
+`plan` checks, builds, and compares desired with running, without touching
+locked inputs (`just update` does that separately). `apply` runs `plan`, asks
+for confirmation, switches, and verifies.
 
 Before committing:
 

@@ -10,10 +10,13 @@ CI should run the same gate rather than maintain a separate definition.
 
 ## System Changes
 
-- `just pre-flight` checks, previews, and builds without switching the running
-  system.
-- `just apply` runs the pre-flight gate, asks for confirmation, and then
-  switches `hardy` to the resulting configuration.
+- `just plan` checks, builds, and diffs against the running system, without
+  touching locked inputs or switching anything -- safe to run non-interactively
+  (agents, CI).
+- `just update` bumps locked inputs, then runs `plan`.
+- `just apply` runs `plan`, asks for confirmation, and then switches the target
+  host to the resulting configuration.
 
-Agents may run the non-destructive gates as verification. Switching the live
-system requires an explicit user request.
+Agents may run the non-destructive gates (`check`, `plan`) as verification.
+Switching the live system, or updating locked inputs, requires an explicit user
+request.
