@@ -111,10 +111,12 @@ in
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
           focus-active-notification = lib.gvariant.mkEmptyArray "as";
-          # Cmd+Space on macOS is the launcher-invoke reflex; GNOME's
-          # Activities overview (with its search box) is the zero-install
-          # baseline that satisfies it once actually bound here.
-          toggle-overview = [ "<Super>space" ];
+          # Cmd+Space on macOS is the launcher-invoke reflex. GNOME's own
+          # Activities overview was tried first here (zero-install baseline)
+          # but Vicinae won the trial (MRU app search + inline calculator
+          # confirmed working; Activities has neither) -- left unbound so it
+          # doesn't collide with Vicinae's custom keybinding below.
+          toggle-overview = lib.gvariant.mkEmptyArray "as";
         };
         "org/gnome/desktop/wm/keybindings" = {
           # <Super>space was switch-input-source by default, colliding with
@@ -128,6 +130,34 @@ in
           # (Cmd+L on macOS) -- moved, not dropped, since lock-screen is a
           # function Daniel actually wants to keep.
           screensaver = [ "<Super><Shift>l" ];
+          custom-keybindings = [
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+          ];
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+          # Launcher trial 2026-07-23: Vicinae won over Ulauncher (kept as a
+          # lighter documented backup, see thoughts/tickets/keybinding-model.md)
+          # and rofi (hard-requires the wlr-layer-shell protocol on Wayland,
+          # same dead end as wofi/fuzzel/anyrun under Mutter). Confirmed
+          # working: MRU-ordered app search, inline calculator ("Qalculate!"
+          # backend). Known gaps: no date-math found in any candidate tried;
+          # clipboard history needs Vicinae's own separate GNOME extension
+          # (github.com/dagimg-dot/vicinae-gnome-extension, not yet pursued).
+          name = "Vicinae toggle";
+          command = "${pkgs.vicinae}/bin/vicinae toggle";
+          binding = "<Super>space";
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+          # Matches 1Password's own macOS default Quick Access shortcut
+          # exactly (not just a Cmd-equivalence guess). Requires 1Password
+          # already running (confirmed) -- the CLI flag reaches the existing
+          # instance via its own single-instance IPC. Autofill into Brave
+          # itself needs the 1Password browser extension, which arrives via
+          # Daniel's existing Brave sync chain -- nothing to package here.
+          name = "1Password quick access";
+          command = "1password --quick-access";
+          binding = "<Super><Shift>space";
         };
         "org/gnome/desktop/peripherals/mouse" = {
           # Pre-existing (not caused by keybinding-model work) but fixed
@@ -189,6 +219,22 @@ in
     # needing a fresh login to pick up new group membership.
     Group = lib.mkForce "users";
     UMask = lib.mkForce "0007";
+  };
+
+  environment.systemPackages = [ pkgs.vicinae ];
+
+  # No NixOS module ships for Vicinae (only a Home Manager one, which this
+  # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
+  # (bound to Super+Space above) needs the server already running to have
+  # anything to toggle.
+  systemd.user.services.vicinae = {
+    description = "Vicinae launcher server";
+    wantedBy = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.vicinae}/bin/vicinae server";
+      Restart = "on-failure";
+    };
   };
 
   # gauss is an always-on homelab box, not a laptop; never suspend.

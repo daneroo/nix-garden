@@ -37,19 +37,14 @@ installed fleet-wide; only the keybinding scheme is open):
   Survey (background research agent, 2026-07-23): GNOME's compositor is Mutter,
   which does **not** implement `wlr-layer-shell` — this kills `wofi`, `fuzzel`,
   and `anyrun` outright (wlroots-only, dead ends here). `krunner` drags in most
-  of the Plasma stack to run standalone — not worth it. Remaining candidates,
-  ranked, **still need verification against the narrowed requirement above**
-  (survey didn't confirm calculator/date-math per candidate):
-  1. **Vicinae** — purpose-built Raycast clone (extension store, Qt/C++, not
-     wlroots-bound), confirmed working on Mutter/GNOME, packaged in nixpkgs with
-     a Home Manager module. Likely has calculator/date-math given it targets
-     Raycast parity, but unconfirmed — check before committing to it.
-  2. **Ulauncher** — mature, actively developed, runs on Mutter via a documented
-     full-screen-transparent-window workaround, has a plugin ecosystem
-     (calculator extension exists; date-math unconfirmed).
-  3. **rofi** (plain `rofi`/xcb mode via Xwayland, **not** `rofi-wayland` — same
-     wlr-layer-shell problem as wofi) — lightweight, scriptable, has a calc
-     mode; loses precise overlay positioning under Xwayland.
+  of the Plasma stack to run standalone — not worth it.
+
+  **Resolved 2026-07-23** — all three remaining candidates actually trialed
+  live; see "GNOME-level functions" below for the full results. **Vicinae won**
+  (MRU search + calculator confirmed, no date-math though), Ulauncher kept as a
+  documented lighter backup (works, simpler, not installed), rofi ruled out
+  (hard-requires `wlr-layer-shell` on Wayland in v2.0.0, same dead end as
+  wofi/fuzzel/anyrun under Mutter, with no override flag available).
 
 Functions (minimum set, expand as gaps surface):
 
@@ -136,23 +131,23 @@ limit, not a fixable bug).
 
 ## Equivalence map (fill in during research)
 
-| Function            | macOS                        | Ghostty          | Brave                        | Launcher | 1Password | Notes                                                      |
-| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------- | --------- | ---------------------------------------------------------- |
-| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |          |           | Browser default (Ctrl+C) untouched; gap, see below         |
-| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |          |           | GNOME conflict fixed, see below; same gap as Copy          |
-| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |          |           | Brave via `keyd`, not the extension — see below            |
-| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |          |           | `close_tab:this`                                           |
-| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a      | n/a       | Brave native Ctrl+Shift+T, via `keyd`                      |
-| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |          |           | GNOME conflict fixed, see below                            |
-| Close window        | Cmd+Shift+W (varies)         | not bound        |                              |          |           | Gap: distinct from close-tab; not requested, not yet bound |
-| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |          |           | Canonical chord, matched exactly in both apps              |
-| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |          |           | Canonical chord, matched exactly in both apps              |
-| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a      | n/a       | No extension API can do this; not achievable via Super     |
-| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a      | n/a       | Same limitation as address-bar focus                       |
-| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a      | n/a       | `clear_screen`, unbound by Ghostty default                 |
-| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |          |           |                                                            |
-| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          |          |           |                                                            |
-| Autofill / password | Cmd+\ (1Password)            | n/a              |                              | n/a      |           |                                                            |
+| Function            | macOS                        | Ghostty          | Brave                        | Launcher       | 1Password            | Notes                                                      |
+| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------------- | -------------------- | ---------------------------------------------------------- |
+| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |                |                      | Browser default (Ctrl+C) untouched; gap, see below         |
+| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |                |                      | GNOME conflict fixed, see below; same gap as Copy          |
+| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |                |                      | Brave via `keyd`, not the extension — see below            |
+| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |                |                      | `close_tab:this`                                           |
+| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a            | n/a                  | Brave native Ctrl+Shift+T, via `keyd`                      |
+| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |                |                      | GNOME conflict fixed, see below                            |
+| Close window        | Cmd+Shift+W (varies)         | not bound        |                              |                |                      | Gap: distinct from close-tab; not requested, not yet bound |
+| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |                |                      | Canonical chord, matched exactly in both apps              |
+| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |                |                      | Canonical chord, matched exactly in both apps              |
+| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a            | n/a                  | No extension API can do this; not achievable via Super     |
+| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a            | n/a                  | Same limitation as address-bar focus                       |
+| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a            | n/a                  | `clear_screen`, unbound by Ghostty default                 |
+| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |                |                      |                                                            |
+| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          | Super+Space ✅ | n/a                  | Vicinae; MRU search + calculator confirmed, see below      |
+| Autofill / password | Cmd+Shift+Space (1Password)  | n/a              | via browser extension        | n/a            | Super+Shift+Space ✅ | Matches 1Password's real macOS default exactly             |
 
 Ghostty: **9/9 validated** 2026-07-23, all via native per-app config (no remap
 layer needed), now declaratively encoded in `hosts/gauss/default.nix`. See
@@ -170,13 +165,59 @@ Brave: **6/6 core tab/window functions validated** 2026-07-23, all via `keyd`
 
 ## GNOME-level functions (2026-07-23)
 
-- **Launcher invoke (Cmd+Space)** — bound `<Super>space` to
-  `org.gnome.shell.keybindings.toggle-overview`, freeing it from the default
+- **Launcher invoke (Cmd+Space)** — `<Super>space` freed from the default
   `switch-input-source` binding (kept via the dedicated `XF86Keyboard` hardware
-  key instead, function not lost). GNOME's Activities overview search is the
-  baseline being tested against the narrowed launcher requirement (MRU app
-  search, calculator, date-math) before deciding whether a dedicated launcher
-  (Vicinae/Ulauncher/rofi) is actually needed.
+  key instead, function not lost). Three candidates actually trialed live
+  2026-07-23 against the narrowed requirement (MRU app search, inline
+  calculator, date-math):
+  - **Activities overview** (`toggle-overview`, the zero-install baseline) —
+    tried first; has app search but no calculator/date-math, so didn't satisfy
+    the requirement. Left unbound in the final config (superseded, not removed
+    as a GNOME feature).
+  - **rofi** (plain, not `rofi-wayland`) — hard dead end: rofi 2.0.0 refuses to
+    start at all on Wayland without the layer-shell protocol
+    (`Wayland-ERROR: Rofi on wayland requires support for the layer shell protocol`),
+    no override flag exists, and forcing X11 via `GDK_BACKEND=x11` doesn't
+    bypass its own Wayland detection. Forcing genuine X11 mode
+    (`env -u WAYLAND_DISPLAY DISPLAY=:0`) got further but hit a separate,
+    unrelated `XAUTHORITY` staleness (pointed at an auth file rotated away by an
+    earlier logout this session) — not pursued further once a working candidate
+    (Vicinae) was already in hand.
+  - **Ulauncher** — actually works (confirmed via verbose log: real keyboard
+    focus, rendered results, launched an app), contrary to an initial "didn't
+    see it" impression — likely genuinely running but visually similar enough to
+    Vicinae to cause confusion when switching between the two quickly. Simpler
+    than Vicinae. **Kept as a documented lighter backup**, not installed
+    declaratively — revisit if Vicinae ever becomes too heavy.
+  - **Vicinae** — **won**. Confirmed live: MRU-ordered app search, inline
+    calculator (own bundled "Qalculate!" backend, started automatically).
+    Confirmed gaps: no date-math (none of the three candidates had it, not just
+    Vicinae); clipboard history needs Vicinae's own separate GNOME extension
+    (`github.com/dagimg-dot/vicinae-gnome-extension`, same class of fix as
+    `keyd`'s extension, not yet pursued) — degrades gracefully to a dummy
+    clipboard backend rather than failing, so this is a missing feature, not a
+    broken one.
+
+  Installed via `environment.systemPackages`; no NixOS module ships for it (only
+  a Home Manager one, not adopted per `feedback_defer_home_manager`), so its
+  client/server split (`vicinae server` / `vicinae toggle`) is wired by hand:
+  `systemd.user.services.vicinae` (`wantedBy = graphical-session.target`) runs
+  the server, and the `<Super>space` custom keybinding runs `vicinae toggle`.
+  Known quirk: adding a new `wantedBy=graphical-session.target` unit while that
+  target is already active (i.e. any `nixos-rebuild switch` during an existing
+  session, not a fresh login) does not retroactively start it — confirmed twice
+  this session; needed a manual `systemctl --user start vicinae` each time. Not
+  a bug, just something to expect after every switch during iteration; a fresh
+  login starts it automatically.
+
+- **1Password Quick Access (Cmd+Shift+Space)** — matches 1Password's own actual
+  macOS default shortcut exactly, not a Cmd-equivalence guess. Bound
+  `<Super><Shift>space` to `1password --quick-access` (a real first-class CLI
+  flag; confirmed working live). Requires the 1Password desktop app already
+  running — its own single-instance IPC forwards the flag to the existing
+  process. Autofill _into_ Brave itself still needs the 1Password browser
+  extension, which arrives via Daniel's existing Brave sync chain — nothing to
+  package or configure here.
 - **Workspace switch left/right (macOS Spaces reflex, Ctrl+Left/Right)** —
   deliberately **not** bound. Plain `Ctrl+Left/Right` is the near-universal
   word-navigation shortcut in text fields; a GNOME WM-level grab intercepts
