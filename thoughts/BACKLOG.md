@@ -6,6 +6,10 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
+- [ ] gauss-onboarding — install NixOS on `gauss` (Beelink SER8) as a clone of
+      `hardy`, generalizing the flake/`Justfile`/bootstrap script to
+      multi-host; plan: [gauss-onboarding](plans/gauss-onboarding.md)
+
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -31,12 +35,15 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Desktop
 
-- [ ] desktop-baseline — build a daily-usable Linux desktop on `hardy` before
-      optimizing or generalizing it.
+- [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
+      standard keyboard and backported to `hardy`, before optimizing or
+      generalizing it.
 - [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
       workflows, hardware behavior, and testability.
 - [ ] keybinding-model — design macOS-consistent bindings across the compositor,
-      terminal, editor, browser, launcher, and selected applications.
+      terminal, editor, browser, launcher, and selected applications; tune on
+      `gauss` (standard keyboard, no Cmd/Super confound like `hardy`'s
+      Chromebook layout) and backport to `hardy`.
 - [ ] desktop-test-harness — explore VM or container-backed graphical testing
       and agent computer-use validation for bindings and window behavior.
 

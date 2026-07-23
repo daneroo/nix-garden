@@ -31,6 +31,29 @@ for Daniel's homelab. `hardy` is the first managed host.
 - `gauss`, a wipeable Beelink SER8 currently running Fedora 43 COSMIC Atomic,
   and a Bluefin iMac with a spare drive provide low-risk physical test targets.
 
+## Two Physical-Host Objectives
+
+`hardy` and `gauss` are not redundant; they anchor the two concrete objectives
+this platform exists to serve, and each host earns broader responsibility only
+as it proves itself.
+
+- **A desktop worth using daily.** This is chiefly a keybindings and ergonomics
+  problem: consistency with macOS across the compositor, terminal, editor,
+  browser, and launcher. `hardy` surfaced a confound rather than an answer — its
+  Chromebook keyboard has no Cmd/Super key, so keybinding decisions made there
+  are contaminated by that non-standard layout. Keybinding tuning should move
+  to `gauss`, which has a standard keyboard layout, and settled bindings should
+  then be backported to `hardy` and verified there.
+- **A virtualization platform.** `gauss` has the strongest hardware in the
+  fleet (8 cores/16 threads, 27 GiB RAM) for driving Incus-based VM/container
+  workflows, explicitly as a blueprint for, and possible eventual replacement
+  of, the existing Proxmox hosts.
+
+Sequencing: `gauss` starts as a clone of `hardy`'s configuration — proving the
+desktop setup is portable to a second machine, not just hardy-specific — before
+its virtualization role grows on top, consistent with not generalizing from one
+host prematurely.
+
 ## Lessons From Earlier Attempts
 
 - The earlier `nix-garden` explored custom installer ISOs, minimal x86/ARM and
