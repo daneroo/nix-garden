@@ -35,7 +35,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] keybinding-model — design macOS-consistent bindings across the compositor,
       terminal, editor, browser, launcher, and selected applications; tune on
       `gauss` (standard keyboard, no Cmd/Super confound like `hardy`'s
-      Chromebook layout) and backport to `hardy`.
+      Chromebook layout) and backport to `hardy`; ticket:
+      [keybinding-model](tickets/keybinding-model.md); plan:
+      [keybinding-model](plans/keybinding-model.md)
 - [ ] desktop-test-harness — explore VM or container-backed graphical testing
       and agent computer-use validation for bindings and window behavior.
 
