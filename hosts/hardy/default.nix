@@ -25,19 +25,30 @@
 
   services.printing.enable = true;
 
+  # The internal keyboard has distinct Ctrl, Alt, and Search keys; Search emits
+  # left Meta. Physical Alt (beside Space, Daniel's Cmd position) becomes Meta,
+  # Search becomes Alt/Option, and both physical Ctrl keys stay native. This
+  # preserves all three roles without the per-app Ctrl compromise considered
+  # before the hardware events were captured.
+  #
   # The Chromebook top-row brightness keys arrive as plain F6/F7. ChromeOS's
-  # keyboard-illumination convention is Alt+F6/F7, but neither the firmware nor
-  # GNOME translates that chord here. Limit keyd to the observed internal
-  # keyboard and emit the standard Linux keyboard-illumination events; leave
-  # plain F6/F7 and all modifier roles unchanged until the separate
-  # macOS-equivalence trial.
+  # keyboard-illumination convention is physical Alt+F6/F7, so those bindings
+  # live in the resulting Meta layer and emit standard Linux illumination
+  # events. Limit the entire mapping to the observed internal keyboard.
   services.keyd = {
     enable = true;
     keyboards.internal = {
       ids = [ "0001:0001:09b4e68d" ];
-      settings.alt = {
-        f6 = "kbdillumdown";
-        f7 = "kbdillumup";
+      settings = {
+        main = {
+          leftalt = "layer(meta)";
+          rightalt = "layer(meta)";
+          leftmeta = "layer(alt)";
+        };
+        meta = {
+          f6 = "kbdillumdown";
+          f7 = "kbdillumup";
+        };
       };
     };
   };
