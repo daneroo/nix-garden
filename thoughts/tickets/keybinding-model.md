@@ -107,50 +107,66 @@ WM-dependent for later porting.
 - No prior research specific to per-app binding schemes (Ghostty, launcher
   candidates, 1Password) exists yet in this repo — treat as open.
 
-## Mechanism candidates (unvalidated — experiment before choosing)
+## Mechanism candidates
 
 An earlier repo review
 ([claude-initial-impressions-and-guidance](../reviews/claude-initial-impressions-and-guidance.md#desktop-and-keybindings))
-floated these; they are starting hypotheses, not conclusions:
+floated these as starting hypotheses. Status as of 2026-07-23, after actually
+running the experiments:
 
-- **Per-app native config** (GNOME custom keybindings, Ghostty's own keybind
-  config, Brave's own settings/policy, 1Password's own settings) — try first;
-  simplest, no new system component.
-- **Global remap layer** (`services.keyd` or similar) — only if per-app config
-  can't deliver a consistent Cmd-like modifier across apps that don't expose
-  independent keybinding config.
-- **Home Manager** — only if user-space config genuinely needs its module
-  system; do not adopt as a default "desktop work is starting" ritual.
+- **Per-app native config** — validated for Ghostty (9/9 functions, no remap
+  layer needed). Insufficient alone for Brave (Chromium exposes no native
+  shortcut settings and no remappable API reaching Super/Meta).
+- **Global remap layer (`services.keyd` + `keyd-application-mapper`)** —
+  validated and **in production** for Brave's tab/window functions and the base
+  Alt↔Super swap (replacing the earlier xkb-only approach entirely). Required
+  patching a GNOME Shell extension for an untested Shell version and fixing two
+  real bugs (see "Brave experiment results") — real cost, but it worked and is
+  now the actual mechanism, not a hypothesis.
+- **Home Manager** — still not needed; not revisited, per the standing rule in
+  `feedback_defer_home_manager` not to adopt it pre-emptively.
 - **Wrapped programs**
-  ([module-architecture](../research/module-architecture.md)) — only relevant if
-  a binding needs to be portable to `galois` (macOS) too, which is not yet an
-  established requirement here.
+  ([module-architecture](../research/module-architecture.md)) — still not
+  relevant; no cross-platform (`galois`/macOS) portability requirement has
+  surfaced.
 
-Record, per candidate actually tried: what was tested, the command/config used,
-the observed result (pass/fail per the fidelity-ladder instruments), and whether
-it was kept.
+A browser extension via `chrome.commands` was also tried for Brave and
+**abandoned** — see "Brave experiment results" for why (a hard Chromium platform
+limit, not a fixable bug).
 
 ## Equivalence map (fill in during research)
 
-| Function            | macOS                        | Ghostty          | Brave | Launcher | 1Password | Notes                                                      |
-| ------------------- | ---------------------------- | ---------------- | ----- | -------- | --------- | ---------------------------------------------------------- |
-| Copy                | Cmd+C                        | Super+C ✅       |       |          |           |                                                            |
-| Paste               | Cmd+V                        | Super+V ✅       |       |          |           | GNOME conflict fixed, see below                            |
-| New tab             | Cmd+T                        | Super+T ✅       |       |          |           |                                                            |
-| Close tab           | Cmd+W                        | Super+W ✅       |       |          |           | `close_tab:this`                                           |
-| New window          | Cmd+N                        | Super+N ✅       |       |          |           | GNOME conflict fixed, see below                            |
-| Close window        | Cmd+Shift+W (varies)         | not bound        |       |          |           | Gap: distinct from close-tab; not requested, not yet bound |
-| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ |       |          |           | Canonical chord — every app must match this exactly        |
-| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ |       |          |           | Canonical chord — every app must match this exactly        |
-| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a   | n/a      | n/a       | `clear_screen`, unbound by Ghostty default                 |
-| Quit app            | Cmd+Q                        | Super+Q ✅       |       |          |           |                                                            |
-| Launcher invoke     | Cmd+Space                    | n/a              | n/a   |          |           |                                                            |
-| Autofill / password | Cmd+\ (1Password)            | n/a              |       | n/a      |           |                                                            |
+| Function            | macOS                        | Ghostty          | Brave                        | Launcher | 1Password | Notes                                                      |
+| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------- | --------- | ---------------------------------------------------------- |
+| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |          |           | Browser default (Ctrl+C) untouched; gap, see below         |
+| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |          |           | GNOME conflict fixed, see below; same gap as Copy          |
+| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |          |           | Brave via `keyd`, not the extension — see below            |
+| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |          |           | `close_tab:this`                                           |
+| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a      | n/a       | Brave native Ctrl+Shift+T, via `keyd`                      |
+| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |          |           | GNOME conflict fixed, see below                            |
+| Close window        | Cmd+Shift+W (varies)         | not bound        |                              |          |           | Gap: distinct from close-tab; not requested, not yet bound |
+| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |          |           | Canonical chord, matched exactly in both apps              |
+| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |          |           | Canonical chord, matched exactly in both apps              |
+| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a      | n/a       | No extension API can do this; not achievable via Super     |
+| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a      | n/a       | Same limitation as address-bar focus                       |
+| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a      | n/a       | `clear_screen`, unbound by Ghostty default                 |
+| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |          |           |                                                            |
+| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          |          |           |                                                            |
+| Autofill / password | Cmd+\ (1Password)            | n/a              |                              | n/a      |           |                                                            |
 
 Ghostty: **9/9 validated** 2026-07-23, all via native per-app config (no remap
-layer needed) — `~/.config/ghostty/config`, live/mutable, not yet in the flake.
-See "Ghostty experiment results" below for the two GNOME conflicts found and
-fixed along the way.
+layer needed), now declaratively encoded in `hosts/gauss/default.nix`. See
+"Ghostty experiment results" below for the two GNOME conflicts found and fixed
+along the way.
+
+Brave: **6/6 core tab/window functions validated** 2026-07-23, all via `keyd`
+
+- `keyd-application-mapper` — the browser-extension approach (`chrome.commands`)
+  was abandoned entirely; see "Brave experiment results" below for why, and for
+  two real bugs found and fixed along the way (a double-swap regression, and an
+  undeclared composite layer). Copy/Paste not addressed via our mechanism —
+  Brave's browser-default Ctrl+C/V still works untouched, just doesn't match the
+  Super-based scheme; logged as an open gap, not urgent since it already works.
 
 ## Open questions
 
@@ -240,6 +256,138 @@ and separately, Daniel's actual default terminal turned out to be GNOME Console
 (`kgx`), not Ghostty — the first "nothing works" report was against a Ghostty
 backend with no visible window, not a real test. Confirm which terminal a test
 is actually running in before trusting a negative result.
+
+## Brave experiment results (2026-07-23)
+
+Two mechanisms were tried in sequence. The first (a browser extension) was
+built, deployed, and then **abandoned once proven fundamentally incapable of
+reaching the actual goal** — not because it was hard, but because it could never
+deliver a Super-based trigger no matter how well built. The second (`keyd` +
+`keyd-application-mapper`) is what's actually in place now, and validated end to
+end: **6/6 core tab/window functions confirmed working live** (New tab, Close
+tab, Reopen closed tab, New window, Next tab, Previous tab).
+
+### Attempt 1: browser extension via `chrome.commands` — abandoned
+
+Brave/Chromium has no native keyboard-shortcut settings page at all (true of
+every Chromium-based browser) and no policy to declaratively set an extension's
+shortcut trigger — confirmed via
+[Chrome's ExtensionSettings policy docs](https://chromeenterprise.google/policies/extension-settings/).
+A small local extension was built anyway (`hosts/gauss/brave-macos-shortcuts/`,
+`chrome.commands` + `chrome.tabs`/`chrome.windows`/`chrome.sessions` APIs,
+deployed via a user-level `~/.local/share/applications/brave-browser.desktop`
+XDG override with `--load-extension`, RSA-keyed for a stable extension ID) —
+fully working mechanically, sanity-checked headless, extension confirmed loaded
+in `brave://extensions`.
+
+It was abandoned once Daniel actually tried assigning a trigger at
+`chrome://extensions/shortcuts` and hit Chrome's hard platform limit: **every
+`chrome.commands` shortcut must include Ctrl or Alt (never both together, to
+avoid AltGr conflicts); Meta/Super is not accepted at all, on any platform** —
+confirmed via
+[Chrome's own commands documentation](https://developer.chrome.com/docs/extensions/reference/api/commands).
+No amount of extension code can work around this — it's enforced before the
+extension's own JS ever runs. This meant the extension could never beat Brave's
+own pre-existing native Ctrl-based defaults, so it added complexity for zero
+actual benefit. Since it also cost a real, ongoing UX price (the
+developer-mode-extension nag banner on every Brave launch) for zero benefit, the
+extension, its `--load-extension` desktop-file override, and the
+`hosts/gauss/brave-macos-shortcuts/` source were all deleted once this was
+confirmed dead — Git retains the history if the API constraint ever changes. Do
+not resurrect this approach without new information (e.g. a future Chromium API
+change).
+
+### Attempt 2: `keyd` + `keyd-application-mapper` — what's actually running
+
+Real fix: `keyd` remaps physical Alt↔Super below the compositor (replacing the
+old xkb `altwin:swap_alt_win`, which this fully subsumes);
+`keyd-application-mapper` retranslates our Super-based chords into Brave's own
+native Ctrl-based ones, but **only while a Brave window has focus** — a GNOME
+Shell extension feeds it live window-focus events, so Ghostty (or anything else)
+keeps receiving plain Super+key when it has focus.
+
+Validated via a nested-Niri protocol test (see "Modifier mapping" and the plan's
+execution log) that this focus-detection approach is far more solid under a
+wlroots compositor than on GNOME — but GNOME is the current baseline, so the
+GNOME-specific path was pursued:
+
+- nixpkgs's `keyd` (2.6.0) ships two GNOME Shell extension builds
+  (`gnome-extension`, `gnome-extension-45`), declaring support only up to Shell
+  45–49. This system runs **Shell 50.2** — one version newer than anything
+  shipped or tested upstream.
+- Patched `metadata.json` to add `"50"` to `shell-version` (via a small Nix
+  derivation, `keydGnomeExtensionPatcher` + `pkgs.runCommand`, not a manual
+  one-off edit) and deployed via the same `systemd.tmpfiles.rules` `L+` pattern
+  used elsewhere. **Validated working** — the extension's actual logic
+  (`Shell.WindowTracker.focus-app`, `Meta.Window.get_wm_class`/ `get_title`,
+  `Main.layoutManager`) uses only long-stable Shell APIs and ran correctly once
+  patched; GNOME Shell also wraps extension `enable()` in error handling, so a
+  broken extension fails safely rather than crashing the session.
+- `keyd-application-mapper` needed to be resolvable via PATH by whatever spawns
+  it (the extension, via `GLib.spawn_command_line_async`) — added via
+  `users.users.daniel.packages = [ pkgs.keyd ]` (the per-user profile path), not
+  just the keyd service's own `ExecStart`, since already-running processes' PATH
+  entries include that directory and don't need a fresh login to see new files
+  placed there.
+- Socket access: upstream's docs assume a dedicated `keyd` group
+  (`usermod -aG keyd <user>`), which the NixOS module doesn't create. Overrode
+  `systemd.services.keyd.serviceConfig.Group = "users"` (daniel's existing
+  primary group) instead — avoids requiring a fresh login for group membership
+  to take effect. Confirmed: socket ends up `root:users`, `rw-rw----`.
+- Brave's real (normalized) window class, confirmed via `-v` verbose output:
+  **`brave-browser`** (all lowercase) — used directly in `app.conf` rather than
+  a defensive wildcard.
+- **Note on `keyd bind` semantics, confirmed by direct testing**: runtime
+  overrides set via `keyd bind <bindings>` persist in the daemon's memory
+  independent of whatever process issued them — killing
+  `keyd-application-mapper` does **not** clear its last-applied bindings. Don't
+  infer "the mechanism is broken" from a stale binding still working after the
+  process that set it is gone; restart the `keyd` service itself
+  (`systemctl restart keyd`) to get a clean read during debugging.
+
+### Two real bugs found and fixed (both root-caused, not guessed)
+
+1. **Double-swap regression** — broke Ghostty's already-working `Super+N` after
+   `keyd` was introduced. Root cause: an early manual
+   `gsettings set org.gnome.desktop.input-sources xkb-options "['altwin:swap_alt_win']"`
+   command (hours earlier, before `keyd` existed) wrote a **local per-user dconf
+   override**. When the ticket's xkb-based swap was later replaced with `keyd`'s
+   in `hosts/gauss/default.nix`, only the _system default_ was removed — the
+   local override, being higher-priority, silently survived and kept applying.
+   With both swaps active, physical Alt got swapped twice (once by `keyd` at the
+   kernel level, once by xkb on top), cancelling back to plain `Alt` at the
+   application level. Diagnosed by a clean bisection (fully stop `keyd`, confirm
+   the app-level symptom persists → the active bug isn't in `keyd` at all)
+   rather than more guessing, then found via
+   `gsettings get org.gnome.desktop.input-sources xkb-options`. Fixed with
+   `gsettings reset` (not `set` — this specifically clears the local override so
+   the removed system default actually takes effect, rather than setting a new
+   local value that would itself later need cleanup).
+2. **Undeclared composite layer** — `meta+shift.<key>` bindings (next/prev tab,
+   reopen-closed-tab) appeared to do nothing, then were found to leak literal
+   `{`/`}` characters into whatever text field had focus (e.g. Brave's address
+   bar) when the chord was held. Root cause, confirmed via
+   `keyd bind "meta+shift.rightbrace=C-tab"` directly:
+   `"meta+shift is not a valid layer"` — per `keyd(1)`, composite layers
+   (`[layer1+layer2]`) must be explicitly declared in the static config before
+   any dynamic `keyd bind` reference to them will resolve; an undeclared
+   reference fails outright rather than falling back to anything sensible, so
+   the raw Shift+bracket keystroke passed through as literal text instead. Fixed
+   by declaring an empty `[meta+shift]` section in
+   `services.keyd.keyboards.default.settings` (Nix attribute ordering after
+   `main` satisfies the man page's "must be defined after the layers of which
+   they are comprised" requirement, since Nix's `toINI` iterates `attrNames`
+   alphabetically and `"main" < "meta+shift"`).
+
+### Incidental fix along the way
+
+`Super+L` was GNOME's global lock-screen shortcut
+(`org.gnome.settings-daemon.plugins.media-keys.screensaver`), colliding with
+what would have been Brave's address-bar-focus binding under the (abandoned)
+extension approach. Lock-screen is a function Daniel actually wants, unlike the
+message-tray/notification frees for Ghostty — moved to `Super+Shift+L` (checked
+free first) rather than dropped. Stands on its own merit even though address-bar
+focus itself turned out unachievable for Brave either way.
 
 ## Test infrastructure (session-local, not persisted)
 

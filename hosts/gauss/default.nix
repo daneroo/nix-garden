@@ -13,6 +13,59 @@ let
     keybind = super+k=clear_screen
     keybind = super+n=new_window
     keybind = super+q=quit
+
+    # Pre-existing issue (not caused by keybinding-model), fixed alongside it:
+    # default multiplier for "precision" scroll devices is 1, producing an
+    # unreadable one-line-at-a-time jump; bumped both categories up.
+    mouse-scroll-multiplier = precision:3,discrete:5
+  '';
+
+  # keyd + keyd-application-mapper: the actual fix for Brave, since Chromium's
+  # chrome.commands API hard-rejects Super/Meta as a shortcut modifier (no
+  # policy or extension workaround exists -- confirmed against Chrome's own
+  # ExtensionSettings docs). keyd remaps physical Alt<->Super below the
+  # compositor (replacing the old xkb altwin:swap_alt_win, which this
+  # subsumes); keyd-application-mapper retranslates Super+key into Brave's
+  # native Ctrl+key ONLY while Brave has focus, via a patched GNOME Shell
+  # extension (upstream only declares support for Shell 45-49; this system
+  # runs 50.2 -- validated 2026-07-23: the extension's actual logic uses only
+  # long-stable Shell APIs and ran correctly once the version string was
+  # patched and keyd-application-mapper was made findable on PATH).
+  # See thoughts/tickets/keybinding-model.md for the full validation trail.
+  keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
+    import json, sys
+    src, dst = sys.argv[1], sys.argv[2]
+    with open(src) as f:
+        m = json.load(f)
+    if "50" not in m["shell-version"]:
+        m["shell-version"].append("50")
+    with open(dst, "w") as f:
+        json.dump(m, f, indent=2)
+  '';
+
+  keydGnomeExtension = pkgs.runCommand "keyd-gnome-extension-patched" { } ''
+    mkdir -p $out
+    cp ${pkgs.keyd}/share/keyd/gnome-extension-45/extension.js $out/
+    ${pkgs.python3}/bin/python3 ${keydGnomeExtensionPatcher} \
+      ${pkgs.keyd}/share/keyd/gnome-extension-45/metadata.json \
+      $out/metadata.json
+  '';
+
+  # Brave's own Linux defaults (Ctrl+T/W/N, Ctrl+Shift+T, Ctrl+Tab/Ctrl+Shift+Tab)
+  # are the actual targets -- keyd-application-mapper rewrites our Super-based
+  # chords into these only while a Brave window has focus. Window-class match
+  # uses a bracket wildcard since Brave's exact WM_CLASS casing wasn't
+  # empirically confirmed (attempted via the extension's own FIFO output, but
+  # ran out of session time) -- verify and narrow once tested.
+  keydAppConf = pkgs.writeText "keyd-app.conf" ''
+    [[Bb]rave*]
+
+    meta.t = C-t
+    meta.w = C-w
+    meta+shift.t = C-S-t
+    meta.n = C-n
+    meta+shift.rightbrace = C-tab
+    meta+shift.leftbrace = C-S-tab
   '';
 in
 {
@@ -52,12 +105,23 @@ in
   programs.dconf.profiles.user.databases = [
     {
       settings = {
-        "org/gnome/desktop/input-sources" = {
-          xkb-options = [ "altwin:swap_alt_win" ];
+        "org/gnome/shell" = {
+          enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
         };
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
           focus-active-notification = lib.gvariant.mkEmptyArray "as";
+        };
+        "org/gnome/settings-daemon/plugins/media-keys" = {
+          # Was <Super>l; freed for Brave's planned address-bar-focus binding
+          # (Cmd+L on macOS) -- moved, not dropped, since lock-screen is a
+          # function Daniel actually wants to keep.
+          screensaver = [ "<Super><Shift>l" ];
+        };
+        "org/gnome/desktop/peripherals/mouse" = {
+          # Pre-existing (not caused by keybinding-model work) but fixed
+          # alongside it: matches Daniel's macOS-trained scroll expectation.
+          natural-scroll = true;
         };
       };
     }
@@ -65,7 +129,56 @@ in
 
   systemd.tmpfiles.rules = [
     "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
+    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
+    "d /home/daniel/.config/keyd 0755 daniel users -"
+    "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
+
+  services.keyd = {
+    enable = true;
+    keyboards.default = {
+      ids = [ "*" ];
+      settings = {
+        main = {
+          # Cmd-equivalence base layer: physical Alt <-> Super, replacing the
+          # old xkb altwin:swap_alt_win (keyd subsumes it). Symmetric on both
+          # sides since the "us" layout here has no AltGr distinction to
+          # preserve.
+          leftalt = "layer(meta)";
+          leftmeta = "layer(alt)";
+          rightalt = "layer(meta)";
+          rightmeta = "layer(alt)";
+        };
+        # Empty composite layer declaration -- required for
+        # keyd-application-mapper's "meta+shift.<key>" bindings (next/prev
+        # tab, reopen-closed-tab) to resolve at all. Confirmed via direct
+        # `keyd bind` test: referencing an undeclared composite layer fails
+        # outright ("meta+shift is not a valid layer"), silently passing the
+        # raw Shift+key through instead of the intended shortcut -- this was
+        # the cause of literal `{`/`}` characters typing into Brave's
+        # address bar instead of switching tabs.
+        "meta+shift" = { };
+      };
+    };
+  };
+
+  # keyd-application-mapper needs to be resolvable via PATH by whatever
+  # spawns it (the GNOME Shell extension); adding it here (rather than only
+  # via the keyd systemd service's own ExecStart) makes it findable through
+  # the per-user profile, which existing long-running processes' PATH
+  # entries already include -- unlike a brand-new PATH entry, this doesn't
+  # require a fresh login to take effect.
+  users.users.daniel.packages = [ pkgs.keyd ];
+
+  systemd.services.keyd.serviceConfig = {
+    # Upstream's docs assume a dedicated "keyd" group (usermod -aG keyd);
+    # the NixOS module doesn't create one. Using "users" instead -- daniel's
+    # existing primary group -- means socket access works without daniel
+    # needing a fresh login to pick up new group membership.
+    Group = lib.mkForce "users";
+    UMask = lib.mkForce "0007";
+  };
 
   # gauss is an always-on homelab box, not a laptop; never suspend.
   systemd.targets.sleep.enable = false;
@@ -92,6 +205,12 @@ in
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
     ];
+    # Keeps user services (e.g. Herdr's server) running independent of an
+    # active login session -- set imperatively via `loginctl enable-linger`
+    # during keybinding-model work to survive a GNOME logout/login cycle
+    # needed to refresh Shell's app-grid file watchers; encoded here so it
+    # isn't lost on a future reinstall.
+    linger = true;
   };
 
   services.openssh = {
