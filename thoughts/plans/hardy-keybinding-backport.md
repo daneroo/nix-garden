@@ -26,7 +26,7 @@ Create a branch named after this plan's slug before executing, per
       and distinguish missing top-row events from missing userspace handling;
       then restore working brightness-down/up controls without coupling them to
       the eventual Cmd/Option mapping. `[tier: high]`
-- [ ] Restore 1Password as an independently deployable checkpoint: add
+- [x] Restore 1Password as an independently deployable checkpoint: add
       `programs._1password-gui` with `polkitPolicyOwners = [ "daniel" ]` and
       `programs._1password` to `hardy`; run `just check`, commit, run
       `just plan` on `hardy`, inspect the closure, and apply with Daniel's

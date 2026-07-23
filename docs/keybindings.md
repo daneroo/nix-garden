@@ -99,9 +99,8 @@ physical positions match macOS.
 - Address-bar focus and Find cannot be supplied by Chromium's extension API.
   Gauss keeps Brave's Ctrl+L/Ctrl+F defaults; Hardy's focus-sensitive `keyd`
   mapper translates them.
-- Hardy's 1Password desktop app, Quick Access, and browser-support wrapper are
-  validated. Its Brave extension handshake remains pending until Brave Sync
-  restores the extension.
+- Hardy's 1Password desktop app, Quick Access, browser-support wrapper, and
+  Brave extension handshake are validated.
 
 ## Adjacent state
 

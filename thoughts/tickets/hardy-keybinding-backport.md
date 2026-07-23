@@ -53,8 +53,9 @@ Restored on the execution branch with both NixOS modules and
 `polkitPolicyOwners = [ "daniel" ]`. Hardy's closure gained only the expected
 GUI, CLI, and wrappers; `1Password-BrowserSupport` is the expected
 `root:onepassword` setgid wrapper. Daniel confirmed the GUI launches,
-authentication works, and his account is connected. The Brave-extension
-handshake remains part of final application validation.
+authentication works, and his account is connected. After restoring Brave Sync,
+the 1Password extension returned and communicated with the desktop app
+successfully.
 
 ## Keyboard backlight regression
 
@@ -221,8 +222,8 @@ attached external keyboard is not put at risk by Hardy's Chromebook layout.
   the same proper module treatment as Gauss. The module installs the
   `1Password-BrowserSupport` setgid wrapper required for browser integration;
   `polkitPolicyOwners` separately enables the package's polkit integration for
-  Daniel. GUI launch, authentication, and account connection are confirmed; live
-  Brave integration remains.
+  Daniel. GUI launch, authentication, account connection, Quick Access, and live
+  Brave-extension integration are confirmed.
 - **`keyd` GNOME Shell extension version**: `gauss` needed patching (upstream
   only declares Shell 45-49 support). It is only relevant if Hardy still needs
   `keyd-application-mapper`; if so, check Hardy's actual GNOME Shell version

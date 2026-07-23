@@ -129,6 +129,7 @@ in
     {
       settings = {
         "org/gnome/shell" = {
+          always-show-log-out = true;
           enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
           favorite-apps = [
             "com.mitchellh.ghostty.desktop"
@@ -162,6 +163,7 @@ in
           custom-keybindings = [
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
           ];
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
@@ -173,6 +175,11 @@ in
           name = "1Password quick access";
           command = "1password --quick-access";
           binding = "<Super><Shift>space";
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+          name = "Log out";
+          command = "${pkgs.gnome-session}/bin/gnome-session-quit --logout";
+          binding = "<Super><Shift>q";
         };
         "org/gnome/desktop/peripherals/mouse" = {
           natural-scroll = true;
