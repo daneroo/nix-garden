@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 {
   imports = [
@@ -33,7 +33,7 @@
       settings = {
         "org/gnome/settings-daemon/plugins/power" = {
           sleep-inactive-ac-type = "nothing";
-          sleep-inactive-ac-timeout = 0;
+          sleep-inactive-ac-timeout = lib.gvariant.mkInt32 0;
         };
       };
     }
