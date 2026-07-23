@@ -25,6 +25,20 @@
 
   services.printing.enable = true;
 
+  # Never suspend while charging; normal battery suspend behavior is
+  # unchanged.
+  programs.dconf.enable = true;
+  programs.dconf.profiles.user.databases = [
+    {
+      settings = {
+        "org/gnome/settings-daemon/plugins/power" = {
+          sleep-inactive-ac-type = "nothing";
+          sleep-inactive-ac-timeout = 0;
+        };
+      };
+    }
+  ];
+
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
