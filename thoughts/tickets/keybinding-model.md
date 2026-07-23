@@ -37,7 +37,9 @@ Captured 2026-07-23, Ghostty scope, from Daniel directly (priority as stated):
 - Copy / paste — high priority; must also pass through cleanly inside a Herdr
   session (Daniel's tmux-like multiplexer, no muscle memory for its own bindings
   yet, but copy/paste should behave normally there too — real test case, not
-  just a Ghostty-alone check).
+  just a Ghostty-alone check). **Confirmed 2026-07-23**: attaching to the same
+  live Herdr session from inside Ghostty (plain `herdr`, reattaches to the
+  running server) — Super+C/V worked normally through Herdr, no interference.
 - Next tab / previous tab — highest priority, used most.
 - New tab / close tab — used often, lower priority than next/prev.
 - Clear / clear scrollback — explicit ask (Cmd+K on macOS).
