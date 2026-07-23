@@ -67,6 +67,11 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 - [ ] Decide whether to add Home Manager later.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
+- [ ] gauss-power-profile — investigate why `gauss`'s internal NVMe buffered
+      reads dropped from `3820 MB/sec` pre-install to `~1750 MB/sec` under
+      NixOS; CPU governor is ruled out, root cause open. Check PCIe link
+      speed/width and `amd_pstate`/EPP tuning; see
+      [performance.md](../docs/performance.md#gauss-unresolved).
 - [ ] flake-pinning — define a practical policy for input pinning, update scope,
       transitive inputs, and reviewable lock diffs; high priority.
 - [ ] reboot-awareness — make `just plan` and `just apply` explicitly report

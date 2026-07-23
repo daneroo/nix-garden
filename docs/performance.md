@@ -29,6 +29,24 @@ Interpretation: the Sabrent disk is limited by the Chromebook's 5 Gbps USB link,
 but the earlier 62-88 MB/sec measurements were dominated by CPU/thermal
 throttling, not only USB link speed.
 
+### Gauss (unresolved)
+
+`gauss`'s internal NVMe (the same physical disk throughout) measured very
+differently before and after the NixOS install:
+
+- Pre-install (Fedora test disk boot, 2026-07-07): `3820.29 MB/sec` buffered
+  reads. See [gauss-hardware.md](gauss-hardware.md).
+- Post-install under NixOS (2026-07-23), `scaling_governor=powersave`:
+  `1727.17 MB/sec`.
+- Same test forcing `scaling_governor=performance`: `1777.75 MB/sec` — barely
+  moved, so the CPU governor is not the cause.
+- NVMe power control (`/sys/class/nvme/nvme0/device/power/control`) reads `on`,
+  not autosuspending.
+- PCIe link speed/width was not checked — `lspci`/`nvme-cli` are not installed
+  on `gauss`.
+
+Root cause is open. Tracked in the backlog as `gauss-power-profile`.
+
 ## Thermal Clamp
 
 The bad state was not ordinary overheating:
