@@ -70,7 +70,11 @@ outside this work.
   - [ ] Complete a minimal `nixos-install` sufficient to boot and reach the
         network (bridge to the flake-managed config happens next, via
         `bootstrap-apply.sh`, not in this minimal install).
-  - [ ] Reboot into the minimal install, clone `nix-garden`, check out the
+  - [ ] Remove the USB stick and reboot; in the BIOS boot menu/order, confirm
+        `systemd-boot`/"Linux Boot Manager" on the internal NVMe is the default
+        entry and remove any stale USB-installer entry, so `gauss` reliably
+        boots headless afterward.
+  - [ ] Log into the minimal install, clone `nix-garden`, check out the
         `gauss-onboarding` branch, and copy the generated
         `hardware-configuration.nix` into `hosts/gauss/`.
 - [ ] Run the generalized `scripts/bootstrap-apply.sh` on `gauss` (flake check,
