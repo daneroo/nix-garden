@@ -18,6 +18,9 @@
   services.xserver.enable = true;
   services.displayManager.gdm.enable = true;
   services.desktopManager.gnome.enable = true;
+  # gnome-console (GTK "Terminal") is confusable with Ghostty, the actual
+  # target terminal for keybinding-model work; drop it from the default set.
+  environment.gnome.excludePackages = [ pkgs.gnome-console ];
   services.xserver.xkb = {
     layout = "us";
     variant = "";

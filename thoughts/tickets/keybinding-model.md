@@ -26,9 +26,30 @@ installed fleet-wide; only the keybinding scheme is open):
   an explicit reason to keep Firefox installed alongside Brave).
 - 1Password (`_1password-gui`) — package present, bindings not yet designed;
   browser-extension pairing with Brave still needs verifying.
-- Raycast-equivalent launcher — **not present in `flake.nix`**; candidate NixOS
-  options need evaluation: e.g. `rofi`/`wofi`, `ulauncher`, `krunner`, GNOME's
-  built-in Activities search as the zero-install baseline to beat.
+- Raycast-equivalent launcher — **not present in `flake.nix`**. Scope narrowed
+  2026-07-23, direct from Daniel: he doesn't use most of Raycast — actual
+  requirement is (1) app search, most-recently-used ordered first, (2) inline
+  calculator, (3) date-math (e.g. "3 days from now"). Everything else Raycast
+  offers is rarely used; do not over-scope the evaluation around a full
+  extension ecosystem. GNOME Activities search is the zero-install baseline to
+  beat (has app search, unclear if truly MRU-ordered; no calculator/date-math).
+
+  Survey (background research agent, 2026-07-23): GNOME's compositor is Mutter,
+  which does **not** implement `wlr-layer-shell` — this kills `wofi`, `fuzzel`,
+  and `anyrun` outright (wlroots-only, dead ends here). `krunner` drags in most
+  of the Plasma stack to run standalone — not worth it. Remaining candidates,
+  ranked, **still need verification against the narrowed requirement above**
+  (survey didn't confirm calculator/date-math per candidate):
+  1. **Vicinae** — purpose-built Raycast clone (extension store, Qt/C++, not
+     wlroots-bound), confirmed working on Mutter/GNOME, packaged in nixpkgs with
+     a Home Manager module. Likely has calculator/date-math given it targets
+     Raycast parity, but unconfirmed — check before committing to it.
+  2. **Ulauncher** — mature, actively developed, runs on Mutter via a documented
+     full-screen-transparent-window workaround, has a plugin ecosystem
+     (calculator extension exists; date-math unconfirmed).
+  3. **rofi** (plain `rofi`/xcb mode via Xwayland, **not** `rofi-wayland` — same
+     wlr-layer-shell problem as wofi) — lightweight, scriptable, has a calc
+     mode; loses precise overlay positioning under Xwayland.
 
 Functions (minimum set, expand as gaps surface):
 
