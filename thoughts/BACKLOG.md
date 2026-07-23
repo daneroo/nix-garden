@@ -36,6 +36,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 - [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
       standard keyboard and backported to `hardy`, before optimizing or
       generalizing it.
+- [ ] home-config-ownership — replace Gauss's system-tmpfiles writes beneath
+      `/home/daniel` with a fresh-home-safe, user-owned mechanism and validate
+      it from an empty home; deferred while bringing both machines online.
 - [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
       workflows, hardware behavior, and testability.
 - [ ] desktop-test-harness — explore VM or container-backed graphical testing
@@ -58,6 +61,12 @@ direction: [homelab-platform](design/homelab-platform.md).
       ACLs, keys, health, and recovery.
 - [ ] unifi-reconciliation — determine which router, DHCP, and network state can
       be safely observed, planned, applied, and verified.
+
+## Security
+
+- [ ] keyd-socket-permissions — replace Gauss's broad `Group = "users"` access
+      to keyd's dynamic remapping socket with a dedicated group, without
+      disrupting the validated desktop mapping.
 
 ## Nix Platform
 

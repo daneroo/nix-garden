@@ -95,14 +95,18 @@ Plan coding tasks for delegation and routing, not only sequencing. Give each
 task enough context to execute without reconstructing the design: boundaries,
 dependencies, risk, acceptance, and verification.
 
+Delegate selectively. Delegation pays for substantial, independently specifiable
+tasks when its expected benefit exceeds the coordination cost; keep small local
+fixes found during wiring and integration with the coordinating agent.
+
 - `[tier: low]` — mechanical, local, and fully specified.
 - `[tier: med]` — scoped implementation or refactor with a written contract.
 - `[tier: high]` — architectural, cross-cutting, stateful, destructive, or
   otherwise judgment-heavy; keep with the coordinating agent by default.
 
-Use the tier to choose an appropriate model class and effort. The executor may
-raise the tier when new complexity appears. The coordinating agent owns
-integration and final verification.
+Use the tier to choose the lowest-power model class and effort that comfortably
+fits the task. The executor may raise the tier when new complexity appears. The
+coordinating agent owns integration and final verification.
 
 ## Supporting Notes
 
