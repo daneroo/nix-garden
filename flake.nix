@@ -16,6 +16,7 @@
       };
       bootstrapPackages = with pkgs; [
         _1password-gui
+        brave
         bun
         claude-code
         codex
@@ -42,6 +43,7 @@
             (./hosts + "/${name}")
             {
               environment.systemPackages = bootstrapPackages;
+              services.tailscale.enable = true;
             }
           ];
         };
