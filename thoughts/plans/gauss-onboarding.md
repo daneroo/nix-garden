@@ -1,6 +1,6 @@
 # Gauss Onboarding
 
-Status: planned
+Status: done
 
 Goal: install NixOS on `gauss` (Beelink SER8) as a verified clone of `hardy`,
 generalizing the flake/`Justfile`/bootstrap script to multi-host in the process,
@@ -108,7 +108,7 @@ outside this work.
         explained by CPU governor. Recorded in
         [performance.md](../../docs/performance.md#gauss-unresolved) and opened
         `gauss-power-profile` in the backlog rather than silently footnoting it.
-- [ ] Merge `gauss-onboarding` into `main` locally (no PR, matching current repo
+- [x] Merge `gauss-onboarding` into `main` locally (no PR, matching current repo
       convention); Daniel decides whether to delete or archive this plan file
       afterward. `[tier: low]`
 

@@ -1,6 +1,6 @@
 # Bootstrap Flake
 
-Status: planning
+Status: active
 
 Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`,
 be pushed to GitHub, and make it easy to get files in and out of the machine.
@@ -14,7 +14,7 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
   - [x] Capture C436F throttling context in `docs/throttling.md`.
   - [x] Capture C436F performance measurements in `docs/performance.md`.
 
-- [ ] Phase 1: first pushable and rebuildable repo
+- [x] Phase 1: first pushable and rebuildable repo
   - [x] Add the smallest NixOS host output for `hardy`.
   - [x] Put the bootstrap tools in system packages so a rebuild makes the box
         usable:
@@ -28,7 +28,7 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
     - `codex`
     - `just`
     - `bun`
-  - [ ] Add a `Justfile` for check, preview, build, and apply.
+  - [x] Add a `Justfile` for check, preview, build, and apply.
   - [x] Preserve the current generated hardware config.
   - [x] Preserve the current NixOS state version.
   - [x] Generate `flake.lock`.
@@ -39,10 +39,14 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
   - [x] Add a self-documenting default `just` target.
   - [x] Configure key-only SSH for `daniel` from Galois.
   - [x] Add a read-only host audit script.
-  - [ ] Pull and apply the SSH configuration on `hardy`.
-  - [ ] Run the audit on `hardy`, review its output, and preserve the result.
-  - [ ] Verify direct or reverse-tunnel SSH access from Galois.
-  - [ ] Validate the flake:
+  - [x] Pull and apply the SSH configuration on `hardy`.
+  - [x] Run the audit on `hardy`, review its output, and preserve the result
+        (`thoughts/research/hardy-before-sshd.md`,
+        `thoughts/research/hardy-after-sshd.md`).
+  - [x] Verify direct or reverse-tunnel SSH access from Galois (proven via
+        Herdr's remote detach/reattach, see
+        `thoughts/plans/archive/herdr-workflow.md`).
+  - [x] Validate the flake:
     - [x] Run `nix flake check`.
     - [x] Build the system with `nixos-rebuild build --flake .#hardy`.
     - [x] Confirm build output has no unexpected warnings.
@@ -59,10 +63,11 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
       - `bun`
   - [x] Configure repo-local git identity.
   - [x] Rename initial branch to `main`.
-  - [ ] Authenticate `gh`.
+  - [x] Authenticate `gh`.
     - [x] Generate an SSH key for GitHub if one is not already present.
     - [x] Add the SSH public key to GitHub.
-    - [ ] Verify SSH auth to GitHub.
+    - [x] Verify SSH auth to GitHub (`gh auth status` confirms logged in, SSH
+          protocol, active).
   - [x] Create or connect the GitHub remote.
   - [x] Make the initial commit.
   - [x] Push the repo.
