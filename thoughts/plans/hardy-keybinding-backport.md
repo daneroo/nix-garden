@@ -2,10 +2,11 @@
 
 Status: planned
 
-Goal: restore `hardy` as a fully usable daily machine with working 1Password and
-Brave integration, then bring it as close as its Chromebook keyboard permits to
-the macOS-equivalence baseline `gauss` reached in `keybinding-model`. Working
-detail in [hardy-keybinding-backport](../tickets/hardy-keybinding-backport.md).
+Goal: restore `hardy` as a fully usable daily machine with keyboard
+illumination, working 1Password, and Brave integration, then bring it as close
+as its Chromebook keyboard permits to the macOS-equivalence baseline `gauss`
+reached in `keybinding-model`. Working detail in
+[hardy-keybinding-backport](../tickets/hardy-keybinding-backport.md).
 
 Create a branch named after this plan's slug before executing, per
 [workflow.md](../../docs/workflow.md#plans).
@@ -17,7 +18,15 @@ Create a branch named after this plan's slug before executing, per
       on `hardy.imetrical.com`. When raw physical key presses or feel judgments
       become the blocking input, prepare an explicit state-and-command handoff
       for Codex running on Hardy with Daniel assisting. `[tier: high]`
-- [ ] Restore 1Password first, as an independently deployable checkpoint: add
+- [ ] Restore keyboard illumination as an early independent checkpoint. Preserve
+      the confirmed working `chromeos::kbd_backlight` LED interface and the
+      immediate `50/100` recovery, determine why systemd restored a saved value
+      of zero, and make a sane nonzero level survive reboot. With Daniel or
+      on-Hardy Codex supplying physical input, capture the backlight-key chords
+      and distinguish missing top-row events from missing userspace handling;
+      then restore working brightness-down/up controls without coupling them to
+      the eventual Cmd/Option mapping. `[tier: high]`
+- [ ] Restore 1Password as an independently deployable checkpoint: add
       `programs._1password-gui` with `polkitPolicyOwners = [ "daniel" ]` and
       `programs._1password` to `hardy`; run `just check`, commit, run
       `just plan` on `hardy`, inspect the closure, and apply with Daniel's
@@ -57,10 +66,10 @@ Create a branch named after this plan's slug before executing, per
 - [ ] Verify the complete Hardy acceptance map live on its physical keyboard,
       using the same objective event checks and real-hardware judgment as
       `keybinding-model`. Include app/window switching, launcher, lock,
-      screenshot, 1Password, Brave integration, and every app binding above;
-      record intentional gaps rather than forcing unsafe or incoherent
-      equivalence. Run `just check` and `just plan` before the final apply.
-      `[tier: high]`
+      screenshot, keyboard-backlight controls, 1Password, Brave integration, and
+      every app binding above; record intentional gaps rather than forcing
+      unsafe or incoherent equivalence. Run `just check` and `just plan` before
+      the final apply. `[tier: high]`
 - [ ] Clean up the durable documentation while harvesting Hardy's results:
       update [docs/keybindings.md](../../docs/keybindings.md) with per-host
       modifier/mechanism tables, fix its duplicate/misaligned close-window rows

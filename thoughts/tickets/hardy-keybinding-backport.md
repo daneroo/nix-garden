@@ -10,6 +10,9 @@ comparisons, and bugs found — this ticket only tracks what's specific to
 
 - 1Password is installed again through the correct NixOS modules, its desktop
   app works, and Brave's extension can communicate with it.
+- The physical keyboard is illuminated at a useful level after boot, and its
+  brightness-down/up controls work without compromising the chosen modifier
+  model.
 - Brave and Ghostty are fully usable for Daniel's daily reflexes.
 - The internal Chromebook keyboard has the sanest achievable mapping of
   Cmd-equivalent, Option, and native Control roles, based on observed key events
@@ -45,6 +48,32 @@ expected from the closure: the shared plain `_1password-gui` package was removed
 when Gauss adopted the proper NixOS module, but Hardy did not receive that
 module. Restore it before keyboard experimentation so Hardy returns to its prior
 functional baseline.
+
+## Keyboard backlight regression
+
+Reported on Hardy 2026-07-23: the keyboard-backlight buttons no longer worked
+and the keyboard was dark.
+
+Initial remote inspection from Galois established:
+
+- Linux 6.18.39 still exposes the correct ChromeOS EC LED device at
+  `/sys/class/leds/chromeos::kbd_backlight`, with `max_brightness = 100`.
+- Its brightness was `0`; writing `50` succeeded immediately, so the LED,
+  firmware interface, and `cros_kbd_led_backlight` path are functional.
+- `systemd-backlight@leds:chromeos::kbd_backlight.service` loaded successfully,
+  but its saved state in `/var/lib/systemd/backlight` was also zero.
+- UPower exposes `org.freedesktop.UPower.KbdBacklight`, so a standard userspace
+  control path is available.
+- The kernel separately reports
+  `cros-ec-keyb GOOG0007:00: cannot register non-matrix inputs: -95`. That is a
+  plausible cause of missing special-key events, but it is not yet proven to be
+  the button regression.
+
+Treat illumination and button handling as separate layers. First preserve a
+useful nonzero level across reboot. Then capture the physical backlight chords
+and determine whether Hardy emits keyboard-illumination events, ordinary
+brightness events, function keys, or nothing. Do not choose a keyd mapping from
+the kernel log alone.
 
 ## Constraint
 
