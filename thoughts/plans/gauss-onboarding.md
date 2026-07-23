@@ -92,22 +92,22 @@ outside this work.
       `just check` and `just plan` run clean on `gauss` itself. `[tier: low]`
 - [x] Commit `hosts/gauss/hardware-configuration.nix` and any install-time
       fixes; push the branch. `[tier: low]`
-- [ ] Harvest durable facts back into `docs/` and `thoughts/`: `[tier: low]`
-  - [ ] Document the bootstrap gotcha found on `gauss`: after
-        `nixos-rebuild switch` from a non-flake system (Calamares' disposable
-        install) to the flake config, `sshd.service` was `enabled` but never
-        started, and `firewall.service` (a oneshot) hadn't re-run to apply
-        `openFirewall`. Both needed a manual `systemctl start`/`restart`.
-        Capture this in `docs/bootstrap.md` as a known first-switch check for
-        future hosts.
-  - [ ] Update [gauss-hardware](../../docs/gauss-hardware.md) or add a
-        post-install note distinguishing pre-install baseline from the installed
-        system.
-  - [ ] Fill in `gauss`'s real fields in
+- [x] Harvest durable facts back into `docs/` and `thoughts/`: `[tier: low]`
+  - [x] Documented the bootstrap sshd/firewall gotcha in `docs/bootstrap.md` as
+        a known first-switch check for future hosts.
+  - [x] Updated [gauss-hardware](../../docs/gauss-hardware.md): confirmed
+        physical facts still hold under NixOS, demoted the Fedora-era storage
+        numbers to a labeled reference subsection, recorded the install method,
+        layout, networking, and a link to the bootstrap gotcha.
+  - [x] Filled in `gauss`'s real fields in
         [host-inventory](../tickets/host-inventory.md).
-  - [ ] Update `thoughts/BACKLOG.md`: remove/fold the now-redundant
-        `multi-host-layout` line and move this item to `## Closed` with the
-        outcome and a link to this plan.
+  - [x] Updated `thoughts/BACKLOG.md`: removed the now-redundant
+        `multi-host-layout` line and moved this item to `## Closed`.
+  - [x] Bonus finding: re-benchmarked `gauss`'s internal NVMe post-install and
+        found a storage-throughput regression (3820 → ~1750 MB/sec) not
+        explained by CPU governor. Recorded in
+        [performance.md](../../docs/performance.md#gauss-unresolved) and opened
+        `gauss-power-profile` in the backlog rather than silently footnoting it.
 - [ ] Merge `gauss-onboarding` into `main` locally (no PR, matching current repo
       convention); Daniel decides whether to delete or archive this plan file
       afterward. `[tier: low]`

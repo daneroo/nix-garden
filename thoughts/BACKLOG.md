@@ -6,10 +6,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
-- [ ] gauss-onboarding — install NixOS on `gauss` (Beelink SER8) as a clone of
-      `hardy`, generalizing the flake/`Justfile`/bootstrap script to multi-host;
-      plan: [gauss-onboarding](plans/gauss-onboarding.md)
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -17,8 +13,6 @@ direction: [homelab-platform](design/homelab-platform.md).
       [host-inventory](tickets/host-inventory.md)
 - [ ] recovery-contract — define and exercise the minimum-fuss wipe, rebuild,
       restore, and verify path while `hardy` is non-load-bearing.
-- [ ] multi-host-layout — evolve from one host to reusable roles and features
-      only when the inventory provides a concrete second consumer.
 
 ## Stateful Operations
 
@@ -126,6 +120,12 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-23 gauss-onboarding — installed NixOS on `gauss` as a clone of
+  `hardy`, generalized the flake/`Justfile`/bootstrap script to multi-host,
+  verified `just check`/`just plan` on the host itself, and handed off execution
+  to Claude Code on `gauss` via Herdr; folded in `multi-host-layout`, which has
+  no remaining independent scope; plan:
+  [gauss-onboarding](plans/gauss-onboarding.md)
 - 2026-07-23 gaussmic-github-key-retirement — deleted the temporary
   `gaussmic-2026-07-22-temp` GitHub SSH key after confirming Gaussmic's disk is
   gone for good.
