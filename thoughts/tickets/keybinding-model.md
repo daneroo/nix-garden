@@ -32,13 +32,35 @@ installed fleet-wide; only the keybinding scheme is open):
 
 Functions (minimum set, expand as gaps surface):
 
-- Copy / paste
-- New tab / close tab
-- New window / close window
-- Next tab / previous tab
-- (Add during research: switch window, switch app, quit app, spotlight/search,
-  screenshot, lock screen, and any other chord Daniel reaches for reflexively on
-  macOS)
+Captured 2026-07-23, Ghostty scope, from Daniel directly (priority as stated):
+
+- Copy / paste — high priority; must also pass through cleanly inside a Herdr
+  session (Daniel's tmux-like multiplexer, no muscle memory for its own bindings
+  yet, but copy/paste should behave normally there too — real test case, not
+  just a Ghostty-alone check).
+- Next tab / previous tab — highest priority, used most.
+- New tab / close tab — used often, lower priority than next/prev.
+- Clear / clear scrollback — explicit ask (Cmd+K on macOS).
+- New window / quit app — nice to have, low priority.
+- Split pane / jump-to-tab-N — explicitly not needed (Herdr covers
+  pane-equivalent workflows; tab-N jump is never used).
+- Find, font-size zoom — not raised when asked; treat as out of scope unless a
+  gap surfaces later.
+
+Cross-app consistency principle (2026-07-23): Daniel isn't confident macOS
+itself is consistent between Brave and Ghostty for next/prev tab — and
+explicitly wants ours to be, regardless. Design rule: pick one canonical chord
+per function and make every app match it, rather than chasing each app's
+possibly-inconsistent macOS default. Locked in for next/prev tab:
+`Super+Shift+]` / `Super+Shift+[`, chosen and validated for Ghostty first; Brave
+must match exactly, which is a real test of whether native per-app config
+suffices (Brave/Chrome tab-switching isn't normally user-remappable without an
+extension or enterprise policy — first likely candidate for the remap-layer
+escalation if native config can't hit this exact chord).
+
+Still to capture: the same walk-through for Brave, the launcher, and 1Password
+(switch window/app, spotlight/search, screenshot, lock screen, etc. remain open
+for those apps).
 
 Out of scope for this ticket: compositor-level tiling/workspace bindings tied to
 `compositor-selection` (Niri vs Hyprland) — GNOME is the current baseline on
@@ -87,18 +109,25 @@ it was kept.
 
 ## Equivalence map (fill in during research)
 
-| Function            | macOS                        | Ghostty | Brave | Launcher | 1Password | Notes |
-| ------------------- | ---------------------------- | ------- | ----- | -------- | --------- | ----- |
-| Copy                | Cmd+C                        |         |       |          |           |       |
-| Paste               | Cmd+V                        |         |       |          |           |       |
-| New tab             | Cmd+T                        |         |       |          |           |       |
-| Close tab           | Cmd+W                        |         |       |          |           |       |
-| New window          | Cmd+N                        |         |       |          |           |       |
-| Close window        | Cmd+Shift+W (varies)         |         |       |          |           |       |
-| Next tab            | Cmd+Shift+] / Ctrl+Tab       |         |       |          |           |       |
-| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab |         |       |          |           |       |
-| Launcher invoke     | Cmd+Space                    |         |       | n/a      |           |       |
-| Autofill / password | Cmd+\ (1Password)            |         |       |          | n/a       |       |
+| Function            | macOS                        | Ghostty          | Brave | Launcher | 1Password | Notes                                                      |
+| ------------------- | ---------------------------- | ---------------- | ----- | -------- | --------- | ---------------------------------------------------------- |
+| Copy                | Cmd+C                        | Super+C ✅       |       |          |           |                                                            |
+| Paste               | Cmd+V                        | Super+V ✅       |       |          |           | GNOME conflict fixed, see below                            |
+| New tab             | Cmd+T                        | Super+T ✅       |       |          |           |                                                            |
+| Close tab           | Cmd+W                        | Super+W ✅       |       |          |           | `close_tab:this`                                           |
+| New window          | Cmd+N                        | Super+N ✅       |       |          |           | GNOME conflict fixed, see below                            |
+| Close window        | Cmd+Shift+W (varies)         | not bound        |       |          |           | Gap: distinct from close-tab; not requested, not yet bound |
+| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ |       |          |           | Canonical chord — every app must match this exactly        |
+| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ |       |          |           | Canonical chord — every app must match this exactly        |
+| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a   | n/a      | n/a       | `clear_screen`, unbound by Ghostty default                 |
+| Quit app            | Cmd+Q                        | Super+Q ✅       |       |          |           |                                                            |
+| Launcher invoke     | Cmd+Space                    | n/a              | n/a   |          |           |                                                            |
+| Autofill / password | Cmd+\ (1Password)            | n/a              |       | n/a      |           |                                                            |
+
+Ghostty: **9/9 validated** 2026-07-23, all via native per-app config (no remap
+layer needed) — `~/.config/ghostty/config`, live/mutable, not yet in the flake.
+See "Ghostty experiment results" below for the two GNOME conflicts found and
+fixed along the way.
 
 ## Open questions
 
@@ -111,15 +140,15 @@ it was kept.
 
 Daniel remaps modifiers on macOS so the physical Alt key (next to Space,
 matching a real MacBook's Cmd position) acts as Cmd, not the Windows-key
-position. The Linux equivalent is the standard xkb option
-`altwin:swap_alt_win` (ships in `xkeyboard-config`, confirmed present at
+position. The Linux equivalent is the standard xkb option `altwin:swap_alt_win`
+(ships in `xkeyboard-config`, confirmed present at
 `/nix/store/czwchfqv2v6v2gm545mhdj03smk50rw0-xkeyboard-config-2.47/share/X11/xkb/symbols/altwin`):
-physical Alt emits `Super_L`/`Super_R`, physical Super/Win emits `Alt_L`/`Alt_R`.
-This means our existing "Super is the Cmd-equivalent modifier" decision does
-not change — bindings stay `Super+key`; the swap only changes which physical
-key generates that keysym, and it leaves GNOME's native Alt-based shortcuts
-(Alt+Tab, etc.) untouched, since they still respond to an `Alt` keysym, just
-from the other physical key now.
+physical Alt emits `Super_L`/`Super_R`, physical Super/Win emits
+`Alt_L`/`Alt_R`. This means our existing "Super is the Cmd-equivalent modifier"
+decision does not change — bindings stay `Super+key`; the swap only changes
+which physical key generates that keysym, and it leaves GNOME's native Alt-based
+shortcuts (Alt+Tab, etc.) untouched, since they still respond to an `Alt`
+keysym, just from the other physical key now.
 
 Applied live (mutable, not yet in the flake) via:
 
@@ -129,26 +158,82 @@ gsettings set org.gnome.desktop.input-sources xkb-options "['altwin:swap_alt_win
 
 Still open: confirm whether NixOS's `services.xserver.xkb.options` actually
 drives this GNOME-Wayland session's layout, or whether the durable encoding
-needs to target the GNOME `input-sources` gsetting/dconf path instead (GNOME
-on Wayland may source its own layout independent of the system X11 xkb
-config) — verify before harvesting into `hosts/gauss/default.nix`.
+needs to target the GNOME `input-sources` gsetting/dconf path instead (GNOME on
+Wayland may source its own layout independent of the system X11 xkb config) —
+verify before harvesting into `hosts/gauss/default.nix`.
+
+## Ghostty experiment results (2026-07-23)
+
+Native per-app config (Ghostty's own `keybind` config) was sufficient for all 9
+captured functions — no global remap layer (`keyd`) needed, per the
+simplest-first bias. Config written to `~/.config/ghostty/config` (live,
+mutable, not yet harvested into the flake):
+
+```ini
+keybind = super+c=copy_to_clipboard:mixed
+keybind = super+v=paste_from_clipboard
+keybind = super+t=new_tab
+keybind = super+w=close_tab:this
+keybind = super+shift+]=next_tab
+keybind = super+shift+[=previous_tab
+keybind = super+k=clear_screen
+keybind = super+n=new_window
+keybind = super+q=quit
+```
+
+Two failures on first pass, both **GNOME Shell global shortcuts intercepting the
+chord before Ghostty ever saw it** — not a Ghostty or remap-layer problem:
+
+- `Super+V` did nothing → `org.gnome.shell.keybindings.toggle-message-tray` was
+  `['<Super>v', '<Super>m']`.
+- `Super+N` did nothing →
+  `org.gnome.shell.keybindings.focus-active-notification` was `['<Super>n']`.
+
+Fixed live (mutable, reversible):
+
+```sh
+gsettings set org.gnome.shell.keybindings toggle-message-tray "['<Super>m']"
+gsettings set org.gnome.shell.keybindings focus-active-notification "[]"
+```
+
+Revert if ever needed:
+
+```sh
+gsettings set org.gnome.shell.keybindings toggle-message-tray "['<Super>v', '<Super>m']"
+gsettings set org.gnome.shell.keybindings focus-active-notification "['<Super>n']"
+```
+
+Implication for later apps: before assuming a per-app config failure means
+"escalate to a remap layer," check `gsettings list-recursively` against
+`org.gnome.desktop.wm.keybindings`, `org.gnome.shell.keybindings`,
+`org.gnome.mutter.keybindings`, `org.gnome.mutter.wayland.keybindings`, and
+`org.gnome.settings-daemon.plugins.media-keys` for the same chord first — this
+was the actual cause both times so far, not app or mechanism limitations.
+
+Debugging note: testing initially got confused because CLI invocations of
+`ghostty +show-config`/`+validate-config` silently start Ghostty's
+single-instance backend process in the background (`--initial-window=false`),
+and separately, Daniel's actual default terminal turned out to be GNOME Console
+(`kgx`), not Ghostty — the first "nothing works" report was against a Ghostty
+backend with no visible window, not a real test. Confirm which terminal a test
+is actually running in before trusting a negative result.
 
 ## Test infrastructure (session-local, not persisted)
 
-No key-injection or screen-capture tooling was installed on `gauss`
-previously. For this session, fetched ephemerally via `nix run`/`nix build`
-(not added to `flake.nix` — these are diagnostic tools, not part of the host
-baseline):
+No key-injection or screen-capture tooling was installed on `gauss` previously.
+For this session, fetched ephemerally via `nix run`/`nix build` (not added to
+`flake.nix` — these are diagnostic tools, not part of the host baseline):
 
 - `wev` — objective keysym/modifier event logging (must have focus on its own
   window to observe events, so useful for spot-checks, not a global logger).
-- `grim` — screenshot capture, for visual confirmation without needing Daniel
-  to describe UI state.
+- `grim` — screenshot capture, for visual confirmation without needing Daniel to
+  describe UI state.
 - `ydotool`/`ydotoold` — synthetic input injection, so most validation doesn't
   require Daniel to physically press every candidate chord. `ydotoold` is
-  running as root (`sudo ydotoold --socket-path=/tmp/.ydotool_socket
-  --socket-own=1000:100`), socket owned by `daniel:users`, **not** a
-  persistent systemd service — dies at reboot/logout, nothing written to
-  `hosts/gauss/default.nix`. Confirmed working: `ydotool key 29:1 29:0`
-  (Ctrl press/release) succeeded once the socket ownership was set to the
-  numeric UID:GID (the flag takes `UID:GID`, not names).
+  running as root
+  (`sudo ydotoold --socket-path=/tmp/.ydotool_socket --socket-own=1000:100`),
+  socket owned by `daniel:users`, **not** a persistent systemd service — dies at
+  reboot/logout, nothing written to `hosts/gauss/default.nix`. Confirmed
+  working: `ydotool key 29:1 29:0` (Ctrl press/release) succeeded once the
+  socket ownership was set to the numeric UID:GID (the flag takes `UID:GID`, not
+  names).
