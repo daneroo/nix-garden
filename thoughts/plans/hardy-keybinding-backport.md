@@ -1,6 +1,6 @@
 # hardy-keybinding-backport
 
-Status: active
+Status: done
 
 Goal: restore `hardy` as a fully usable daily machine with keyboard
 illumination, working 1Password, and Brave integration, then bring it as close
@@ -63,7 +63,7 @@ Create a branch named after this plan's slug before executing, per
       effective `gsettings` value, reset only conflicting local overrides or
       deliberately lock settings where enforcement is warranted, and confirm the
       declarative values survive logout and reboot. `[tier: med]`
-- [ ] Verify the complete Hardy acceptance map live on its physical keyboard,
+- [x] Verify the complete Hardy acceptance map live on its physical keyboard,
       using the same objective event checks and real-hardware judgment as
       `keybinding-model`. Include app/window switching, launcher, lock,
       screenshot, keyboard-backlight controls, 1Password, Brave integration, and
@@ -77,5 +77,5 @@ Create a branch named after this plan's slug before executing, per
       still-open capture note, correct the 1Password wrapper terminology, and
       add `keybindings.md` to `docs/README.md` and `docs/file-layout.md`.
       `[tier: low]`
-- [ ] Move `hardy-keybinding-backport` to `BACKLOG.md`'s `## Closed` section
+- [x] Move `hardy-keybinding-backport` to `BACKLOG.md`'s `## Closed` section
       with outcome and this plan's link. `[tier: low]`

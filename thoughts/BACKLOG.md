@@ -4,14 +4,6 @@ Unscheduled work, grouped by theme. Keep entries brief; move growing detail to
 `tickets/` as described in [docs/workflow.md](../docs/workflow.md). Working
 direction: [homelab-platform](design/homelab-platform.md).
 
-## Now
-
-- [ ] hardy-keybinding-backport — bring `hardy` up to the macOS-equivalence
-      keybinding baseline `gauss` reached in `keybinding-model`, accounting for
-      `hardy`'s missing physical Cmd/Super key; ticket:
-      [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
-      [hardy-keybinding-backport](plans/hardy-keybinding-backport.md)
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -131,6 +123,13 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-23 hardy-keybinding-backport — restored keyboard illumination and
+  1Password/Brave integration, validated a Chromebook-specific Ctrl/Cmd/Option
+  model plus Ghostty, Brave, Vicinae, lock, screenshot, and logout bindings, and
+  secured keyd's mapper socket with a dedicated group; settled map:
+  [docs/keybindings.md](../docs/keybindings.md); ticket:
+  [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
+  [hardy-keybinding-backport](plans/hardy-keybinding-backport.md)
 - 2026-07-23 keybinding-model — validated a macOS-equivalence keybinding map for
   Ghostty, Brave, Vicinae, and 1Password on `gauss` (Alt↔Super swap via `keyd` +
   a patched GNOME Shell extension); settled facts harvested to

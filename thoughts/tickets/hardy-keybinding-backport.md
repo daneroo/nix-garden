@@ -207,6 +207,18 @@ mapping recovered. The final dedicated-group implementation then survived a full
 reboot. The static mapping remains limited to the exact internal keyboard, so an
 attached external keyboard is not put at risk by Hardy's Chromebook layout.
 
+The final GNOME acceptance pass required a logout after each dconf-only switch;
+the running Shell and media-key daemon had cached the prior system defaults.
+After refresh, physical Alt+Shift+3 and Alt+Shift+4 produced full-screen and
+selection screenshots, and Ctrl+Alt+Q locked the session. Two new files in
+`~/Pictures/Screenshots` independently confirmed both screenshot paths.
+
+Daniel also requested the real macOS logout chord because GNOME initially
+offered no visible Logout item. Hardy now forces Logout visible in the system
+menu and binds physical Alt+Shift+Q (logical Super+Shift+Q) to
+`gnome-session-quit --logout`. After the final session refresh, both the menu
+item and the shortcut's confirmation dialog worked.
+
 ## Carried-forward facts
 
 - **Alternative base-layer strategy to consider**: the

@@ -81,13 +81,16 @@ quit/close convention, so this is not claimed as exhaustive.
 | --------------------- | ------------- | ------------------------- | ----------------------------- |
 | Switch applications   | Cmd+Tab       | Super+Tab                 | Super+Tab                     |
 | Lock                  | Ctrl+Cmd+Q    | Super+Shift+L             | Ctrl+Super+Q                  |
+| Log out               | Cmd+Shift+Q   | no declared equivalent    | Super+Shift+Q                 |
 | Full-screen capture   | Cmd+Shift+3   | Shift+Print               | Super+Shift+3                 |
 | Screenshot selection  | Cmd+Shift+4   | Print screenshot UI       | Super+Shift+4                 |
 | Keyboard illumination | hardware keys | hardware-specific/default | Super+F6/F7 from physical Alt |
 
 Hardy preserves GNOME's original Print variants and Super+Shift+L lock as
 fallbacks. Its screenshot and lock rows use physical Alt as Super/Cmd, so the
-physical positions match macOS.
+physical positions match macOS. Logout is also forced visible in GNOME's system
+menu; Super+Shift+Q opens the standard confirmation dialog rather than ending
+the session immediately.
 
 ## Known gaps
 
