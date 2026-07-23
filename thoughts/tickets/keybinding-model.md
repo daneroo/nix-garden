@@ -183,6 +183,11 @@ surfaces, not as a macOS-equivalence item.
 
 ## GNOME-level functions (2026-07-23)
 
+- **Dash pinned apps** — `org.gnome.shell.favorite-apps` set to Ghostty, Brave,
+  and Files (Nautilus was already a GNOME default; Ghostty/Brave pinned by
+  Daniel via the UI, then read back and encoded declaratively). Not a
+  keybinding, but adjacent desktop-baseline state that surfaced during this
+  work.
 - **Launcher invoke (Cmd+Space)** — `<Super>space` freed from the default
   `switch-input-source` binding (kept via the dedicated `XF86Keyboard` hardware
   key instead, function not lost). Three candidates actually trialed live
@@ -253,10 +258,14 @@ surfaces, not as a macOS-equivalence item.
 
 ## Open questions
 
-- Which launcher candidate to trial first?
-- Drop `programs.firefox.enable` from `hosts/hardy/default.nix` and
-  `hosts/gauss/default.nix`, or is Firefox intentionally kept installed
-  alongside Brave for a reason not yet recorded?
+- ~~Which launcher candidate to trial first?~~ Resolved — Vicinae, see
+  "GNOME-level functions".
+- ~~Drop `programs.firefox.enable`...~~ Resolved 2026-07-23: dropped from both
+  `hosts/gauss/default.nix` (applied and verified) and `hosts/hardy/default.nix`
+  (edited, not yet applied — needs `hardy`'s own `just apply`, out of reach from
+  this `gauss` session). Confirmed genuinely unused first (not running, no real
+  profile in `~/.mozilla`, only auto-created native-messaging entries from other
+  apps' installers).
 
 ## Modifier mapping (resolved 2026-07-23)
 

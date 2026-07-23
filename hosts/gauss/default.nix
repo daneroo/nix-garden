@@ -123,6 +123,13 @@ in
       settings = {
         "org/gnome/shell" = {
           enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
+          # Pinned to the dash 2026-07-23; Files (Nautilus) was already
+          # there as a GNOME default, kept alongside Ghostty and Brave.
+          favorite-apps = [
+            "com.mitchellh.ghostty.desktop"
+            "brave-browser.desktop"
+            "org.gnome.Nautilus.desktop"
+          ];
         };
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
@@ -324,7 +331,6 @@ in
 
   nixpkgs.config.allowUnfree = true;
 
-  programs.firefox.enable = true;
   programs.git.enable = true;
 
   system.stateVersion = "26.05";
