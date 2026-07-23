@@ -1,6 +1,6 @@
 # keybinding-model
 
-Status: active
+Status: done
 
 Goal: design and verify a macOS-equivalence keybinding map for Ghostty, Brave, a
 Raycast-equivalent launcher, and 1Password — covering copy/paste, tab/window
@@ -53,26 +53,23 @@ deciding it here.
       `gauss`: objective pass via `wev`/`keyd monitor`, then feel judgment on
       real `gauss` hardware (L2+, never VNC/VM for feel). Log failures and
       feel-mismatches back into the ticket. `[tier: med]`
-- [ ] Iterate bindings against test findings until the map is stable across a
-      normal day of real use on `gauss`, not just a single pass. `[tier: high]`
-      — genuinely still open; today was heavy same-session iteration, not real
-      daily use over time. Revisit after living with it a few days.
-- [ ] Finalize the equivalence map in the ticket and harvest the durable,
-      settled map plus the mechanism actually chosen (and why) into `docs/` (new
-      doc, e.g. `docs/keybindings.md`) — decide naming per
-      [markdown.md](../../docs/markdown.md). `[tier: low]`
-- [ ] Backport the finalized bindings to `hardy`, accounting for its missing
-      Cmd/Super key (Chromebook layout) — re-validate the chosen mechanism there
-      rather than assuming it transfers unchanged. `[tier: med]` — deliberately
-      deferred; also test the Ctrl↔Meta swap alternative noted in the ticket's
-      Constraints section, and the `programs._1password-gui` module (`hardy`
-      currently has none, gauss's own copy was moved out of the shared
-      `bootstrapPackages` this session).
-- [ ] Verify the backported bindings on `hardy` using the same test procedure.
-      `[tier: med]`
+- [x] ~~Iterate bindings against test findings until the map is stable across a
+      normal day of real use on `gauss`~~ — descoped from this plan on Daniel's
+      explicit call: not a todo. Real-use issues surface naturally; log them in
+      `BACKLOG.md` as they come up, and open a new ticket/plan only if enough
+      accumulate to warrant one. `[tier: high]`
+- [x] Finalize the equivalence map in the ticket and harvest the durable,
+      settled map plus the mechanism actually chosen (and why) into
+      [docs/keybindings.md](../../docs/keybindings.md). `[tier: low]`
+- [x] ~~Backport the finalized bindings to `hardy`~~ — split into its own ticket
+      and plan,
+      [hardy-keybinding-backport](../tickets/hardy-keybinding-backport.md),
+      since Daniel doesn't want `hardy` work on this branch; this plan closes
+      once `gauss`'s work is merged to `main`. `[tier: med]`
+- [x] ~~Verify the backported bindings on `hardy`~~ — moved to
+      `hardy-keybinding-backport` alongside the above. `[tier: med]`
 - [x] Resolve the ticket's open question on `programs.firefox.enable` (drop or
       justify) as part of this work, since it's adjacent leftover state in the
       same host files being touched. `[tier: low]`
-- [ ] Move `keybinding-model` to `BACKLOG.md`'s `## Closed` section with outcome
-      and this plan's link; decide whether to delete the ticket (after
-      harvesting into `docs/`) or archive the plan. `[tier: low]`
+- [x] Move `keybinding-model` to `BACKLOG.md`'s `## Closed` section with outcome
+      and this plan's link.
