@@ -7,8 +7,8 @@ direction: [homelab-platform](design/homelab-platform.md).
 ## Now
 
 - [ ] gauss-onboarding — install NixOS on `gauss` (Beelink SER8) as a clone of
-      `hardy`, generalizing the flake/`Justfile`/bootstrap script to
-      multi-host; plan: [gauss-onboarding](plans/gauss-onboarding.md)
+      `hardy`, generalizing the flake/`Justfile`/bootstrap script to multi-host;
+      plan: [gauss-onboarding](plans/gauss-onboarding.md)
 
 ## Fleet and Recovery
 

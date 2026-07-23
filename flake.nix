@@ -1,5 +1,5 @@
 {
-  description = "Reproducible system config for hardy";
+  description = "Reproducible system config for the homelab fleet";
 
   inputs = {
     herdr.url = "github:ogulcancelik/herdr/v0.7.5";
@@ -17,6 +17,7 @@
       bootstrapPackages = with pkgs; [
         _1password-gui
         bun
+        claude-code
         codex
         curl
         fresh-editor
@@ -29,16 +30,23 @@
         btop
         vim
       ];
+      hosts = [
+        "hardy"
+        "gauss"
+      ];
+      mkHost =
+        name:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            (./hosts + "/${name}")
+            {
+              environment.systemPackages = bootstrapPackages;
+            }
+          ];
+        };
     in
     {
-      nixosConfigurations.hardy = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          ./hosts/hardy
-          {
-            environment.systemPackages = bootstrapPackages;
-          }
-        ];
-      };
+      nixosConfigurations = nixpkgs.lib.genAttrs hosts mkHost;
     };
 }
