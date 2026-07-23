@@ -168,6 +168,30 @@ Brave: **6/6 core tab/window functions validated** 2026-07-23, all via `keyd`
   Brave's browser-default Ctrl+C/V still works untouched, just doesn't match the
   Super-based scheme; logged as an open gap, not urgent since it already works.
 
+## GNOME-level functions (2026-07-23)
+
+- **Launcher invoke (Cmd+Space)** — bound `<Super>space` to
+  `org.gnome.shell.keybindings.toggle-overview`, freeing it from the default
+  `switch-input-source` binding (kept via the dedicated `XF86Keyboard` hardware
+  key instead, function not lost). GNOME's Activities overview search is the
+  baseline being tested against the narrowed launcher requirement (MRU app
+  search, calculator, date-math) before deciding whether a dedicated launcher
+  (Vicinae/Ulauncher/rofi) is actually needed.
+- **Workspace switch left/right (macOS Spaces reflex, Ctrl+Left/Right)** —
+  deliberately **not** bound. Plain `Ctrl+Left/Right` is the near-universal
+  word-navigation shortcut in text fields; a GNOME WM-level grab intercepts
+  globally before any app sees the key, so it would have broken word-nav
+  everywhere for a workspace-switch win. `Ctrl+Shift+Left/Right` (word-select)
+  was considered as a lower-risk alternative — no existing GNOME conflict, and
+  Daniel doesn't rely on that function much (already non-functional in
+  Ghostty/Herdr; works in Brave's location bar, low priority to keep) — but
+  ended up unnecessary: GNOME's own **existing default** bindings,
+  `Super+Alt+Left/Right` and `Ctrl+Alt+Left/Right`, already work and map cleanly
+  onto Cmd+Option+Left/Right in Daniel's physical muscle-memory terms once the
+  Alt↔Super swap is applied. Adopted as-is — **zero config change, zero risk**,
+  not something built. If plain Ctrl+Left/Right specifically is ever wanted,
+  revisit the word-nav tradeoff explicitly; don't add it casually.
+
 ## Open questions
 
 - Which launcher candidate to trial first?

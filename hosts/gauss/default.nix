@@ -111,6 +111,17 @@ in
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
           focus-active-notification = lib.gvariant.mkEmptyArray "as";
+          # Cmd+Space on macOS is the launcher-invoke reflex; GNOME's
+          # Activities overview (with its search box) is the zero-install
+          # baseline that satisfies it once actually bound here.
+          toggle-overview = [ "<Super>space" ];
+        };
+        "org/gnome/desktop/wm/keybindings" = {
+          # <Super>space was switch-input-source by default, colliding with
+          # the launcher-invoke binding above; kept the dedicated hardware
+          # key (XF86Keyboard) so the function isn't lost, just the trigger.
+          switch-input-source = [ "XF86Keyboard" ];
+          switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           # Was <Super>l; freed for Brave's planned address-bar-focus binding
