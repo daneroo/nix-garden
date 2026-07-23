@@ -1,7 +1,7 @@
 # Keybindings
 
-macOS-equivalence keybinding map, tuned and validated on `gauss` 2026-07-23 and
-being live-validated on `hardy`. Hardy's active work and evidence are in
+macOS-equivalence keybinding map, tuned and validated on `gauss` and `hardy`
+2026-07-23. Hardy's full execution evidence is in
 [hardy-keybinding-backport](../thoughts/tickets/hardy-keybinding-backport.md).
 Full Gauss validation, mechanism comparisons, and bugs found stay in
 [keybinding-model](../thoughts/tickets/keybinding-model.md) (git history); this
@@ -37,8 +37,9 @@ focus-sensitive application remapping.
   Super-based chords into Brave's own native Ctrl-based ones, but only while a
   Brave window has focus (a patched GNOME Shell extension feeds it window-focus
   events — GNOME's Shell extension only officially supports up to version 49;
-  Gauss runs 50.2, patched and confirmed working). Hardy's focus-sensitive Brave
-  layer remains under live validation.
+  both hosts run 50.2, patched and confirmed working). Hardy uses a dedicated
+  `keyd` group and a `0660 root:keyd` socket; Gauss's broader socket permission
+  is tracked separately for security cleanup.
 - **Launcher** — [Vicinae](https://vicinae.com), chosen over Ulauncher (kept as
   a documented lighter fallback, not installed) and rofi (ruled out —
   hard-requires the wlr-layer-shell protocol GNOME's Mutter doesn't implement).
@@ -46,30 +47,47 @@ focus-sensitive application remapping.
 
 ## Equivalence map
 
-| Function               | macOS                        | Ghostty       | Brave                    | Launcher    | 1Password         |
-| ---------------------- | ---------------------------- | ------------- | ------------------------ | ----------- | ----------------- |
-| Copy                   | Cmd+C                        | Super+C       | Ctrl+C (browser default) |             |                   |
-| Paste                  | Cmd+V                        | Super+V       | Ctrl+V (browser default) |             |                   |
-| New tab                | Cmd+T                        | Super+T       | Super+T                  |             |                   |
-| Close tab              | Cmd+W                        | Super+W       | Super+W                  |             |                   |
-| Reopen closed tab      | Cmd+Shift+T                  | n/a           | Super+Shift+T            | n/a         | n/a               |
-| New window             | Cmd+N                        | Super+N       | Super+N                  |             |                   |
-| Next tab               | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] | Super+Shift+]            |             |                   |
-| Previous tab           | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ | Super+Shift+[            |             |                   |
-| Close window / context | Cmd+W                        | Super+W       | Super+W                  | n/a         | n/a               |
-| Address-bar focus      | Cmd+L                        | n/a           | Ctrl+L (browser default) | n/a         | n/a               |
-| Find                   | Cmd+F                        | n/a           | Ctrl+F (browser default) | n/a         | n/a               |
-| Clear / scrollback     | Cmd+K                        | Super+K       | n/a                      | n/a         | n/a               |
-| Quit app               | Cmd+Q                        | Super+Q       |                          |             |                   |
-| Launcher invoke        | Cmd+Space                    | n/a           | n/a                      | Super+Space | n/a               |
-| Autofill / password    | Cmd+Shift+Space              | n/a           | via browser extension    | n/a         | Super+Shift+Space |
+| Function               | macOS                        | Ghostty       | Brave (`gauss`)          | Brave (`hardy`) | Launcher    | 1Password         |
+| ---------------------- | ---------------------------- | ------------- | ------------------------ | --------------- | ----------- | ----------------- |
+| Copy                   | Cmd+C                        | Super+C       | Ctrl+C (browser default) | Super+C         |             |                   |
+| Paste                  | Cmd+V                        | Super+V       | Ctrl+V (browser default) | Super+V         |             |                   |
+| New tab                | Cmd+T                        | Super+T       | Super+T                  | Super+T         |             |                   |
+| Close tab              | Cmd+W                        | Super+W       | Super+W                  | Super+W         |             |                   |
+| Reopen closed tab      | Cmd+Shift+T                  | n/a           | Super+Shift+T            | Super+Shift+T   | n/a         | n/a               |
+| New window             | Cmd+N                        | Super+N       | Super+N                  | Super+N         |             |                   |
+| Next tab               | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] | Super+Shift+]            | Super+Shift+]   |             |                   |
+| Previous tab           | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ | Super+Shift+[            | Super+Shift+[   |             |                   |
+| Close window / context | Cmd+W                        | Super+W       | Super+W                  | Super+W         | n/a         | n/a               |
+| Address-bar focus      | Cmd+L                        | n/a           | Ctrl+L (browser default) | Super+L         | n/a         | n/a               |
+| Find                   | Cmd+F                        | n/a           | Ctrl+F (browser default) | Super+F         | n/a         | n/a               |
+| Clear / scrollback     | Cmd+K                        | Super+K       | n/a                      | n/a             | n/a         | n/a               |
+| Quit app               | Cmd+Q                        | Super+Q       |                          |                 |             |                   |
+| Launcher invoke        | Cmd+Space                    | n/a           | n/a                      | n/a             | Super+Space | n/a               |
+| Autofill / password    | Cmd+Shift+Space              | n/a           | via browser extension    | via extension   | n/a         | Super+Shift+Space |
 
-Copy/Paste in Brave intentionally left on the browser default (Ctrl+C/V) — a
-real, logged gap, not urgent since it already works.
+Gauss intentionally leaves Brave copy/paste, address focus, and Find on native
+Ctrl defaults. Hardy's dedicated focus-sensitive mapper closes those gaps. Hardy
+also provides Super+Shift+W as a tested close-window convenience, but it is not
+presented as macOS equivalence: macOS uses contextual Cmd+W rather than a
+separate standard close-window chord.
 
 On Gauss, the application mapper also provides a best-effort Super+W → Ctrl+W
 catch-all for apps other than Ghostty and Brave. Linux has no universal
 quit/close convention, so this is not claimed as exhaustive.
+
+## GNOME functions
+
+| Function              | macOS         | `gauss`                   | `hardy`                       |
+| --------------------- | ------------- | ------------------------- | ----------------------------- |
+| Switch applications   | Cmd+Tab       | Super+Tab                 | Super+Tab                     |
+| Lock                  | Ctrl+Cmd+Q    | Super+Shift+L             | Ctrl+Super+Q                  |
+| Full-screen capture   | Cmd+Shift+3   | Shift+Print               | Super+Shift+3                 |
+| Screenshot selection  | Cmd+Shift+4   | Print screenshot UI       | Super+Shift+4                 |
+| Keyboard illumination | hardware keys | hardware-specific/default | Super+F6/F7 from physical Alt |
+
+Hardy preserves GNOME's original Print variants and Super+Shift+L lock as
+fallbacks. Its screenshot and lock rows use physical Alt as Super/Cmd, so the
+physical positions match macOS.
 
 ## Known gaps
 
@@ -79,8 +97,11 @@ quit/close convention, so this is not claimed as exhaustive.
   not yet pursued — degrades gracefully to no clipboard history rather than
   failing.
 - Address-bar focus and Find cannot be supplied by Chromium's extension API.
-  Gauss keeps Brave's Ctrl+L/Ctrl+F defaults; its focus-sensitive `keyd` mapper
-  could translate the Super chords if that gap becomes worth closing.
+  Gauss keeps Brave's Ctrl+L/Ctrl+F defaults; Hardy's focus-sensitive `keyd`
+  mapper translates them.
+- Hardy's 1Password desktop app, Quick Access, and browser-support wrapper are
+  validated. Its Brave extension handshake remains pending until Brave Sync
+  restores the extension.
 
 ## Adjacent state
 

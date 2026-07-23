@@ -40,23 +40,23 @@ Create a branch named after this plan's slug before executing, per
       actual GNOME Shell version and existing local dconf overrides for
       candidate chords. Define whether the internal and any external keyboards
       need separate mappings. `[tier: high]`
-- [ ] Compare base-layer candidates on the physical keyboard. Trial the smallest
+- [x] Compare base-layer candidates on the physical keyboard. Trial the smallest
       mapping that can provide distinct, usable Cmd-equivalent, Option, and
       native Control roles; specifically test whether the Cmd-position key
       emitting native Ctrl closes most Linux-app gaps. Do not assume either
       `gauss`'s Alt↔Super swap or a Ctrl↔Meta swap. Keep SSH recovery available,
       use exact device IDs where practical, and verify `keyd`'s emergency
       termination chord before persisting the mapping. `[tier: high]`
-- [ ] Implement and live-validate Ghostty and Brave against the chosen logical
+- [x] Implement and live-validate Ghostty and Brave against the chosen logical
       modifier, starting with native Ctrl behavior. Cover copy/paste, tab
       new/close/reopen/cycle, new window, address-bar focus, Find, terminal
       clear, and the contextual close behavior. `[tier: med]`
-- [ ] Only if the native base layer leaves demonstrated Brave gaps, add
+- [x] Only if the native base layer leaves demonstrated Brave gaps, add
       `keyd-application-mapper`. Before validating it, check `hardy`'s GNOME
       Shell version and install an unpatched, Gauss-equivalent, or differently
       patched extension as required. Do not carry over Gauss's broad
       `Group = "users"` socket permission. `[tier: high]`
-- [ ] Install and validate the launcher (Vicinae, per `gauss`'s result) on
+- [x] Install and validate the launcher (Vicinae, per `gauss`'s result) on
       `hardy`, binding launcher invocation and 1Password Quick Access to the
       physical chords selected above. `[tier: med]`
 - [x] Reconcile GNOME conflicts and mutable user state: inspect each relevant
@@ -70,7 +70,7 @@ Create a branch named after this plan's slug before executing, per
       every app binding above; record intentional gaps rather than forcing
       unsafe or incoherent equivalence. Run `just check` and `just plan` before
       the final apply. `[tier: high]`
-- [ ] Clean up the durable documentation while harvesting Hardy's results:
+- [x] Clean up the durable documentation while harvesting Hardy's results:
       update [docs/keybindings.md](../../docs/keybindings.md) with per-host
       modifier/mechanism tables, fix its duplicate/misaligned close-window rows
       and stale browser-extension limitation wording, resolve the old ticket's

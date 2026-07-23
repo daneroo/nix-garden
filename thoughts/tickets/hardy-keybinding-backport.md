@@ -188,6 +188,24 @@ manager, GNOME Shell, and mapper all had the dedicated group. The patched
 extension and Vicinae service were active, and the declared dconf bindings were
 effective. Final per-app physical validation remains.
 
+The post-reboot physical pass then confirmed every implemented app binding:
+
+- Ghostty physical Alt+V pasted instead of opening Calendar.
+- Physical Alt+Space opened Vicinae, and Alt+Shift+Space opened 1Password Quick
+  Access.
+- Brave physical Alt provided Cmd-equivalent copy, paste, new/close/reopen tab,
+  new window, address-bar focus, Find, and next/previous tab. The additional
+  Alt+Shift+W convenience closed a disposable Brave window.
+- Keyboard illumination returned after reboot and physical Alt+F6/F7 continued
+  to adjust it.
+
+The planned emergency-chord check was superseded by stronger real recovery
+evidence: when the first group-only experiment made keyd restart-loop, SSH
+remained available, the exact cause was reversed remotely, and the daemon and
+mapping recovered. The final dedicated-group implementation then survived a full
+reboot. The static mapping remains limited to the exact internal keyboard, so an
+attached external keyboard is not put at risk by Hardy's Chromebook layout.
+
 ## Carried-forward facts
 
 - **Alternative base-layer strategy to consider**: the
