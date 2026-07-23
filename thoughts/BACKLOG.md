@@ -6,11 +6,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
-- [ ] herdr-workflow — package and validate Herdr on `hardy`, including
-      persistence, remote attach, clipboard behavior, and agent integrations;
-      ticket: [herdr-workflow](tickets/herdr-workflow.md); plan:
-      [herdr-workflow](plans/herdr-workflow.md)
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -121,6 +116,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-22 herdr-workflow — installed and verified Herdr v0.7.5 on `hardy`,
+  including remote detach/reattach and native agent detection; plan:
+  [herdr-workflow](plans/archive/herdr-workflow.md)
 - 2026-07-22 legacy-fact-collector — removed the distro-hopping hardware probe;
   durable Hardy throttling evidence remains in `docs/`.
 - 2026-07-12 repository-command-surface — implemented and exercised the
