@@ -67,7 +67,6 @@ in
       };
     };
   };
-  users.groups.keyd = { };
 
   # Never suspend while charging; normal battery suspend behavior is
   # unchanged.
