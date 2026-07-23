@@ -49,6 +49,13 @@ when Gauss adopted the proper NixOS module, but Hardy did not receive that
 module. Restore it before keyboard experimentation so Hardy returns to its prior
 functional baseline.
 
+Restored on the execution branch with both NixOS modules and
+`polkitPolicyOwners = [ "daniel" ]`. Hardy's closure gained only the expected
+GUI, CLI, and wrappers; `1Password-BrowserSupport` is the expected
+`root:onepassword` setgid wrapper. Daniel confirmed the GUI launches,
+authentication works, and his account is connected. The Brave-extension
+handshake remains part of final application validation.
+
 ## Keyboard backlight regression
 
 Reported on Hardy 2026-07-23: the keyboard-backlight buttons no longer worked
@@ -83,6 +90,12 @@ Physical `evtest` capture then established:
 - `keyd monitor` identifies the internal keyboard as `0001:0001:09b4e68d`. Use
   that exact device instead of a wildcard for the backlight mapping.
 
+The deployed fix scopes `keyd` to that device and maps physical `Alt+F6/F7` to
+standard `kbdillumdown/up` events. Daniel confirmed repeated level changes and
+GNOME's native keyboard-illumination OSD; the live EC value changed accordingly.
+Plain F6/F7 and every modifier role remain unchanged in this independently
+deployable checkpoint.
+
 Treat illumination and button handling as separate layers. First preserve a
 useful nonzero level across reboot. Then capture the physical backlight chords
 and determine whether Hardy emits keyboard-illumination events, ordinary
@@ -97,6 +110,24 @@ C436F), but its Search/Launcher key has now been observed emitting native
 keyboard: re-validate which physical positions should provide Cmd-equivalent,
 Option, and native Control rather than copying Gauss's symmetric mapping
 unchanged.
+
+## Modifier capture and reversible trial
+
+Raw capture established that both Alt keys, both Ctrl keys, and Search are
+independently available. Search emits `KEY_LEFTMETA`; there is no physical
+right-Meta key.
+
+The first in-memory trial therefore maps both physical Alt keys beside Space to
+Meta/Cmd, maps Search to Alt/Option, and leaves both Ctrl keys native.
+`keyd monitor` confirmed the resulting output exactly, and moving the
+illumination bindings from the Alt layer to the Meta layer preserved physical
+Alt+brightness-down/up. This provides all three roles without asking a native
+Linux Ctrl key to do double duty. Daniel confirmed physical Alt+Tab is his
+established muscle-memory choice, so this is the base map to make declarative.
+Search's physical Caps-Lock position makes Caps Lock an interesting future
+alternative, including for cross-platform symmetry with macOS, but that is a
+later refinement rather than a reason to discard Hardy's only distinct Option
+role now.
 
 ## Carried-forward facts
 
