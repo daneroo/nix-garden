@@ -14,6 +14,46 @@ let
 
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
+
+  # keyd ships a GNOME extension only for Shell 45-49. Hardy runs Shell 50.2;
+  # the extension uses stable APIs, so extend only its declared compatibility.
+  keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
+    import json, sys
+    src, dst = sys.argv[1], sys.argv[2]
+    with open(src) as f:
+        m = json.load(f)
+    if "50" not in m["shell-version"]:
+        m["shell-version"].append("50")
+    with open(dst, "w") as f:
+        json.dump(m, f, indent=2)
+  '';
+
+  keydGnomeExtension = pkgs.runCommand "keyd-gnome-extension-patched" { } ''
+    mkdir -p $out
+    cp ${pkgs.keyd}/share/keyd/gnome-extension-45/extension.js $out/
+    ${pkgs.python3}/bin/python3 ${keydGnomeExtensionPatcher} \
+      ${pkgs.keyd}/share/keyd/gnome-extension-45/metadata.json \
+      $out/metadata.json
+  '';
+
+  # Brave has no native Super bindings. Translate only while Brave has focus,
+  # preserving native Ctrl globally and closing the macOS-equivalence gaps that
+  # Chromium's chrome.commands API cannot accept.
+  keydAppConf = pkgs.writeText "keyd-app.conf" ''
+    [brave-browser]
+
+    meta.c = C-c
+    meta.v = C-v
+    meta.t = C-t
+    meta.w = C-w
+    meta+shift.t = C-S-t
+    meta+shift.w = C-S-w
+    meta.n = C-n
+    meta.l = C-l
+    meta.f = C-f
+    meta+shift.rightbrace = C-tab
+    meta+shift.leftbrace = C-S-tab
+  '';
 in
 {
   imports = [
@@ -64,8 +104,22 @@ in
           f6 = "kbdillumdown";
           f7 = "kbdillumup";
         };
+        # keyd-application-mapper cannot dynamically bind a composite layer
+        # unless the static config declares it first.
+        "meta+shift" = { };
       };
     };
+  };
+
+  # keyd drops its effective group to "keyd" when that group exists. The NixOS
+  # unit's capability bounding set omits CAP_SETGID by default, so adding the
+  # group alone makes the daemon fail. Grant only that missing capability and
+  # use a group-readable socket; do not expose it to Gauss's broad "users"
+  # group. Daniel receives the new membership at the required logout below.
+  users.groups.keyd = { };
+  systemd.services.keyd.serviceConfig = {
+    CapabilityBoundingSet = lib.mkAfter [ "CAP_SETGID" ];
+    UMask = lib.mkForce "0007";
   };
 
   # Never suspend while charging; normal battery suspend behavior is
@@ -75,6 +129,7 @@ in
     {
       settings = {
         "org/gnome/shell" = {
+          enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
           favorite-apps = [
             "com.mitchellh.ghostty.desktop"
             "brave-browser.desktop"
@@ -120,6 +175,10 @@ in
 
   systemd.tmpfiles.rules = [
     "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
+    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
+    "d /home/daniel/.config/keyd 0755 daniel users -"
+    "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
 
   environment.systemPackages = [ pkgs.vicinae ];
@@ -147,9 +206,11 @@ in
     isNormalUser = true;
     description = "Daniel Lauzon";
     extraGroups = [
+      "keyd"
       "networkmanager"
       "wheel"
     ];
+    packages = [ pkgs.keyd ];
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
     ];
