@@ -159,6 +159,35 @@ only those three values were reset. The declared favorites, timeout `0`, and
 type `nothing` are now effective. Logout/reboot survival and live physical
 acceptance remain to be proven.
 
+The first physical baseline pass before a session refresh confirmed:
+
+- Ghostty's Cmd-equivalent bindings worked except physical Alt+V, which the old
+  GNOME session still intercepted as its Super+V calendar shortcut.
+- Physical Alt+Space did not yet invoke Vicinae for the same reason.
+- Physical Alt+Tab and Search+Tab both switched apps. This preserves the desired
+  Cmd-position reflex while Search remains a real native-Alt/Option role.
+- Brave's native Ctrl+T worked and physical Alt+T did not, directly proving the
+  need for the focus-sensitive mapper rather than assuming Gauss's result.
+- 1Password's app worked. Brave had not yet restored Daniel's Sync chain, so no
+  browser extensions existed and the integration handshake could not yet be
+  tested.
+- Physical Alt+F6/F7 repeatedly changed keyboard illumination.
+
+The mapper checkpoint uses a dedicated `keyd` group, `0660 root:keyd` socket,
+and only adds `CAP_SETGID` to NixOS's existing capability bounding set. Hardy's
+patched GNOME 50 extension became active after logout and started
+`keyd-application-mapper`; a reboot was then required because the long-lived
+systemd user manager retained its pre-group supplementary groups across the
+GNOME-only logout.
+
+The reboot supplied the full persistence checkpoint: the selected keyboard
+illumination level returned at `30/100` and systemd's saved value was also 30;
+the declared NixOS generation booted; keyd started cleanly with the exact
+internal keyboard; `/run/keyd.socket` returned as `0660 root:keyd`; and the user
+manager, GNOME Shell, and mapper all had the dedicated group. The patched
+extension and Vicinae service were active, and the declared dconf bindings were
+effective. Final per-app physical validation remains.
+
 ## Carried-forward facts
 
 - **Alternative base-layer strategy to consider**: the

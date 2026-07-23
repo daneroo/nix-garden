@@ -18,7 +18,7 @@ Create a branch named after this plan's slug before executing, per
       on `hardy.imetrical.com`. When raw physical key presses or feel judgments
       become the blocking input, prepare an explicit state-and-command handoff
       for Codex running on Hardy with Daniel assisting. `[tier: high]`
-- [ ] Restore keyboard illumination as an early independent checkpoint. Preserve
+- [x] Restore keyboard illumination as an early independent checkpoint. Preserve
       the confirmed working `chromeos::kbd_backlight` LED interface and the
       immediate `50/100` recovery, determine why systemd restored a saved value
       of zero, and make a sane nonzero level survive reboot. With Daniel or
@@ -59,7 +59,7 @@ Create a branch named after this plan's slug before executing, per
 - [ ] Install and validate the launcher (Vicinae, per `gauss`'s result) on
       `hardy`, binding launcher invocation and 1Password Quick Access to the
       physical chords selected above. `[tier: med]`
-- [ ] Reconcile GNOME conflicts and mutable user state: inspect each relevant
+- [x] Reconcile GNOME conflicts and mutable user state: inspect each relevant
       effective `gsettings` value, reset only conflicting local overrides or
       deliberately lock settings where enforcement is warranted, and confirm the
       declarative values survive logout and reboot. `[tier: med]`
