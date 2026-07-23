@@ -38,9 +38,9 @@ just plan
 just apply
 ```
 
-Bare `just` lists the public commands. `plan` optionally updates inputs, checks,
-builds, and compares desired with running. `apply` replans without updates,
-asks, switches, and verifies.
+Bare `just` lists the public commands. `plan` checks, builds, and compares
+desired with running, without touching locked inputs (`just update` does that
+separately). `apply` runs `plan`, asks, switches, and verifies.
 
 The bootstrap script is a one-time bridge. It assumes only Nix and Git and
 defensively enables the Nix features the normal system already provides.

@@ -4,6 +4,7 @@
 docs/
   README.md
   bootstrap.md
+  coding-style.md
   file-layout.md
   gauss-hardware.md
   hardy-firmware-history.md
@@ -15,6 +16,7 @@ docs/
   workspace.md
 
 scripts/
+  audit-host.sh
   bootstrap-apply.sh
 
 thoughts/

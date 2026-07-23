@@ -10,8 +10,8 @@ first managed host.
 
 - `just check` — required after edits and before commits; see
   [docs/workspace.md](docs/workspace.md).
-- `just pre-flight` — check, preview, and build before changing the running
-  system.
+- `just plan` — check, build, and diff before changing the running system; never
+  touches locked inputs, safe to run non-interactively.
 
 ## Execution
 
@@ -26,4 +26,4 @@ first managed host.
 - `scripts/` — reviewed bootstrap, operational, and quality-check helpers.
 
 Do not run `just apply` unless the user asks to switch the running system; it
-performs the pre-flight checks and then requests confirmation.
+runs `just plan` and then requests confirmation.

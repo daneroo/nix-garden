@@ -28,8 +28,9 @@ for Daniel's homelab. `hardy` is the first managed host.
   verify, recover, and push primarily from the machine being configured.
 - Physical hosts may combine desktop and server roles. `hardy` can deploy server
   workloads as well as drive desktop development.
-- `gauss`, a wipeable Beelink SER8 currently running Fedora 43 COSMIC Atomic,
-  and a Bluefin iMac with a spare drive provide low-risk physical test targets.
+- `gauss`, a Beelink SER8 onboarded as NixOS's second managed host (2026-07-23,
+  see [gauss-hardware](../../docs/gauss-hardware.md)), and a Bluefin iMac with a
+  spare drive provide low-risk physical test targets.
 
 ## Two Physical-Host Objectives
 

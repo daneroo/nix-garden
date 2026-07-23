@@ -6,6 +6,12 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Now
 
+- [ ] hardy-keybinding-backport — bring `hardy` up to the macOS-equivalence
+      keybinding baseline `gauss` reached in `keybinding-model`, accounting for
+      `hardy`'s missing physical Cmd/Super key; ticket:
+      [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
+      [hardy-keybinding-backport](plans/hardy-keybinding-backport.md)
+
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -32,12 +38,6 @@ direction: [homelab-platform](design/homelab-platform.md).
       generalizing it.
 - [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
       workflows, hardware behavior, and testability.
-- [ ] keybinding-model — design macOS-consistent bindings across the compositor,
-      terminal, editor, browser, launcher, and selected applications; tune on
-      `gauss` (standard keyboard, no Cmd/Super confound like `hardy`'s
-      Chromebook layout) and backport to `hardy`; ticket:
-      [keybinding-model](tickets/keybinding-model.md); plan:
-      [keybinding-model](plans/keybinding-model.md)
 - [ ] desktop-test-harness — explore VM or container-backed graphical testing
       and agent computer-use validation for bindings and window behavior.
 
@@ -122,6 +122,13 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-23 keybinding-model — validated a macOS-equivalence keybinding map for
+  Ghostty, Brave, Vicinae, and 1Password on `gauss` (Alt↔Super swap via `keyd` +
+  a patched GNOME Shell extension); settled facts harvested to
+  [docs/keybindings.md](../docs/keybindings.md); `hardy` backport split into its
+  own ticket/plan,
+  [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
+  [keybinding-model](plans/keybinding-model.md)
 - 2026-07-23 gauss-onboarding — installed NixOS on `gauss` as a clone of
   `hardy`, generalized the flake/`Justfile`/bootstrap script to multi-host,
   verified `just check`/`just plan` on the host itself, and handed off execution

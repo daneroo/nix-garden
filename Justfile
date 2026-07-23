@@ -4,21 +4,36 @@ blessed_hosts := "hardy gauss"
 hostname := `hostname`
 flake := ".#" + hostname
 
+# Show this helpful listing.
 default:
-    @just --list
+    @just --list --unsorted
 
-# Check, build, and compare desired with running; optionally update inputs.
+# Check pre-commit invariants: shell, formatting, Markdown, and flake.
+check: _shell-check _fmt-check _lint-md _flake-check
+
+# Format supported repository files.
+fmt:
+    bunx prettier --write .
+
+# Check, build, and compare desired with running; never touches inputs (see `update`).
 plan:
     just _host-check
     just _git-state
-    just _maybe-update
     just check
     just _build
     just _diff
 
-# Replan without updates, confirm, switch, and verify.
+# Update locked inputs, then plan.
+update:
+    @echo "== update: nix flake update =="
+    nix flake update
+    @echo "== update result: git diff -- flake.lock =="
+    git diff -- flake.lock
+    just plan
+
+# Plan, confirm, switch, and verify.
 apply:
-    just _plan-locked
+    just plan
     @echo "== apply: sudo nixos-rebuild switch --flake {{ flake }} =="
     @printf 'Apply {{ flake }} to this machine? [y/N] '; \
     read answer; \
@@ -27,13 +42,6 @@ apply:
       *) echo 'apply aborted'; exit 1 ;; \
     esac
     just _verify
-
-# Check pre-commit invariants: shell, formatting, Markdown, and flake.
-check: _shell-check _fmt-check _lint-md _flake-check
-
-# Format supported repository files.
-fmt:
-    bunx prettier --write .
 
 [private]
 [script('bash')]
@@ -68,29 +76,6 @@ _git-state:
     case "$answer" in
       n|N|no|NO) echo 'plan aborted'; exit 1 ;;
     esac
-
-[private]
-[script('bash')]
-_maybe-update:
-    set -euo pipefail
-    printf 'Update locked inputs before planning? [y/N] '
-    read -r answer
-    case "$answer" in
-      y|Y|yes|YES)
-        echo '== update: nix flake update =='
-        nix flake update
-        echo '== update result: git diff -- flake.lock =='
-        git diff -- flake.lock
-        ;;
-    esac
-
-[private]
-_plan-locked:
-    just _host-check
-    just _git-state
-    just check
-    just _build
-    just _diff
 
 [private]
 _shell-check:

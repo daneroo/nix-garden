@@ -83,7 +83,6 @@
 
   nixpkgs.config.allowUnfree = true;
 
-  programs.firefox.enable = true;
   programs.git.enable = true;
 
   system.stateVersion = "26.05";
