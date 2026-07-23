@@ -1,5 +1,20 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
+let
+  # Validated 2026-07-23 against a real Ghostty window; see
+  # thoughts/tickets/keybinding-model.md for the per-binding test results.
+  ghosttyConfig = pkgs.writeText "ghostty-config" ''
+    keybind = super+c=copy_to_clipboard:mixed
+    keybind = super+v=paste_from_clipboard
+    keybind = super+t=new_tab
+    keybind = super+w=close_tab:this
+    keybind = super+shift+]=next_tab
+    keybind = super+shift+[=previous_tab
+    keybind = super+k=clear_screen
+    keybind = super+n=new_window
+    keybind = super+q=quit
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -27,6 +42,30 @@
   };
 
   services.printing.enable = true;
+
+  # macOS-equivalence keybinding-model work (thoughts/tickets/keybinding-model.md).
+  # Physical Alt key acts as the Cmd-equivalent Super modifier, matching
+  # Daniel's existing macOS modifier swap; GNOME's own Super+V/Super+N
+  # shortcuts are freed since they collided with Ghostty's paste/new-window
+  # bindings before either reached the app.
+  programs.dconf.enable = true;
+  programs.dconf.profiles.user.databases = [
+    {
+      settings = {
+        "org/gnome/desktop/input-sources" = {
+          xkb-options = [ "altwin:swap_alt_win" ];
+        };
+        "org/gnome/shell/keybindings" = {
+          toggle-message-tray = [ "<Super>m" ];
+          focus-active-notification = lib.gvariant.mkEmptyArray "as";
+        };
+      };
+    }
+  ];
+
+  systemd.tmpfiles.rules = [
+    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+  ];
 
   # gauss is an always-on homelab box, not a laptop; never suspend.
   systemd.targets.sleep.enable = false;
