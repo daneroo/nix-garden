@@ -18,7 +18,7 @@ plan:
 
 # Replan without updates, confirm, switch, and verify.
 apply:
-    just _plan-locked
+    just pre-flight
     @echo "== apply: sudo nixos-rebuild switch --flake {{ flake }} =="
     @printf 'Apply {{ flake }} to this machine? [y/N] '; \
     read answer; \
@@ -30,6 +30,14 @@ apply:
 
 # Check pre-commit invariants: shell, formatting, Markdown, and flake.
 check: _shell-check _fmt-check _lint-md _flake-check
+
+# Check, build, and diff without updating inputs or switching; the gate agents and CI can run.
+pre-flight:
+    just _host-check
+    just _git-state
+    just check
+    just _build
+    just _diff
 
 # Format supported repository files.
 fmt:
@@ -83,14 +91,6 @@ _maybe-update:
         git diff -- flake.lock
         ;;
     esac
-
-[private]
-_plan-locked:
-    just _host-check
-    just _git-state
-    just check
-    just _build
-    just _diff
 
 [private]
 _shell-check:
