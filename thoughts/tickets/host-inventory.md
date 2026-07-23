@@ -5,10 +5,13 @@ roles.
 
 ## Known Hosts
 
-- `hardy`: ASUS Chromebook Flip C436F / Google Helios; NixOS target and first
+- `hardy`: ASUS Chromebook Flip C436F / Google Helios; first NixOS target and
   self-hosting development machine; may run desktop and server workloads;
-  currently non-load-bearing. Confirm whether the committed generation is
-  applied.
+  currently non-load-bearing. Tailscale is enabled declaratively and enrolled
+  with runtime state outside Nix. Its current tailnet IPv4 address is
+  `100.70.165.86`; SSH is verified through both MagicDNS (`hardy`) and the
+  manually mapped `hardy.ts.imetrical.com` record, including automatic identity
+  restoration after reboot. Confirm whether the committed generation is applied.
 - `gauss`: Beelink SER8; second NixOS host, installed 2026-07-23 on its internal
   NVMe (previously Omarchy, now wiped). AMD Ryzen 7 8845HS, 27 GiB RAM;
   hardware/storage baseline and install notes in
