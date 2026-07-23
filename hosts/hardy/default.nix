@@ -1,5 +1,20 @@
 { pkgs, lib, ... }:
 
+let
+  ghosttyConfig = pkgs.writeText "ghostty-config" ''
+    keybind = super+c=copy_to_clipboard:mixed
+    keybind = super+v=paste_from_clipboard
+    keybind = super+t=new_tab
+    keybind = super+w=close_tab:this
+    keybind = super+shift+]=next_tab
+    keybind = super+shift+[=previous_tab
+    keybind = super+k=clear_screen
+    keybind = super+n=new_window
+    keybind = super+q=quit
+
+    mouse-scroll-multiplier = precision:3,discrete:5
+  '';
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -52,6 +67,7 @@
       };
     };
   };
+  users.groups.keyd = { };
 
   # Never suspend while charging; normal battery suspend behavior is
   # unchanged.
@@ -59,6 +75,42 @@
   programs.dconf.profiles.user.databases = [
     {
       settings = {
+        "org/gnome/shell" = {
+          favorite-apps = [
+            "com.mitchellh.ghostty.desktop"
+            "brave-browser.desktop"
+            "org.gnome.Nautilus.desktop"
+          ];
+        };
+        "org/gnome/shell/keybindings" = {
+          toggle-message-tray = [ "<Super>m" ];
+          focus-active-notification = lib.gvariant.mkEmptyArray "as";
+          toggle-overview = lib.gvariant.mkEmptyArray "as";
+        };
+        "org/gnome/desktop/wm/keybindings" = {
+          switch-input-source = [ "XF86Keyboard" ];
+          switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
+        };
+        "org/gnome/settings-daemon/plugins/media-keys" = {
+          screensaver = [ "<Super><Shift>l" ];
+          custom-keybindings = [
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+          ];
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
+          name = "Vicinae toggle";
+          command = "${pkgs.vicinae}/bin/vicinae toggle";
+          binding = "<Super>space";
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
+          name = "1Password quick access";
+          command = "1password --quick-access";
+          binding = "<Super><Shift>space";
+        };
+        "org/gnome/desktop/peripherals/mouse" = {
+          natural-scroll = true;
+        };
         "org/gnome/settings-daemon/plugins/power" = {
           sleep-inactive-ac-type = "nothing";
           sleep-inactive-ac-timeout = lib.gvariant.mkInt32 0;
@@ -66,6 +118,22 @@
       };
     }
   ];
+
+  systemd.tmpfiles.rules = [
+    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+  ];
+
+  environment.systemPackages = [ pkgs.vicinae ];
+
+  systemd.user.services.vicinae = {
+    description = "Vicinae launcher server";
+    wantedBy = [ "graphical-session.target" ];
+    partOf = [ "graphical-session.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.vicinae}/bin/vicinae server";
+      Restart = "on-failure";
+    };
+  };
 
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
