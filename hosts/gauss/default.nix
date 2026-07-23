@@ -295,7 +295,7 @@ in
 
   # Proper NixOS module instead of the plain package (which was in the
   # shared flake.nix bootstrapPackages until now) -- needed for the
-  # 1Password-BrowserSupport setuid wrapper that native-messaging-based
+  # 1Password-BrowserSupport setgid wrapper that native-messaging-based
   # browser extension integration actually requires. Confirmed missing
   # (/run/wrappers/bin/1Password-BrowserSupport didn't exist) after joining
   # Daniel's Brave sync chain, which installed the extension itself but had

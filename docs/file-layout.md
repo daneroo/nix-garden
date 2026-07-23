@@ -8,6 +8,7 @@ docs/
   file-layout.md
   gauss-hardware.md
   hardy-firmware-history.md
+  keybindings.md
   markdown.md
   performance.md
   reconciliation.md

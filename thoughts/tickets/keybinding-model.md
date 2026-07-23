@@ -76,9 +76,9 @@ suffices (Brave/Chrome tab-switching isn't normally user-remappable without an
 extension or enterprise policy — first likely candidate for the remap-layer
 escalation if native config can't hit this exact chord).
 
-Still to capture: the same walk-through for Brave, the launcher, and 1Password
-(switch window/app, spotlight/search, screenshot, lock screen, etc. remain open
-for those apps).
+The later sections record the completed Gauss walk-through for Brave, Vicinae,
+1Password Quick Access, app switching, launcher, screenshot, and lock. Hardy's
+physical-key validation moved to its own backport ticket when this work closed.
 
 Out of scope for this ticket: compositor-level tiling/workspace bindings tied to
 `compositor-selection` (Niri vs Hyprland) — GNOME is the current baseline on
@@ -139,23 +139,23 @@ limit, not a fixable bug).
 
 ## Equivalence map (fill in during research)
 
-| Function            | macOS                        | Ghostty          | Brave                        | Launcher       | 1Password            | Notes                                                  |
-| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------------- | -------------------- | ------------------------------------------------------ |
-| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |                |                      | Browser default (Ctrl+C) untouched; gap, see below     |
-| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |                |                      | GNOME conflict fixed, see below; same gap as Copy      |
-| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |                |                      | Brave via `keyd`, not the extension — see below        |
-| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |                |                      | `close_tab:this`                                       |
-| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a            | n/a                  | Brave native Ctrl+Shift+T, via `keyd`                  |
-| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |                |                      | GNOME conflict fixed, see below                        |
-| Close window        | n/a — see note               | not bound        |                              |                |                      | Not a real distinct macOS chord; see note below        |
-| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |                |                      | Canonical chord, matched exactly in both apps          |
-| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |                |                      | Canonical chord, matched exactly in both apps          |
-| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a            | n/a                  | No extension API can do this; not achievable via Super |
-| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a            | n/a                  | Same limitation as address-bar focus                   |
-| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a            | n/a                  | `clear_screen`, unbound by Ghostty default             |
-| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |                |                      |                                                        |
-| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          | Super+Space ✅ | n/a                  | Vicinae; MRU search + calculator confirmed, see below  |
-| Autofill / password | Cmd+Shift+Space (1Password)  | n/a              | via browser extension        | n/a            | Super+Shift+Space ✅ | Matches 1Password's real macOS default exactly         |
+| Function            | macOS                        | Ghostty          | Brave                        | Launcher       | 1Password            | Notes                                                 |
+| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------------- | -------------------- | ----------------------------------------------------- |
+| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |                |                      | Browser default (Ctrl+C) untouched; gap, see below    |
+| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |                |                      | GNOME conflict fixed, see below; same gap as Copy     |
+| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |                |                      | Brave via `keyd`, not the extension — see below       |
+| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |                |                      | `close_tab:this`                                      |
+| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a            | n/a                  | Brave native Ctrl+Shift+T, via `keyd`                 |
+| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |                |                      | GNOME conflict fixed, see below                       |
+| Close window        | n/a — see note               | not bound        |                              |                |                      | Not a real distinct macOS chord; see note below       |
+| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |                |                      | Canonical chord, matched exactly in both apps         |
+| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |                |                      | Canonical chord, matched exactly in both apps         |
+| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a            | n/a                  | `chrome.commands` cannot; the keyd mapper could       |
+| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a            | n/a                  | Same mechanism choice as address-bar focus            |
+| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a            | n/a                  | `clear_screen`, unbound by Ghostty default            |
+| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |                |                      |                                                       |
+| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          | Super+Space ✅ | n/a                  | Vicinae; MRU search + calculator confirmed, see below |
+| Autofill / password | Cmd+Shift+Space (1Password)  | n/a              | via browser extension        | n/a            | Super+Shift+Space ✅ | Matches 1Password's real macOS default exactly        |
 
 Ghostty: **9/9 validated** 2026-07-23, all via native per-app config (no remap
 layer needed), now declaratively encoded in `hosts/gauss/default.nix`. See

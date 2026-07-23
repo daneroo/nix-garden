@@ -13,6 +13,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
   boundaries.
 - [markdown.md](markdown.md) — documentation authoring conventions.
 - [bootstrap.md](bootstrap.md) — fresh-install and rebuild path.
+- [keybindings.md](keybindings.md) — per-host modifier roles and the settled
+  macOS-equivalence map.
 - [reconciliation.md](reconciliation.md) — desired-versus-actual convergence for
   stateful systems.
 
