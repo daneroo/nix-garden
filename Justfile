@@ -4,8 +4,16 @@ blessed_hosts := "hardy gauss"
 hostname := `hostname`
 flake := ".#" + hostname
 
+# Show this helpful listing.
 default:
-    @just --list
+    @just --list --unsorted
+
+# Check pre-commit invariants: shell, formatting, Markdown, and flake.
+check: _shell-check _fmt-check _lint-md _flake-check
+
+# Format supported repository files.
+fmt:
+    bunx prettier --write .
 
 # Check, build, and compare desired with running; never touches inputs (see `update`).
 plan:
@@ -34,13 +42,6 @@ apply:
       *) echo 'apply aborted'; exit 1 ;; \
     esac
     just _verify
-
-# Check pre-commit invariants: shell, formatting, Markdown, and flake.
-check: _shell-check _fmt-check _lint-md _flake-check
-
-# Format supported repository files.
-fmt:
-    bunx prettier --write .
 
 [private]
 [script('bash')]
