@@ -58,26 +58,26 @@ outside this work.
 - [x] Commit the plan to `main`, branch `gauss-onboarding`, and commit the
       multi-host flake groundwork and `hosts/gauss/default.nix` (without
       hardware-configuration.nix yet) on that branch. `[tier: low]`
-- [ ] **Manual runbook — physical install (Daniel, hands-on at the machine):**
-      `[tier: high]`
-  - [ ] Write the official NixOS ISO to a USB stick.
-  - [ ] Boot `gauss` from the USB stick.
-  - [ ] Wipe the Omarchy install; partition the internal NVMe: ~512MiB vfat EFI
-        `/boot`, ~16GiB swap partition, remaining space as one btrfs partition
-        with `root`/`home`/`nix` subvolumes (mirrors `hardy`).
-  - [ ] Run `nixos-generate-config` to produce
+- [x] **Manual runbook — physical install (Daniel, hands-on at the machine):**
+      `[tier: high]` — actual install used the graphical/Calamares installer
+      (erase disk, btrfs, plain swap/no hibernate) rather than manual `parted`;
+      layout still mirrors hardy's shape and `nixos-generate-config` captured it
+      faithfully.
+  - [x] Write the official NixOS ISO to a USB stick.
+  - [x] Boot `gauss` from the USB stick.
+  - [x] Wipe the Omarchy install; partition the internal NVMe: vfat EFI `/boot`,
+        swap partition, remaining space as one btrfs partition with `home`/`nix`
+        subvolumes and `/` on the top-level subvolume (mirrors `hardy`'s actual
+        layout).
+  - [x] Run `nixos-generate-config` to produce
         `hosts/gauss/hardware-configuration.nix`.
-  - [ ] Complete a minimal `nixos-install` sufficient to boot and reach the
-        network (bridge to the flake-managed config happens next, via
-        `bootstrap-apply.sh`, not in this minimal install).
-  - [ ] Remove the USB stick and reboot; in the BIOS boot menu/order, confirm
-        `systemd-boot`/"Linux Boot Manager" on the internal NVMe is the default
-        entry and remove any stale USB-installer entry, so `gauss` reliably
-        boots headless afterward.
-  - [ ] Log into the minimal install, clone `nix-garden`, check out the
+  - [x] Complete a minimal install sufficient to boot and reach the network.
+  - [x] Remove the USB stick and reboot; confirmed NVME/Linux Boot Manager as
+        the boot entry.
+  - [x] Log into the minimal install, clone `nix-garden`, check out the
         `gauss-onboarding` branch, and copy the generated
         `hardware-configuration.nix` into `hosts/gauss/`.
-- [ ] Run the generalized `scripts/bootstrap-apply.sh` on `gauss` (flake check,
+- [x] Run the generalized `scripts/bootstrap-apply.sh` on `gauss` (flake check,
       build, confirm, then `switch` to `.#gauss`) — first real end-to-end proof
       of the documented bootstrap path. `[tier: med]`
 - [ ] Log in to Claude Code on `gauss` (and Codex, matching the pattern recorded
@@ -87,12 +87,19 @@ outside this work.
       Codex) in the session, same as verified for `hardy`. All remaining steps
       below run from this `gauss`-side session, not orchestrated remotely.
       `[tier: med]`
-- [ ] Verify (from the `gauss`-side session; confirm reachability by SSH from
-      `galois`): `just check` and `just plan` run clean on `gauss` itself.
-      `[tier: low]`
-- [ ] Commit `hosts/gauss/hardware-configuration.nix` and any install-time
+- [x] Verify (SSH reachability from `galois`, confirmed with the shared key
+      after starting `sshd` and applying the firewall's `openFirewall` rule):
+      `just check` and `just plan` run clean on `gauss` itself. `[tier: low]`
+- [x] Commit `hosts/gauss/hardware-configuration.nix` and any install-time
       fixes; push the branch. `[tier: low]`
 - [ ] Harvest durable facts back into `docs/` and `thoughts/`: `[tier: low]`
+  - [ ] Document the bootstrap gotcha found on `gauss`: after
+        `nixos-rebuild switch` from a non-flake system (Calamares' disposable
+        install) to the flake config, `sshd.service` was `enabled` but never
+        started, and `firewall.service` (a oneshot) hadn't re-run to apply
+        `openFirewall`. Both needed a manual `systemctl start`/`restart`.
+        Capture this in `docs/bootstrap.md` as a known first-switch check for
+        future hosts.
   - [ ] Update [gauss-hardware](../../docs/gauss-hardware.md) or add a
         post-install note distinguishing pre-install baseline from the installed
         system.

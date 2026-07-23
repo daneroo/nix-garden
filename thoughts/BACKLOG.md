@@ -19,8 +19,6 @@ direction: [homelab-platform](design/homelab-platform.md).
       restore, and verify path while `hardy` is non-load-bearing.
 - [ ] multi-host-layout — evolve from one host to reusable roles and features
       only when the inventory provides a concrete second consumer.
-- [ ] gaussmic-github-key-retirement — remove the temporary GitHub SSH key
-      `gaussmic-2026-07-22-temp` when Gaussmic is retired.
 
 ## Stateful Operations
 
@@ -123,6 +121,9 @@ direction: [homelab-platform](design/homelab-platform.md).
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-23 gaussmic-github-key-retirement — deleted the temporary
+  `gaussmic-2026-07-22-temp` GitHub SSH key after confirming Gaussmic's disk is
+  gone for good.
 - 2026-07-22 herdr-workflow — installed and verified Herdr v0.7.5 on `hardy`,
   including remote detach/reattach and native agent detection; plan:
   [herdr-workflow](plans/archive/herdr-workflow.md)
