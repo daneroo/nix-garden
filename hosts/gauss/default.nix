@@ -25,6 +25,12 @@
 
   services.printing.enable = true;
 
+  # gauss is an always-on homelab box, not a laptop; never suspend.
+  systemd.targets.sleep.enable = false;
+  systemd.targets.suspend.enable = false;
+  systemd.targets.hibernate.enable = false;
+  systemd.targets.hybrid-sleep.enable = false;
+
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
