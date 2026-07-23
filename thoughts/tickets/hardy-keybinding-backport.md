@@ -129,6 +129,36 @@ alternative, including for cross-platform symmetry with macOS, but that is a
 later refinement rather than a reason to discard Hardy's only distinct Option
 role now.
 
+The mapping is now declarative and active, scoped to the exact internal-keyboard
+ID. External keyboards deliberately retain their native events until one is
+actually attached and assessed; the internal Chromebook constraint should not
+silently rewrite them.
+
+One NixOS-specific trap surfaced during the next checkpoint: creating the
+otherwise conventional empty `keyd` group made keyd 2.6.0 find the group and
+attempt `setgid`, but the hardened NixOS unit rejects that operation
+(`setgid: Operation not permitted`). The daemon then entered a restart loop.
+Deleting the newly created group restored service immediately, and the
+declaration was removed in the next commit. The harmless startup warning about
+the absent group remains for the base static mapping. Any future application
+mapper work must solve socket access together with the unit hardening rather
+than adding the group alone or copying Gauss's broad `Group = "users"` override.
+
+## Desktop binding checkpoint
+
+Ghostty's validated native Super bindings and scroll multipliers are now
+deployed on Hardy. Vicinae 0.23.1 is installed, its user service is active, and
+GNOME has declarative physical-Cmd equivalents for Vicinae (`<Super>space`) and
+1Password Quick Access (`<Super><Shift>space`). The corresponding GNOME
+collisions are freed, lock is moved to `<Super><Shift>l`, and Ghostty, Brave,
+and Files are the declared favorites.
+
+The local-only dconf inventory found no user overrides for the new shortcuts. It
+did find stale local values for GNOME favorites and AC suspend timeout/type;
+only those three values were reset. The declared favorites, timeout `0`, and
+type `nothing` are now effective. Logout/reboot survival and live physical
+acceptance remain to be proven.
+
 ## Carried-forward facts
 
 - **Alternative base-layer strategy to consider**: the
@@ -139,13 +169,13 @@ role now.
   narrower: a Cmd-position physical key that emits native `Ctrl` may use common
   Linux shortcuts directly and sidestep much of the per-app remapping Gauss
   needed. Test that hypothesis first; do not assume a particular symmetric swap.
-- **`programs._1password-gui` module**: `hardy` currently has none — 1Password
-  was moved out of the shared `flake.nix` `bootstrapPackages` during
-  `keybinding-model` work. The module installs the `1Password-BrowserSupport`
-  setgid wrapper required for browser integration; `polkitPolicyOwners`
-  separately enables the package's polkit integration for Daniel. `hardy` needs
-  the same module treatment `gauss` got, plus live verification of the GUI and
-  Brave integration.
+- **`programs._1password-gui` module**: 1Password was moved out of the shared
+  `flake.nix` `bootstrapPackages` during `keybinding-model` work. Hardy now has
+  the same proper module treatment as Gauss. The module installs the
+  `1Password-BrowserSupport` setgid wrapper required for browser integration;
+  `polkitPolicyOwners` separately enables the package's polkit integration for
+  Daniel. GUI launch, authentication, and account connection are confirmed; live
+  Brave integration remains.
 - **`keyd` GNOME Shell extension version**: `gauss` needed patching (upstream
   only declares Shell 45-49 support). It is only relevant if Hardy still needs
   `keyd-application-mapper`; if so, check Hardy's actual GNOME Shell version

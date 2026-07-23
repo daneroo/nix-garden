@@ -14,11 +14,9 @@
         inherit system;
         config.allowUnfree = true;
       };
-      # 1Password moved to hosts/gauss/default.nix's programs._1password-gui
-      # (needs a per-host polkitPolicyOwners override for browser-extension
-      # integration, which builds a different package than this shared list
-      # would produce) -- see thoughts/tickets/keybinding-model.md. hardy
-      # loses it here until it gets the same module treatment during backport.
+      # 1Password lives in each host's programs._1password-gui module because
+      # browser integration needs a per-host polkitPolicyOwners override; a
+      # plain package in this shared list would not build the required wrapper.
       bootstrapPackages = with pkgs; [
         brave
         bun

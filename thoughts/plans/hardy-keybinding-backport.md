@@ -34,7 +34,7 @@ Create a branch named after this plan's slug before executing, per
       `/run/wrappers/bin/1Password-BrowserSupport` exists with the expected
       setgid wrapper, and the Brave extension can talk to the desktop app.
       `[tier: high]`
-- [ ] Capture `hardy`'s input truth before choosing a remap: with `keyd`
+- [x] Capture `hardy`'s input truth before choosing a remap: with `keyd`
       stopped, record device IDs and raw events for both Ctrl/Alt keys,
       Search/Launcher, and relevant Chromebook top-row keys; also record the
       actual GNOME Shell version and existing local dconf overrides for
