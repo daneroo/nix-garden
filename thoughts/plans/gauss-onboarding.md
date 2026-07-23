@@ -32,32 +32,32 @@ outside this work.
 
 ## Steps
 
-- [ ] Generalize `flake.nix` to multi-host: promote `bootstrapPackages` to a
+- [x] Generalize `flake.nix` to multi-host: promote `bootstrapPackages` to a
       list shared by both hosts (add `claude-code` alongside `codex`), and
       produce `nixosConfigurations.hardy` and `.gauss` from a small host
       list/map instead of one hardcoded output. Update the flake `description`.
       `[tier: med]`
-- [ ] Generalize `Justfile`'s `flake := ".#hardy"` to derive the target from
+- [x] Generalize `Justfile`'s `flake := ".#hardy"` to derive the target from
       `hostname` at run time; keep the existing `/run/current-system` guard. Add
       a small "blessed hosts" check (`hardy`, `gauss`) that fails clearly on an
       unrecognized hostname — low priority, but requested. `[tier: low]`
-- [ ] Generalize `scripts/bootstrap-apply.sh` the same way (hostname-derived
+- [x] Generalize `scripts/bootstrap-apply.sh` the same way (hostname-derived
       flake target instead of hardcoded `.#hardy`). This script has never been
       exercised end-to-end; treat the `gauss` install as its first real proof.
       `[tier: med]`
-- [ ] Create `hosts/gauss/default.nix` as a clone of `hosts/hardy/default.nix`
+- [x] Create `hosts/gauss/default.nix` as a clone of `hosts/hardy/default.nix`
       with only `networking.hostName = "gauss"` changed (everything else — GNOME
       desktop, NetworkManager, timezone, locale, SSH key, passwordless wheel
       with its caveat comment, `stateVersion "26.05"` — stays identical).
       `hosts/gauss/hardware-configuration.nix` cannot be written yet; it comes
       from step below. `[tier: low]`
-- [ ] Run `just check` and `nix flake check` against the new multi-host flake
+- [x] Run `just check` and `nix flake check` against the new multi-host flake
       (buildable even before `gauss`'s hardware-configuration.nix exists is not
       possible — confirm the flake at least evaluates cleanly for `hardy` and
       that `gauss`'s output is structurally wired correctly). `[tier: low]`
-- [ ] Commit the multi-host flake groundwork and `hosts/gauss/default.nix`
-      (without hardware-configuration.nix yet) to `main`, then branch
-      `gauss-onboarding` for the remaining steps. `[tier: low]`
+- [x] Commit the plan to `main`, branch `gauss-onboarding`, and commit the
+      multi-host flake groundwork and `hosts/gauss/default.nix` (without
+      hardware-configuration.nix yet) on that branch. `[tier: low]`
 - [ ] **Manual runbook — physical install (Daniel, hands-on at the machine):**
       `[tier: high]`
   - [ ] Write the official NixOS ISO to a USB stick.
