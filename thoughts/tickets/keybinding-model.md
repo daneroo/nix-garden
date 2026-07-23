@@ -89,7 +89,15 @@ WM-dependent for later porting.
 
 - `hardy` has no Cmd/Super key (Chromebook layout) — a known confound. Per
   [homelab-platform](../design/homelab-platform.md), all tuning happens on
-  `gauss` (standard keyboard) first; `hardy` only receives the finished map.
+  `gauss` first. **Hint for that backport** (2026-07-23, from prior-art research
+  below): the `stevenilsen123/mac-keyboard-behavior-in-linux` keyd config swaps
+  **Ctrl↔Meta** rather than Alt↔Super, so its "Cmd" key physically emits `Ctrl`
+  — which happens to already be a common native close/shortcut modifier across
+  many Linux apps, sidestepping a lot of the per-app remapping this ticket
+  needed. Worth considering as an alternative base-layer strategy specifically
+  for `hardy`'s constrained keyboard (missing key entirely, not just "which key
+  plays which role" like gauss), not necessarily as a change to gauss's
+  already-validated Alt↔Super swap.
 - Existing research:
   [desktop-test-harness-fidelity](../research/desktop-test-harness-fidelity.md)
   establishes the test fidelity ladder (L0 nested compositor, L1 QEMU VM, L2
@@ -131,23 +139,23 @@ limit, not a fixable bug).
 
 ## Equivalence map (fill in during research)
 
-| Function            | macOS                        | Ghostty          | Brave                        | Launcher       | 1Password            | Notes                                                      |
-| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------------- | -------------------- | ---------------------------------------------------------- |
-| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |                |                      | Browser default (Ctrl+C) untouched; gap, see below         |
-| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |                |                      | GNOME conflict fixed, see below; same gap as Copy          |
-| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |                |                      | Brave via `keyd`, not the extension — see below            |
-| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |                |                      | `close_tab:this`                                           |
-| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a            | n/a                  | Brave native Ctrl+Shift+T, via `keyd`                      |
-| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |                |                      | GNOME conflict fixed, see below                            |
-| Close window        | Cmd+Shift+W (varies)         | not bound        |                              |                |                      | Gap: distinct from close-tab; not requested, not yet bound |
-| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |                |                      | Canonical chord, matched exactly in both apps              |
-| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |                |                      | Canonical chord, matched exactly in both apps              |
-| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a            | n/a                  | No extension API can do this; not achievable via Super     |
-| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a            | n/a                  | Same limitation as address-bar focus                       |
-| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a            | n/a                  | `clear_screen`, unbound by Ghostty default                 |
-| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |                |                      |                                                            |
-| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          | Super+Space ✅ | n/a                  | Vicinae; MRU search + calculator confirmed, see below      |
-| Autofill / password | Cmd+Shift+Space (1Password)  | n/a              | via browser extension        | n/a            | Super+Shift+Space ✅ | Matches 1Password's real macOS default exactly             |
+| Function            | macOS                        | Ghostty          | Brave                        | Launcher       | 1Password            | Notes                                                  |
+| ------------------- | ---------------------------- | ---------------- | ---------------------------- | -------------- | -------------------- | ------------------------------------------------------ |
+| Copy                | Cmd+C                        | Super+C ✅       | not bound via our mechanism  |                |                      | Browser default (Ctrl+C) untouched; gap, see below     |
+| Paste               | Cmd+V                        | Super+V ✅       | not bound via our mechanism  |                |                      | GNOME conflict fixed, see below; same gap as Copy      |
+| New tab             | Cmd+T                        | Super+T ✅       | Super+T ✅                   |                |                      | Brave via `keyd`, not the extension — see below        |
+| Close tab           | Cmd+W                        | Super+W ✅       | Super+W ✅                   |                |                      | `close_tab:this`                                       |
+| Reopen closed tab   | Cmd+Shift+T                  | n/a              | Super+Shift+T ✅             | n/a            | n/a                  | Brave native Ctrl+Shift+T, via `keyd`                  |
+| New window          | Cmd+N                        | Super+N ✅       | Super+N ✅                   |                |                      | GNOME conflict fixed, see below                        |
+| Close window        | n/a — see note               | not bound        |                              |                |                      | Not a real distinct macOS chord; see note below        |
+| Next tab            | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] ✅ | Super+Shift+] ✅             |                |                      | Canonical chord, matched exactly in both apps          |
+| Previous tab        | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ ✅ | Super+Shift+[ ✅             |                |                      | Canonical chord, matched exactly in both apps          |
+| Address-bar focus   | Cmd+L                        | n/a              | Ctrl+L (Brave default, kept) | n/a            | n/a                  | No extension API can do this; not achievable via Super |
+| Find                | Cmd+F                        | n/a              | Ctrl+F (Brave default, kept) | n/a            | n/a                  | Same limitation as address-bar focus                   |
+| Clear / scrollback  | Cmd+K                        | Super+K ✅       | n/a                          | n/a            | n/a                  | `clear_screen`, unbound by Ghostty default             |
+| Quit app            | Cmd+Q                        | Super+Q ✅       |                              |                |                      |                                                        |
+| Launcher invoke     | Cmd+Space                    | n/a              | n/a                          | Super+Space ✅ | n/a                  | Vicinae; MRU search + calculator confirmed, see below  |
+| Autofill / password | Cmd+Shift+Space (1Password)  | n/a              | via browser extension        | n/a            | Super+Shift+Space ✅ | Matches 1Password's real macOS default exactly         |
 
 Ghostty: **9/9 validated** 2026-07-23, all via native per-app config (no remap
 layer needed), now declaratively encoded in `hosts/gauss/default.nix`. See
@@ -162,6 +170,16 @@ Brave: **6/6 core tab/window functions validated** 2026-07-23, all via `keyd`
   undeclared composite layer). Copy/Paste not addressed via our mechanism —
   Brave's browser-default Ctrl+C/V still works untouched, just doesn't match the
   Super-based scheme; logged as an open gap, not urgent since it already works.
+
+Close window: briefly implemented as `Super+Shift+W` (Ghostty `close_window`,
+Brave `Ctrl+Shift+W` via `keyd`) then **reverted** the same session — Daniel
+correctly caught that Cmd+Shift+W isn't actually a standard macOS convention
+(this ticket's own first draft had already flagged it "(varies)", which got
+missed when implementing). The real macOS pattern is that Cmd+W is _contextual_:
+it closes the current tab when multiple tabs are open, and closes the window
+itself when there's only one tab left — not a distinct chord to replicate.
+Nothing bound; revisit only if a genuine need for a separate close-window action
+surfaces, not as a macOS-equivalence item.
 
 ## GNOME-level functions (2026-07-23)
 

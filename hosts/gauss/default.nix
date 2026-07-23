@@ -53,12 +53,11 @@ let
 
   # Brave's own Linux defaults (Ctrl+T/W/N, Ctrl+Shift+T, Ctrl+Tab/Ctrl+Shift+Tab)
   # are the actual targets -- keyd-application-mapper rewrites our Super-based
-  # chords into these only while a Brave window has focus. Window-class match
-  # uses a bracket wildcard since Brave's exact WM_CLASS casing wasn't
-  # empirically confirmed (attempted via the extension's own FIFO output, but
-  # ran out of session time) -- verify and narrow once tested.
+  # chords into these only while a Brave window has focus. Window-class
+  # confirmed via keyd-application-mapper's own -v output: "brave-browser"
+  # (all lowercase).
   keydAppConf = pkgs.writeText "keyd-app.conf" ''
-    [[Bb]rave*]
+    [brave-browser]
 
     meta.t = C-t
     meta.w = C-w
@@ -66,6 +65,23 @@ let
     meta.n = C-n
     meta+shift.rightbrace = C-tab
     meta+shift.leftbrace = C-S-tab
+
+    # General close-window catch-all for every other app (2026-07-23):
+    # prior-art research (dannyfaris/nix-config's cross-platform keybind
+    # taxonomy) confirmed Linux has no reliable universal Ctrl+Q quit
+    # convention -- Super+Q was deliberately not attempted here for that
+    # reason. Ctrl+W, however, is already a common native "close" binding
+    # across many GTK apps, so it's the target rather than Alt+F4. Excludes
+    # Ghostty ("com-mitchellh-ghostty") and Brave ("brave-browser") -- both
+    # already have their own specific, validated Super+W handling above and
+    # in Ghostty's own config -- via a single first-letter character-class
+    # match rather than an exhaustive exclusion list; imperfect (would also
+    # skip any other app whose class happens to start with b/c) but matches
+    # the requested "simple, general" approach. Best-effort, not verified
+    # against every possible app.
+    [[!bc]*]
+
+    meta.w = C-w
   '';
 in
 {
@@ -269,6 +285,21 @@ in
     # isn't lost on a future reinstall.
     linger = true;
   };
+
+  # Proper NixOS module instead of the plain package (which was in the
+  # shared flake.nix bootstrapPackages until now) -- needed for the
+  # 1Password-BrowserSupport setuid wrapper that native-messaging-based
+  # browser extension integration actually requires. Confirmed missing
+  # (/run/wrappers/bin/1Password-BrowserSupport didn't exist) after joining
+  # Daniel's Brave sync chain, which installed the extension itself but had
+  # no working way to talk to the desktop app. See
+  # thoughts/tickets/keybinding-model.md and
+  # https://wiki.nixos.org/wiki/1Password.
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "daniel" ];
+  };
+  programs._1password.enable = true;
 
   services.openssh = {
     enable = true;
