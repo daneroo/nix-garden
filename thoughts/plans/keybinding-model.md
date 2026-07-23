@@ -1,6 +1,6 @@
 # keybinding-model
 
-Status: planned
+Status: active
 
 Goal: design and verify a macOS-equivalence keybinding map for Ghostty, Brave, a
 Raycast-equivalent launcher, and 1Password — covering copy/paste, tab/window
