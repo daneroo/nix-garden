@@ -1,6 +1,6 @@
 # hardy-keybinding-backport
 
-Status: planned
+Status: active
 
 Goal: restore `hardy` as a fully usable daily machine with keyboard
 illumination, working 1Password, and Brave integration, then bring it as close
@@ -11,7 +11,7 @@ reached in `keybinding-model`. Working detail in
 Create a branch named after this plan's slug before executing, per
 [workflow.md](../../docs/workflow.md#plans).
 
-- [ ] Coordinate non-physical execution from the current workspace over SSH to
+- [x] Coordinate non-physical execution from the current workspace over SSH to
       `daniel@192.168.2.40`: confirm Hardy's repository, running generation, and
       working tree are safe before mutation. Continue using the LAN address
       until Tailscale and `hardy.ts.imetrical.com` are available; do not depend

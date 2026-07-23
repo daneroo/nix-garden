@@ -83,6 +83,12 @@
 
   nixpkgs.config.allowUnfree = true;
 
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "daniel" ];
+  };
+  programs._1password.enable = true;
+
   programs.git.enable = true;
 
   system.stateVersion = "26.05";
