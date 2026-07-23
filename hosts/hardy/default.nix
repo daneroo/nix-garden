@@ -140,13 +140,25 @@ in
           toggle-message-tray = [ "<Super>m" ];
           focus-active-notification = lib.gvariant.mkEmptyArray "as";
           toggle-overview = lib.gvariant.mkEmptyArray "as";
+          screenshot = [
+            "<Shift>Print"
+            "<Super><Shift>3"
+          ];
+          screenshot-window = [ "<Alt>Print" ];
+          show-screenshot-ui = [
+            "Print"
+            "<Super><Shift>4"
+          ];
         };
         "org/gnome/desktop/wm/keybindings" = {
           switch-input-source = [ "XF86Keyboard" ];
           switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
-          screensaver = [ "<Super><Shift>l" ];
+          screensaver = [
+            "<Super><Shift>l"
+            "<Control><Super>q"
+          ];
           custom-keybindings = [
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
