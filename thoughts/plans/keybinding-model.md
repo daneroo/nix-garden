@@ -70,7 +70,7 @@ deciding it here.
       `bootstrapPackages` this session).
 - [ ] Verify the backported bindings on `hardy` using the same test procedure.
       `[tier: med]`
-- [ ] Resolve the ticket's open question on `programs.firefox.enable` (drop or
+- [x] Resolve the ticket's open question on `programs.firefox.enable` (drop or
       justify) as part of this work, since it's adjacent leftover state in the
       same host files being touched. `[tier: low]`
 - [ ] Move `keybinding-model` to `BACKLOG.md`'s `## Closed` section with outcome
