@@ -23,7 +23,7 @@ scripts/
 thoughts/
   BACKLOG.md
   design/
-    feature-design.md
+    feature.md
   plans/
     feature.md
     archive/

@@ -60,9 +60,10 @@ clear title. Delete it when the item closes after harvesting durable facts into
 
 ## Designs
 
-`thoughts/design/<id>-design.md` explains a problem, constraints, alternatives,
-decisions, and open questions. A design says what should be built and why; a
-plan turns the chosen direction into executable steps.
+`thoughts/design/<id>.md` explains a problem, constraints, alternatives,
+decisions, and open questions. The directory already identifies the artifact as
+a design; do not repeat `-design` in its filename. A design says what should be
+built and why; a plan turns the chosen direction into executable steps.
 
 Consolidate superseded drafts rather than accumulating them. When the design is
 settled, harvest durable facts and delete the transient design.

@@ -25,6 +25,10 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 ## Desktop
 
+- [ ] simplified-keybinding-model — determine whether native Alt can be the
+      shared physical primary modifier with fewer transformations and less
+      host-specific Nix; design:
+      [simplified-keybinding-model](design/simplified-keybinding-model.md)
 - [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
       standard keyboard and backported to `hardy`, before optimizing or
       generalizing it.
@@ -63,6 +67,11 @@ direction: [homelab-platform](design/homelab-platform.md).
 ## Nix Platform
 
 - [ ] Decide whether to add Home Manager later.
+- [ ] cli-baseline — give `hardy` and `gauss` a shared daily shell baseline:
+      install Starship, `nh`, ripgrep, and `doggo`; match or improve the macOS
+      prompt; settle nix-garden versus dotfiles ownership; prefer `doggo` for
+      normal DNS queries now that `dog` is retired, retaining `dig` only if its
+      distinct diagnostics justify it.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
 - [ ] gauss-power-profile — investigate why `gauss`'s internal NVMe buffered
       reads dropped from `3820 MB/sec` pre-install to `~1750 MB/sec` under
