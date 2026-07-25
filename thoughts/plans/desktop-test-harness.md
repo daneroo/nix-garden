@@ -52,10 +52,13 @@ restricts to blessed NixOS hosts and builds only `.#$(hostname)`.
       closure diff before accepting. Commit the lock and push. Do not apply yet.
       Done in `105a3e6`: nixpkgs `241313f` -> `e2587ca`, herdr unchanged.
       `[tier: med]`
-- [ ] On `hardy`: pull, then `just apply`. Hardy is the canary — it takes the
+- [x] On `hardy`: pull, then `just apply`. Hardy is the canary — it takes the
       risk first so that `gauss`, the machine about to run this plan, stays on a
-      known-good system until the update is proven. `[tier: med]`
-- [ ] On `hardy`: re-verify the acceptance map in
+      known-good system until the update is proven. Applied as generation 21;
+      the switch ended the GNOME session, and `just apply` skipped verification
+      because `nixos-rebuild` exited 4, which is what prompted the recipe fix in
+      `84c5ea7`. `[tier: med]`
+- [x] On `hardy`: re-verify the acceptance map in
       [docs/keybindings.md](../../docs/keybindings.md). This update turned out
       to leave the validated surface alone — `keyd`, Brave, Ghostty, and GNOME
       Shell all keep their current versions — so the exposure is narrower than
@@ -63,21 +66,28 @@ restricts to blessed NixOS hosts and builds only `.#$(hostname)`.
       Check anyway, and concentrate on chords that depend on keysym and layout
       data. Verifying now attributes any breakage to the update rather than to
       later harness work. `[tier: med]`
-- [ ] On `gauss`: `just apply`, then re-verify the same acceptance map. Expect
+- [x] On `gauss`: `just apply`, then re-verify the same acceptance map. Expect
       to be logged out of GNOME: the same apply on `hardy` restarted the user
       session units and ended the graphical session, and `nixos-rebuild` exits
       non-zero when that happens even though the switch succeeded. Close
       anything unsaved on `gauss`'s desktop first, and drive this from a Herdr
-      session so the agent context survives the logout. `[tier: med]`
-- [ ] On both hosts, confirm the revision stamp took effect:
+      session so the agent context survives the logout. Applied as generation
+      18; the session dropped as predicted and the Herdr session reconnected on
+      its own. `[tier: med]`
+- [x] On both hosts, confirm the revision stamp took effect:
       `nixos-version --configuration-revision` should return the applied commit,
       and `nixos-rebuild list-generations` should no longer show `Unknown`. From
       here on that value is the drift check between the committed configuration
-      and the running system. `[tier: low]`
+      and the running system. Both report `84c5ea7`. `[tier: low]`
 
 Note that these applies carry two changes, not one: the moved lock, and
 `system.configurationRevision` (commit `0eaf491`). The second is metadata only
 and cannot affect runtime behavior, but the closure diff will show both.
+
+Outcome: both hosts run nixpkgs `e2587ca` at revision `84c5ea7` with no failed
+units. The `xkeyboard-config` 2.47 -> 2.48 exposure did not materialize; the
+layout-sensitive bracket chords pass on both hosts. `just apply` now verifies
+even when `nixos-rebuild` exits non-zero, which `gauss`'s apply exercised.
 
 ## Build the Workbench
 
