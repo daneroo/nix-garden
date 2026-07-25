@@ -7,7 +7,12 @@
   };
 
   outputs =
-    { herdr, nixpkgs, ... }:
+    {
+      self,
+      herdr,
+      nixpkgs,
+      ...
+    }:
     let
       system = "x86_64-linux";
       pkgs = import nixpkgs {
@@ -45,6 +50,11 @@
             (./hosts + "/${name}")
             {
               environment.systemPackages = bootstrapPackages;
+              # Stamp the building commit into the system so a host can report
+              # which revision of this repository it is running. Without it
+              # `nixos-rebuild list-generations` shows "Unknown". A dirty tree
+              # stamps as such, which is itself useful signal.
+              system.configurationRevision = self.rev or self.dirtyRev or "dirty";
               services.tailscale.enable = true;
               xdg.mime.defaultApplications = {
                 "text/html" = "brave-browser.desktop";
