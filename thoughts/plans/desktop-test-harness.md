@@ -29,8 +29,10 @@ remotely:
 | `driverInteractive` REPL | Yes                                   |
 | Headless `runNixOSTest`  | Yes                                   |
 
-So the build-out and the assertion work can proceed from anywhere, but the steps
-that involve looking at a desktop need Daniel at `gauss`.
+So the build-out and the assertion work can proceed from anywhere. Windows the
+work opens still render on `gauss`'s display, and Daniel can switch to it to
+observe them — so the executing agent should say explicitly when it has put
+something on screen worth looking at, rather than assuming nobody can see it.
 
 Run the agent session under Herdr, not in a plain Ghostty terminal on `gauss`'s
 desktop. This work boots VMs and may end the desktop session, and a terminal
