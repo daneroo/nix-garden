@@ -48,17 +48,21 @@ Do this before branching, so the harness is built against a lock that will not
 move underneath it. `just update` cannot run from `galois`; the `Justfile`
 restricts to blessed NixOS hosts and builds only `.#$(hostname)`.
 
-- [ ] On `gauss`: `just update`. Review both the `flake.lock` diff and the
+- [x] On `gauss`: `just update`. Review both the `flake.lock` diff and the
       closure diff before accepting. Commit the lock and push. Do not apply yet.
+      Done in `105a3e6`: nixpkgs `241313f` -> `e2587ca`, herdr unchanged.
       `[tier: med]`
 - [ ] On `hardy`: pull, then `just apply`. Hardy is the canary — it takes the
       risk first so that `gauss`, the machine about to run this plan, stays on a
       known-good system until the update is proven. `[tier: med]`
 - [ ] On `hardy`: re-verify the acceptance map in
-      [docs/keybindings.md](../../docs/keybindings.md). The update moves GNOME,
-      `keyd`, Brave, and Ghostty, which is precisely the validated surface;
-      checking now attributes any breakage to the update rather than to later
-      harness work. `[tier: med]`
+      [docs/keybindings.md](../../docs/keybindings.md). This update turned out
+      to leave the validated surface alone — `keyd`, Brave, Ghostty, and GNOME
+      Shell all keep their current versions — so the exposure is narrower than
+      feared: `xkeyboard-config` 2.47 -> 2.48 and `wayland` 1.25.0 -> 1.26.0.
+      Check anyway, and concentrate on chords that depend on keysym and layout
+      data. Verifying now attributes any breakage to the update rather than to
+      later harness work. `[tier: med]`
 - [ ] On `gauss`: `just apply` — no pull needed, `gauss` authored the commit —
       then re-verify the same acceptance map. `[tier: med]`
 - [ ] On both hosts, confirm the revision stamp took effect:
