@@ -4,6 +4,18 @@ Unscheduled work, grouped by theme. Keep entries brief; move growing detail to
 `tickets/` as described in [docs/workflow.md](../docs/workflow.md). Working
 direction: [homelab-platform](design/homelab-platform.md).
 
+## Now
+
+Scheduled items go here (leave this comment)
+
+Desktop work, in order. The harness comes first because it makes the other two
+reversible; each is listed with its theme below.
+
+1. `desktop-test-harness` — VM workbench; plan:
+   [desktop-test-harness](plans/desktop-test-harness.md)
+2. `simplified-keybinding-model` — consolidate and simplify `gauss` and `hardy`
+3. `compositor-selection` — evaluate Niri and Hyprland
+
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -36,9 +48,11 @@ direction: [homelab-platform](design/homelab-platform.md).
       `/home/daniel` with a fresh-home-safe, user-owned mechanism and validate
       it from an empty home; deferred while bringing both machines online.
 - [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
-      workflows, hardware behavior, and testability.
-- [ ] desktop-test-harness — explore VM or container-backed graphical testing
-      and agent computer-use validation for bindings and window behavior.
+      workflows, hardware behavior, and testability; ticket:
+      [compositor-selection](tickets/compositor-selection.md)
+- [ ] desktop-test-harness — build a VM workbench that boots a host's
+      configuration for hands-on experimentation and headless assertions;
+      ticket: [desktop-test-harness](tickets/desktop-test-harness.md)
 
 ## Virtualization
 
