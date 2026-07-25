@@ -61,6 +61,15 @@ restricts to blessed NixOS hosts and builds only `.#$(hostname)`.
       harness work. `[tier: med]`
 - [ ] On `gauss`: `just apply` — no pull needed, `gauss` authored the commit —
       then re-verify the same acceptance map. `[tier: med]`
+- [ ] On both hosts, confirm the revision stamp took effect:
+      `nixos-version --configuration-revision` should return the applied commit,
+      and `nixos-rebuild list-generations` should no longer show `Unknown`. From
+      here on that value is the drift check between the committed configuration
+      and the running system. `[tier: low]`
+
+Note that these applies carry two changes, not one: the moved lock, and
+`system.configurationRevision` (commit `0eaf491`). The second is metadata only
+and cannot affect runtime behavior, but the closure diff will show both.
 
 ## Build the Workbench
 
