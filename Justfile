@@ -32,16 +32,35 @@ update:
     just plan
 
 # Plan, confirm, switch, and verify.
+[script('bash')]
 apply:
-    just plan
-    @echo "== apply: sudo nixos-rebuild switch --flake {{ flake }} =="
-    @printf 'Apply {{ flake }} to this machine? [y/N] '; \
-    read answer; \
-    case "$answer" in \
-      y|Y|yes|YES) sudo nixos-rebuild switch --flake {{ flake }} ;; \
-      *) echo 'apply aborted'; exit 1 ;; \
+    set -uo pipefail
+    just plan || exit 1
+    echo "== apply: sudo nixos-rebuild switch --flake {{ flake }} =="
+    printf 'Apply {{ flake }} to this machine? [y/N] '
+    read -r answer
+    case "$answer" in
+      y|Y|yes|YES) ;;
+      *) echo 'apply aborted'; exit 1 ;;
     esac
+    sudo nixos-rebuild switch --flake {{ flake }}
+    switch_status=$?
+    # switch-to-configuration exits non-zero when live user-session units fail
+    # to restart. On a desktop that is routine and does not mean the switch was
+    # rejected, so verify regardless rather than aborting here; the earlier
+    # behavior skipped verification in exactly the case that most needed it.
+    if [[ $switch_status -ne 0 ]]; then
+      echo "== warning: nixos-rebuild exited ${switch_status}; verifying anyway =="
+      echo "== on a live desktop this is usually GNOME user units; check below =="
+    fi
     just _verify
+    verify_status=$?
+    if [[ $verify_status -ne 0 ]]; then
+      echo 'verify failed: the running system does not match ./result' >&2
+    fi
+    if [[ $switch_status -ne 0 || $verify_status -ne 0 ]]; then
+      exit 1
+    fi
 
 [private]
 [script('bash')]

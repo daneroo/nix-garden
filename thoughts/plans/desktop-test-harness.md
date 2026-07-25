@@ -63,8 +63,12 @@ restricts to blessed NixOS hosts and builds only `.#$(hostname)`.
       Check anyway, and concentrate on chords that depend on keysym and layout
       data. Verifying now attributes any breakage to the update rather than to
       later harness work. `[tier: med]`
-- [ ] On `gauss`: `just apply` — no pull needed, `gauss` authored the commit —
-      then re-verify the same acceptance map. `[tier: med]`
+- [ ] On `gauss`: `just apply`, then re-verify the same acceptance map. Expect
+      to be logged out of GNOME: the same apply on `hardy` restarted the user
+      session units and ended the graphical session, and `nixos-rebuild` exits
+      non-zero when that happens even though the switch succeeded. Close
+      anything unsaved on `gauss`'s desktop first, and drive this from a Herdr
+      session so the agent context survives the logout. `[tier: med]`
 - [ ] On both hosts, confirm the revision stamp took effect:
       `nixos-version --configuration-revision` should return the applied commit,
       and `nixos-rebuild list-generations` should no longer show `Unknown`. From

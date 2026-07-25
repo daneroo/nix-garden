@@ -95,8 +95,13 @@ reversible; each is listed with its theme below.
 - [ ] flake-pinning — define a practical policy for input pinning, update scope,
       transitive inputs, and reviewable lock diffs; high priority.
 - [ ] reboot-awareness — make `just plan` and `just apply` explicitly report
-      whether the proposed closure changes require a reboot, including the basis
-      for that assessment and post-reboot verification.
+      whether the proposed closure changes require a reboot or a desktop
+      re-login, including the basis for that assessment and post-change
+      verification. Observed 2026-07-25 on `hardy`: a routine nixpkgs bump
+      restarted the GNOME user units and ended the graphical session with no
+      warning. Re-login is a distinct category from reboot and currently has no
+      signal at all; the Herdr session survived, which is how the apply stayed
+      recoverable.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
 - [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
