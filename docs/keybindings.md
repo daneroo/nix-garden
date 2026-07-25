@@ -65,10 +65,18 @@ focus-sensitive application remapping.
 | Launcher invoke        | Cmd+Space                    | n/a           | n/a                      | n/a             | Super+Space | n/a               |
 | Autofill / password    | Cmd+Shift+Space              | n/a           | via browser extension    | via extension   | n/a         | Super+Shift+Space |
 
-Gauss intentionally leaves Brave copy/paste, address focus, and Find on native
-Ctrl defaults. Hardy's dedicated focus-sensitive mapper closes those gaps. Hardy
-also provides Super+Shift+W as a tested close-window convenience, but it is not
-presented as macOS equivalence: macOS uses contextual Cmd+W rather than a
+Gauss still uses Brave's native Ctrl defaults for copy/paste, address focus, and
+Find. Hardy's dedicated focus-sensitive mapper closes those gaps, so Super+L and
+Super+F work there and not on Gauss. This asymmetry is unfinished work, not a
+chosen end state: the reason Gauss was left on Ctrl defaults is no longer
+recorded, and the intended behavior is the same on both hosts. Closing it
+belongs to
+[simplified-keybinding-model](../thoughts/design/simplified-keybinding-model.md),
+which already lists Brave's contextual map as shared. Do not treat the Gauss
+column as a requirement to preserve.
+
+Hardy also provides Super+Shift+W as a tested close-window convenience, but it
+is not presented as macOS equivalence: macOS uses contextual Cmd+W rather than a
 separate standard close-window chord.
 
 On Gauss, the application mapper also provides a best-effort Super+W → Ctrl+W

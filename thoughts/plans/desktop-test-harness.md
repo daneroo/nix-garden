@@ -32,6 +32,13 @@ remotely:
 So the build-out and the assertion work can proceed from anywhere, but the steps
 that involve looking at a desktop need Daniel at `gauss`.
 
+Run the agent session under Herdr, not in a plain Ghostty terminal on `gauss`'s
+desktop. This work boots VMs and may end the desktop session, and a terminal
+living inside that session dies with it. Both applies on 2026-07-25 killed the
+GNOME session; the Herdr session survived and reconnected on its own. Herdr also
+means the session can be driven from `galois` between the steps that need a
+local display.
+
 Git flow, per [workflow.md](../../docs/workflow.md#plans):
 
 - This ticket and plan are committed on `main`.
