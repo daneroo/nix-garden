@@ -1,4 +1,4 @@
-# Repository command surface
+# Repository Command Surface
 
 Status: done
 

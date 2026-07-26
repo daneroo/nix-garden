@@ -1,6 +1,6 @@
 # Bootstrap Flake
 
-Status: active
+Status: done
 
 Goal: reach v0.1: a minimal reproducible NixOS config that can rebuild `hardy`,
 be pushed to GitHub, and make it easy to get files in and out of the machine.
@@ -72,5 +72,7 @@ be pushed to GitHub, and make it easy to get files in and out of the machine.
   - [x] Make the initial commit.
   - [x] Push the repo.
 
-- [ ] Phase 2+: rebuild from remote
-  - [ ] Document clone-and-rebuild, including direct URL patterns if useful.
+- [x] Phase 2: bootstrap from a remote clone
+  - [x] Document the clone-and-rebuild path in `docs/bootstrap.md`.
+  - [x] Exercise the equivalent path on a fresh non-flake installation while
+        onboarding `gauss`.

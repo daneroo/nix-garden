@@ -22,10 +22,10 @@ Manual steps completed on this install:
 - [x] Opened 1Password GUI.
 - [x] Used 1Password GUI to retrieve credentials.
 - [x] Authenticated Codex.
-- [ ] Create a flake NixOS config that installs the bootstrap tools as system
+- [x] Create a flake NixOS config that installs the bootstrap tools as system
       packages.
-- [ ] Push the repo to GitHub.
-- [ ] Document the clone-and-rebuild path.
+- [x] Push the repo to GitHub.
+- [x] Document the clone-and-rebuild path.
 
 ## v0.1 Target
 
@@ -81,7 +81,8 @@ before assuming SSH access is broken at the network level.
 - Phase 0: manual bootstrap already completed.
 - Phase 1: first pushable repo that can minimally rebuild `hardy` with the
   bootstrap tools installed as system packages.
-- Phase 2+: rebuild from the remote repo, possibly directly from a URL pattern.
+- Phase 2: bootstrap from the remote clone. The `gauss` install proved this path
+  from a fresh non-flake installation.
 
-The later target is a single command that can rebuild the machine from the repo
-after clone.
+The remaining stronger proof—wipe, restore, and verify—is tracked as the
+`recovery-contract` backlog item.

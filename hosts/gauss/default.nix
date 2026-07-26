@@ -122,6 +122,12 @@ in
     {
       settings = {
         "org/gnome/shell" = {
+          # GNOME hides Log Out for a single local user with a single session
+          # type, which both hosts now are: GNOME 50 dropped the Xorg session,
+          # so `sessionData.desktops` holds only `gnome.desktop`. Hardy has
+          # carried this key since 38cdb98; gauss never had it, which is why
+          # the menu differed between them rather than any regression.
+          always-show-log-out = true;
           enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
           # Pinned to the dash 2026-07-23; Files (Nautilus) was already
           # there as a GNOME default, kept alongside Ghostty and Brave.
@@ -133,13 +139,15 @@ in
         };
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
-          focus-active-notification = lib.gvariant.mkEmptyArray "as";
+          focus-active-notification =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
           # Cmd+Space on macOS is the launcher-invoke reflex. GNOME's own
           # Activities overview was tried first here (zero-install baseline)
           # but Vicinae won the trial (MRU app search + inline calculator
           # confirmed working; Activities has neither) -- left unbound so it
           # doesn't collide with Vicinae's custom keybinding below.
-          toggle-overview = lib.gvariant.mkEmptyArray "as";
+          toggle-overview =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
         };
         "org/gnome/desktop/wm/keybindings" = {
           # <Super>space was switch-input-source by default, colliding with
@@ -191,11 +199,33 @@ in
     }
   ];
 
+  # Stopgap. This whole block is what `home-config-ownership` in the backlog
+  # exists to delete, and the fix below grew it rather than shrinking it —
+  # keep that trade deliberate rather than letting the list creep further.
+  #
+  # Every parent directory below is declared explicitly, and must stay that way.
+  # systemd-tmpfiles refuses to descend a path whose ownership changes -- a
+  # symlink-attack guard -- and materialising a parent implicitly creates it as
+  # root. On a home that already contains daniel-owned .config and .local the
+  # rules work by luck; on a fresh one tmpfiles creates a root-owned .config,
+  # then its own guard makes it skip every L+ beneath, silently and without
+  # failing the unit. Found 2026-07-25 in the test-harness VM, where none of
+  # these three dotfiles existed: "Detected unsafe path transition
+  # /home/daniel (owned by daniel) -> /home/daniel/.config (owned by root)".
+  # A reinstall of this host would have hit the same thing.
+  #
+  # Modes match what the running system already had, so applying this changes
+  # no existing permissions: XDG wants 0700 on .config and .local/share.
   systemd.tmpfiles.rules = [
-    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
-    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
-    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
+    "d /home/daniel/.config 0700 daniel users -"
+    "d /home/daniel/.config/ghostty 0755 daniel users -"
     "d /home/daniel/.config/keyd 0755 daniel users -"
+    "d /home/daniel/.local 0755 daniel users -"
+    "d /home/daniel/.local/share 0700 daniel users -"
+    "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
+    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
+    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
     "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
 

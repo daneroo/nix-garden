@@ -23,7 +23,13 @@ first managed host.
 - `docs/` — durable reference, indexed by [docs/README.md](docs/README.md).
 - `thoughts/` — backlog and transient working material; see
   [docs/workflow.md](docs/workflow.md).
-- `scripts/` — reviewed bootstrap, operational, and quality-check helpers.
+- `scripts/` — reviewed bootstrap, operational, and quality-check helpers. A
+  script earns a file when it is run outside `just`, or is long enough that
+  reading it inline obscures the recipe; otherwise it stays in the `Justfile`.
+- `hosts/` — one entry per machine, keyed by hostname; `mkHost` resolves
+  `./hosts + "/${name}"`, so nothing here may be anything but a host.
+- `modules/` — configuration shared across hosts or drive modes.
+- `tests/` — VM checks run by `just e2e-vm`, never by `just check`.
 
 Do not run `just apply` unless the user asks to switch the running system; it
 runs `just plan` and then requests confirmation.

@@ -11,10 +11,20 @@ Scheduled items go here (leave this comment)
 Desktop work, in order. The harness comes first because it makes the other two
 reversible; each is listed with its theme below.
 
-1. `desktop-test-harness` — VM workbench; plan:
-   [desktop-test-harness](plans/desktop-test-harness.md)
-2. `simplified-keybinding-model` — consolidate and simplify `gauss` and `hardy`
-3. `compositor-selection` — evaluate Niri and Hyprland
+1. `simplified-keybinding-model` — consolidate and simplify `gauss` and `hardy`
+2. `compositor-selection` — evaluate Niri and Hyprland
+
+## Quick
+
+- [ ] quick-cli-packages — add `lazygit`, `doggo`, and `dig`; if `dig` is not
+      installed, provide an alias that explains to use `doggo` instead.
+- [ ] current-state — add `scripts/current-state.sh` plus a `just current-state`
+      recipe answering "what is this machine actually running" in one command:
+      `nixos-version --json | jq` for `configurationRevision`, `nixosVersion`,
+      and `nixpkgsRevision`, then the branch and a `--dirty`-aware
+      `git describe --always --long --tags --dirty`. Puts the running system and
+      the working tree side by side; the revision stamp only became meaningful
+      once `system.configurationRevision` was set in `0eaf491`.
 
 ## Fleet and Recovery
 
@@ -44,15 +54,20 @@ reversible; each is listed with its theme below.
 - [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
       standard keyboard and backported to `hardy`, before optimizing or
       generalizing it.
-- [ ] home-config-ownership — replace Gauss's system-tmpfiles writes beneath
+- [ ] home-config-ownership — replace both hosts' system-tmpfiles writes beneath
       `/home/daniel` with a fresh-home-safe, user-owned mechanism and validate
-      it from an empty home; deferred while bringing both machines online.
+      it from an empty home; deferred while bringing both machines online. The
+      predicted failure was confirmed on 2026-07-25: on an empty home
+      systemd-tmpfiles creates a root-owned `.config`, then its own unsafe
+      path-transition guard skips every `L+` below it, silently and without
+      failing the unit — losing the Ghostty keybindings, the keyd application
+      map, and the GNOME extension on any reinstall. Patched in place for now by
+      declaring each parent directory explicitly, which grew the very block this
+      item exists to delete. `just e2e-vm --no-test --host HOST` is now the
+      empty-home validation instrument this item calls for.
 - [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
       workflows, hardware behavior, and testability; ticket:
       [compositor-selection](tickets/compositor-selection.md)
-- [ ] desktop-test-harness — build a VM workbench that boots a host's
-      configuration for hands-on experimentation and headless assertions;
-      ticket: [desktop-test-harness](tickets/desktop-test-harness.md)
 
 ## Virtualization
 
@@ -151,6 +166,11 @@ reversible; each is listed with its theme below.
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-26 desktop-test-harness — added persistent exploration, visible
+  demonstration, and fresh headless regression workflows over the real host
+  configuration; proved Ghostty's primary chords and GNOME lock/unlock in a
+  disposable VM; reference: [e2e-testing](../docs/e2e-testing.md); plan:
+  [desktop-test-harness](plans/archive/desktop-test-harness.md)
 - 2026-07-23 hardy-keybinding-backport — restored keyboard illumination and
   1Password/Brave integration, validated a Chromebook-specific Ctrl/Cmd/Option
   model plus Ghostty, Brave, Vicinae, lock, screenshot, and logout bindings, and
@@ -170,7 +190,7 @@ Prune old lines freely; Git keeps everything.
   verified `just check`/`just plan` on the host itself, and handed off execution
   to Claude Code on `gauss` via Herdr; folded in `multi-host-layout`, which has
   no remaining independent scope; plan:
-  [gauss-onboarding](plans/gauss-onboarding.md)
+  [gauss-onboarding](plans/archive/gauss-onboarding.md)
 - 2026-07-23 gaussmic-github-key-retirement — deleted the temporary
   `gaussmic-2026-07-22-temp` GitHub SSH key after confirming Gaussmic's disk is
   gone for good.
@@ -179,9 +199,13 @@ Prune old lines freely; Git keeps everything.
   [herdr-workflow](plans/archive/herdr-workflow.md)
 - 2026-07-22 legacy-fact-collector — removed the distro-hopping hardware probe;
   durable Hardy throttling evidence remains in `docs/`.
+- 2026-07-12 bootstrap-flake — established the pushable, rebuildable flake and
+  documented the remote-clone bootstrap path later proved while onboarding
+  `gauss`; plan: [bootstrap-flake](plans/archive/bootstrap-flake.md)
 - 2026-07-12 repository-command-surface — implemented and exercised the
   `plan`/`apply` workflow, passwordless sudo, and the locked unstable migration;
-  plan: [repository-command-surface](plans/repository-command-surface.md)
+  plan:
+  [repository-command-surface](plans/archive/repository-command-surface.md)
 - 2026-07-12 migrate-to-nix-garden — consolidated both repository histories and
   made nix-garden the verified live fleet repository; plan:
   [migrate-to-nix-garden](plans/archive/migrate-to-nix-garden.md)

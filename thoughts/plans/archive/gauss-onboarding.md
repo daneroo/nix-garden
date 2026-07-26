@@ -4,7 +4,8 @@ Status: done
 
 Goal: install NixOS on `gauss` (Beelink SER8) as a verified clone of `hardy`,
 generalizing the flake/`Justfile`/bootstrap script to multi-host in the process,
-per [homelab-platform](../design/homelab-platform.md)'s two-objective framing.
+per [homelab-platform](../../design/homelab-platform.md)'s two-objective
+framing.
 
 Folds in the `multi-host-layout` backlog item — it has no independent scope
 outside this work.
@@ -13,7 +14,7 @@ outside this work.
 
 - `gauss`'s internal NVMe currently runs Omarchy; it may be fully wiped.
 - Pre-install hardware/storage baseline:
-  [gauss-hardware](../../docs/gauss-hardware.md).
+  [gauss-hardware](../../../docs/gauss-hardware.md).
 - Decisions behind this plan (resolved by interview, not re-litigated here):
   install via USB NixOS ISO; partition layout mirrors `hardy` exactly (single
   btrfs partition, `root`/`home`/`nix` subvolumes, vfat `/boot`, ~16GiB fixed
@@ -95,19 +96,20 @@ outside this work.
 - [x] Harvest durable facts back into `docs/` and `thoughts/`: `[tier: low]`
   - [x] Documented the bootstrap sshd/firewall gotcha in `docs/bootstrap.md` as
         a known first-switch check for future hosts.
-  - [x] Updated [gauss-hardware](../../docs/gauss-hardware.md): confirmed
+  - [x] Updated [gauss-hardware](../../../docs/gauss-hardware.md): confirmed
         physical facts still hold under NixOS, demoted the Fedora-era storage
         numbers to a labeled reference subsection, recorded the install method,
         layout, networking, and a link to the bootstrap gotcha.
   - [x] Filled in `gauss`'s real fields in
-        [host-inventory](../tickets/host-inventory.md).
+        [host-inventory](../../tickets/host-inventory.md).
   - [x] Updated `thoughts/BACKLOG.md`: removed the now-redundant
         `multi-host-layout` line and moved this item to `## Closed`.
   - [x] Bonus finding: re-benchmarked `gauss`'s internal NVMe post-install and
         found a storage-throughput regression (3820 → ~1750 MB/sec) not
         explained by CPU governor. Recorded in
-        [performance.md](../../docs/performance.md#gauss-unresolved) and opened
-        `gauss-power-profile` in the backlog rather than silently footnoting it.
+        [performance.md](../../../docs/performance.md#gauss-unresolved) and
+        opened `gauss-power-profile` in the backlog rather than silently
+        footnoting it.
 - [x] Merge `gauss-onboarding` into `main` locally (no PR, matching current repo
       convention); Daniel decides whether to delete or archive this plan file
       afterward. `[tier: low]`

@@ -9,6 +9,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 - [workflow.md](workflow.md) — how backlog items, tickets, designs, plans, and
   supporting notes move through the repo.
 - [workspace.md](workspace.md) — quality gate and safe system-change commands.
+- [e2e-testing.md](e2e-testing.md) — VM workflows, assertions, and fidelity
+  boundaries for desktop changes.
 - [coding-style.md](coding-style.md) — top-down code order and command-wrapper
   boundaries.
 - [markdown.md](markdown.md) — documentation authoring conventions.

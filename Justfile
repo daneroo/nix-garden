@@ -62,6 +62,11 @@ apply:
       exit 1
     fi
 
+# Run desktop assertions headlessly, visibly, or open an exploratory VM.
+[script('bash')]
+e2e-vm *args:
+    scripts/e2e-vm.sh {{ args }}
+
 [private]
 [script('bash')]
 _host-check:

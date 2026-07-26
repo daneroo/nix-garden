@@ -139,8 +139,10 @@ in
         };
         "org/gnome/shell/keybindings" = {
           toggle-message-tray = [ "<Super>m" ];
-          focus-active-notification = lib.gvariant.mkEmptyArray "as";
-          toggle-overview = lib.gvariant.mkEmptyArray "as";
+          focus-active-notification =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
+          toggle-overview =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
           screenshot = [
             "<Shift>Print"
             "<Super><Shift>3"
@@ -192,11 +194,24 @@ in
     }
   ];
 
+  # Stopgap, like gauss's: `home-config-ownership` in the backlog replaces this
+  # block wholesale with a user-owned mechanism.
+  #
+  # Parent directories are declared explicitly for the reason documented in
+  # hosts/gauss/default.nix: systemd-tmpfiles will not descend a daniel -> root
+  # ownership transition, and an implicitly materialised parent is root-owned,
+  # so on a fresh home every L+ below is skipped without the unit failing.
+  # Keep the two hosts in step; the failure is silent on a reinstall.
   systemd.tmpfiles.rules = [
-    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
-    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
-    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
+    "d /home/daniel/.config 0700 daniel users -"
+    "d /home/daniel/.config/ghostty 0755 daniel users -"
     "d /home/daniel/.config/keyd 0755 daniel users -"
+    "d /home/daniel/.local 0755 daniel users -"
+    "d /home/daniel/.local/share 0700 daniel users -"
+    "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
+    "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
+    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
+    "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
     "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
 
