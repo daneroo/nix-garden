@@ -23,11 +23,14 @@
       # browser integration needs a per-host polkitPolicyOwners override; a
       # plain package in this shared list would not build the required wrapper.
       bootstrapPackages = with pkgs; [
+        btop
         brave
         bun
         claude-code
         codex
         curl
+        doggo
+        dnsutils # dig
         fresh-editor
         gh
         ghostty
@@ -35,7 +38,7 @@
         herdr.packages.${system}.default
         just
         jq
-        btop
+        lazygit
         vim
       ];
       hosts = [

@@ -14,18 +14,6 @@ reversible; each is listed with its theme below.
 1. `simplified-keybinding-model` — consolidate and simplify `gauss` and `hardy`
 2. `compositor-selection` — evaluate Niri and Hyprland
 
-## Quick
-
-- [ ] quick-cli-packages — add `lazygit`, `doggo`, and `dig`; if `dig` is not
-      installed, provide an alias that explains to use `doggo` instead.
-- [ ] current-state — add `scripts/current-state.sh` plus a `just current-state`
-      recipe answering "what is this machine actually running" in one command:
-      `nixos-version --json | jq` for `configurationRevision`, `nixosVersion`,
-      and `nixpkgsRevision`, then the branch and a `--dirty`-aware
-      `git describe --always --long --tags --dirty`. Puts the running system and
-      the working tree side by side; the revision stamp only became meaningful
-      once `system.configurationRevision` was set in `0eaf491`.
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -166,6 +154,11 @@ reversible; each is listed with its theme below.
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-26 current-state — added one command showing the running NixOS
+  configuration and nixpkgs revisions beside the repository branch and
+  dirty-aware description; plan: [quick-utilities](plans/quick-utilities.md)
+- 2026-07-26 quick-cli-packages — added `lazygit`, `doggo`, and `dig` to the
+  shared host packages; plan: [quick-utilities](plans/quick-utilities.md)
 - 2026-07-26 desktop-test-harness — added persistent exploration, visible
   demonstration, and fresh headless regression workflows over the real host
   configuration; proved Ghostty's primary chords and GNOME lock/unlock in a

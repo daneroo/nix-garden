@@ -15,6 +15,10 @@ check: _shell-check _fmt-check _lint-md _flake-check
 fmt:
     bunx prettier --write .
 
+# Show the running NixOS revision beside this repository's working state.
+current-state:
+    scripts/current-state.sh
+
 # Check, build, and compare desired with running; never touches inputs (see `update`).
 plan:
     just _host-check
