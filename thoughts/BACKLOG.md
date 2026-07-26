@@ -85,10 +85,9 @@ reversible; each is listed with its theme below.
 
 - [ ] Decide whether to add Home Manager later.
 - [ ] cli-baseline — give `hardy` and `gauss` a shared daily shell baseline:
-      install Starship, `nh`, ripgrep, and `doggo`; match or improve the macOS
-      prompt; settle nix-garden versus dotfiles ownership; prefer `doggo` for
-      normal DNS queries now that `dog` is retired, retaining `dig` only if its
-      distinct diagnostics justify it.
+      install Starship; match or improve the macOS prompt; settle nix-garden
+      versus dotfiles ownership; add a nix-garden-scoped Starship custom module
+      surfacing `scripts/current-state.sh`.
 - [ ] If adding `thermald`, first revisit `docs/throttling.md`.
 - [ ] gauss-power-profile — investigate why `gauss`'s internal NVMe buffered
       reads dropped from `3820 MB/sec` pre-install to `~1750 MB/sec` under

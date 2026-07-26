@@ -39,6 +39,8 @@
         just
         jq
         lazygit
+        nh
+        ripgrep
         vim
       ];
       hosts = [
