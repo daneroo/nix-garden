@@ -39,7 +39,6 @@
         just
         jq
         lazygit
-        nh
         ripgrep
         vim
       ];
@@ -61,6 +60,10 @@
             # `nixos-rebuild list-generations` shows "Unknown". A dirty tree
             # stamps as such, which is itself useful signal.
             system.configurationRevision = self.rev or self.dirtyRev or "dirty";
+            programs.nh = {
+              enable = true;
+              flake = "/home/daniel/nix-garden";
+            };
             services.tailscale.enable = true;
             xdg.mime.defaultApplications = {
               "text/html" = "brave-browser.desktop";

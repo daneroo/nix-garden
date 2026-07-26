@@ -38,6 +38,20 @@ The shared workflow defines the invariant, not a universal command. A copied or
 generated workflow must preserve the adopting repository's local command and
 must not overwrite repository-specific safety constraints.
 
+## Canonical Managed-Host Checkout
+
+On managed NixOS hosts, `/home/daniel/nix-garden` is the canonical operational
+checkout. `programs.nh.flake` exports that path through `NH_FLAKE`, allowing
+`nh os` commands to find the flake from any directory. Moving or removing the
+checkout breaks unqualified `nh` commands; pass an explicit flake path or use
+the documented raw NixOS recovery commands when the canonical checkout is
+unavailable.
+
+Installing `nh` does not replace repository policy. Until `nh-iteration`
+deliberately rewires the lifecycle, `just plan` and `just apply` remain
+authoritative for the Git-state check, quality gate, activation confirmation,
+and post-switch verification.
+
 ## Backlog
 
 `thoughts/BACKLOG.md` is the index of unscheduled work, grouped by theme. Use a
