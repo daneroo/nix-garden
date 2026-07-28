@@ -29,7 +29,7 @@ guardrails.
 - `nh clean` understands what `nix-collect-garbage -d` misses: user/Home Manager
   profiles, `result` gcroots, keep-N/keep-age policies.
 - `nh search` — fast package search from the terminal.
-- Declarative adoption: `programs.nh.enable`, `programs.nh.clean.automatic` (+
+- Declarative adoption: `programs.nh.enable`, `programs.nh.clean.enable` (+
   schedule/args), and a default flake path — the whole tool arrives as three
   lines of host config, including scheduled GC, which is homelab disk hygiene
   solved declaratively.

@@ -134,6 +134,9 @@ Shared direction and comparison criteria:
       into concrete conventions and reusable checks as dynamic systems appear.
 - [ ] clan-reference — study Clan's solutions for fleet management, secrets,
       backups, networking, and installation before designing equivalents.
+- [ ] generation-retention — configure automatic cleanup of old NixOS and
+      profile generations while preserving a deliberate rollback window; ticket:
+      [generation-retention](tickets/generation-retention.md)
 - [ ] nh-iteration — evaluate `nh` for planned diffs, activation, rollback, and
       generation management in the normal host workflow.
 - [ ] related-reconcilers — inventory reusable lessons and boundaries from the
