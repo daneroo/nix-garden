@@ -17,6 +17,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 - [bootstrap.md](bootstrap.md) — fresh-install and rebuild path.
 - [keybindings.md](keybindings.md) — per-host modifier roles and the settled
   macOS-equivalence map.
+- [tiling-windows.md](tiling-windows.md) — PaperWM behavior, persistent enabled
+  state, Vicinae integration, and recovery.
 - [reconciliation.md](reconciliation.md) — desired-versus-actual convergence for
   stateful systems.
 

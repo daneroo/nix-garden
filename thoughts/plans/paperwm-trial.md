@@ -1,8 +1,8 @@
 # PaperWM Trial
 
-Status: active
+Status: done
 
-Goal: make PaperWM usable on `gauss` for an immediate real-hardware trial.
+Goal: make PaperWM usable and switchable on both desktop hosts.
 
 - [x] Record the clean `gauss` baseline and current NixOS generation.
 - [x] On `paperwm-trial`, install and enable PaperWM for `gauss` only; keep its
@@ -12,10 +12,12 @@ Goal: make PaperWM usable on `gauss` for an immediate real-hardware trial.
       meaningful system diff, and apply it.
 - [x] Confirm PaperWM is active and basic window management works in the real
       GNOME session.
-- [ ] Expose the toggle through Vicinae from the system profile and remove the
+- [x] Expose the toggle through Vicinae from the system profile and remove the
       temporary user-owned link from `gauss`. `[tier: low]`
-- [ ] Stop with PaperWM usable and switchable. Daniel's experience will decide
-      the production keybindings and E2E impact later.
+- [x] Share PaperWM across `hardy` and `gauss`, float Vicinae by default, and
+      validate tiling and toggle behavior after logout/login.
+- [x] Harvest the accepted behavior into `docs/tiling-windows.md`; leave E2E VM
+      assessment to Daniel as separate post-merge work.
 
 Recovery: apply clean `main`, or select the previous NixOS generation if the
 desktop cannot be used normally.

@@ -8,16 +8,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
-Desktop behavior work, in order. Preserve the completed harness as the
-regression boundary throughout; each item is also listed with its theme below.
-
-- `paperwm-trial` — evaluate scrollable tiling inside the existing GNOME desktop
-
-Architecture learning may proceed alongside this sequence, but do not combine a
-flake/module migration with either behavioral experiment. Revisit the
-`module-architecture` implementation boundary after the keybinding behavior is
-settled; a quick PaperWM trial does not wait for that refactor.
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -64,9 +54,6 @@ settled; a quick PaperWM trial does not wait for that refactor.
 - [ ] vicinae-files-launch — fix the pre-existing Hardy Vicinae service PATH so
       the Files desktop entry's bare `nautilus` command resolves; keep this
       separate from keybinding behavior.
-- [ ] paperwm-trial — evaluate scrollable tiling without leaving GNOME, after
-      the simplified keybinding model is settled; ticket:
-      [paperwm-trial](tickets/paperwm-trial.md)
 - [ ] niri-desktop — separately evaluate and, only if justified, assemble a
       complete standalone Niri desktop after PaperWM establishes which
       scrollable-workspace behavior matters; ticket:
@@ -180,6 +167,11 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-28 paperwm-trial — adopted switchable PaperWM scrollable tiling on
+  Hardy and Gauss, floated Vicinae by default, and exposed one system-owned
+  toggle through the shell and Vicinae; reference:
+  [tiling-windows](../docs/tiling-windows.md); plan:
+  [paperwm-trial](plans/paperwm-trial.md)
 - 2026-07-28 simplified-keybinding-model — replaced the global Alt-to-Super
   carrier with direct native Alt bindings on Hardy and Gauss, retained only
   Brave's focused chord translation and Hardy's internal-keyboard illumination

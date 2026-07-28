@@ -6,8 +6,9 @@ Determine whether Niri's native scrollable compositor model justifies replacing
 the GNOME session after PaperWM establishes which scrolling behavior matters in
 practice.
 
-This is intentionally separate from [paperwm-trial](paperwm-trial.md). Shared
-rationale is in [scrolling-desktop](../design/scrolling-desktop.md).
+This is intentionally separate from the accepted
+[PaperWM configuration](../../docs/tiling-windows.md). Shared rationale is in
+[scrolling-desktop](../design/scrolling-desktop.md).
 
 ## Why Separate
 
