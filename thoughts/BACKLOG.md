@@ -59,10 +59,10 @@ settled; a quick PaperWM trial does not wait for that refactor.
       declaring each parent directory explicitly, which grew the very block this
       item exists to delete. `just e2e-vm --no-test --host HOST` is now the
       empty-home validation instrument this item calls for.
-- [ ] visible-vm-lock — diagnose why the guided Alt+Shift+L case does not
-      visibly lock the `--show` VM even though the emitted event sequence is
-      correct and real Gauss locks; ticket:
-      [visible-vm-lock](tickets/visible-vm-lock.md)
+- [ ] visible-vm-session-actions — diagnose why the guided Alt+Shift+L and
+      Alt+Shift+Q cases do not visibly lock or open the logout dialog in the
+      `--show` VM even though real Gauss handles both; ticket:
+      [visible-vm-session-actions](tickets/visible-vm-session-actions.md)
 - [ ] paperwm-trial — evaluate scrollable tiling without leaving GNOME, after
       the simplified keybinding model is settled; ticket:
       [paperwm-trial](tickets/paperwm-trial.md)

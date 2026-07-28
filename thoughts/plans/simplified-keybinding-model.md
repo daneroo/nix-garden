@@ -270,11 +270,11 @@ Deferred, non-blocking observations from Hardy acceptance:
 
 Deferred, non-blocking observation from Gauss acceptance:
 
-- The guided Alt+Shift+L case did not visibly lock a post-apply
-  `just e2e-vm --host gauss --show` run, while the same binding locked real
-  Gauss correctly. This is logged as the
-  [visible-vm-lock](../tickets/visible-vm-lock.md) harness bug; do not fix or
-  reinvestigate it in this plan.
+- The guided Alt+Shift+L and Alt+Shift+Q cases did not visibly lock or open the
+  logout dialog in a post-apply `just e2e-vm --host gauss --show` run, while
+  both bindings worked on real Gauss. This is logged as the
+  [visible-vm-session-actions](../tickets/visible-vm-session-actions.md) harness
+  bug; do not fix or reinvestigate it in this plan.
 
 ## Compare and Close Out
 
