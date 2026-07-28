@@ -184,11 +184,11 @@ were not changed.
       Brave guided consequences and accepted the four-second lock/logout
       injections without visual confirmation as sufficient for this pre-apply
       gate. `[tier: high]`
-- [ ] Commit and push the Hardy milestone before planning it. Run `just plan` on
-      Hardy, review the closure diff, session/re-login implications, affected
-      keyd and dconf state, and rollback generation with Daniel, then wait for
-      explicit approval before `just apply`. The recipe's own confirmation is an
-      additional guard, not the approval. `[tier: high]`
+- [x] Commit and push the Hardy milestone before planning it.
+- [ ] Run `just plan` on Hardy, review the closure diff, session/re-login
+      implications, affected keyd and dconf state, and rollback generation with
+      Daniel, then wait for explicit approval before `just apply`. The recipe's
+      own confirmation is an additional guard, not the approval. `[tier: high]`
 - [ ] Keep Galois SSH and Herdr recovery available through the switch. If
       modifier identity, Ctrl behavior, keyboard access, GNOME login, or remote
       recovery becomes unreliable, roll back immediately to the recorded
