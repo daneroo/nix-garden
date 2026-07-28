@@ -185,24 +185,24 @@ were not changed.
       injections without visual confirmation as sufficient for this pre-apply
       gate. `[tier: high]`
 - [x] Commit and push the Hardy milestone before planning it.
-- [ ] Run `just plan` on Hardy, review the closure diff, session/re-login
+- [x] Run `just plan` on Hardy, review the closure diff, session/re-login
       implications, affected keyd and dconf state, and rollback generation with
       Daniel, then wait for explicit approval before `just apply`. The recipe's
       own confirmation is an additional guard, not the approval. `[tier: high]`
-- [ ] Keep Galois SSH and Herdr recovery available through the switch. If
+- [x] Keep Galois SSH and Herdr recovery available through the switch. If
       modifier identity, Ctrl behavior, keyboard access, GNOME login, or remote
       recovery becomes unreliable, roll back immediately to the recorded
       generation. If Hardy remains operable and only a noncritical chord fails,
       preserve evidence and diagnose in place. Any fix must be declarative,
       committed, pushed, re-planned, and separately approved; do not repair with
       persistent runtime keyd overrides. `[tier: high]`
-- [ ] Reconcile after apply: run `just current-state`, compare
+- [x] Reconcile after apply: run `just current-state`, compare
       `/run/current-system` with the planned result, inspect keyd and GNOME user
       units, confirm effective dconf values and store-backed files, remove only
       identified stale runtime/local overrides, and rerun the Hardy headless
       suite. Record switch warnings separately from actual verification.
       `[tier: high]`
-- [ ] On Hardy's internal keyboard, verify Alt, Ctrl, and physical Search
+- [x] On Hardy's internal keyboard, verify Alt, Ctrl, and physical Search
       independently; the complete Ghostty and Brave maps; Vicinae open/dismiss;
       1Password Quick Access and a Brave extension-to-desktop smoke check;
       lock/unlock; logout confirmation/cancel; Alt+Shift+3; native Alt+Tab;
@@ -212,17 +212,31 @@ were not changed.
 - [ ] Attach an external keyboard to Hardy and repeat Alt, Ctrl, the physical
       Windows-logo key, covered application chords, right Alt/AltGr where
       available, and workspace switching. Confirm that external Alt+F6/F7 is not
-      captured by the Chromebook illumination rule. `[tier: high]`
-- [ ] In Files, verify representative native Ctrl behavior and confirm that the
+      captured by the Chromebook illumination rule. Daniel explicitly deferred
+      this noncritical check after the successful internal-keyboard and reboot
+      passes because it was 05:00. `[tier: high]`
+- [x] In Files, verify representative native Ctrl behavior and confirm that the
       focused application did not inherit Brave's Alt translation. `[tier: med]`
-- [ ] Log out and back in, reconcile, and repeat representative modifier,
+- [x] Log out and back in, reconcile, and repeat representative modifier,
       Brave-focus, Vicinae, and lock checks. Reboot only after the logged-in
       pass is sound; reconcile and repeat representative checks after reboot.
       `[tier: high]`
-- [ ] Require Daniel to complete at least one normal Hardy work session after
+- [x] Require Daniel to complete at least one normal Hardy work session after
       reboot, switching ordinarily among Ghostty, Brave, Vicinae, and GNOME
       applications. Daniel's real-use confirmation is the gate to Gauss
-      portability; no arbitrary multi-day soak is required. `[tier: high]`
+      portability; no arbitrary multi-day soak is required. Daniel accepted
+      Hardy after the post-reboot representative pass; the external-keyboard
+      check above remains an explicit follow-up. `[tier: high]`
+
+Deferred, non-blocking observations from Hardy acceptance:
+
+- Vicinae cannot launch Files because its unchanged systemd user service PATH
+  omits `/run/current-system/sw/bin`; the desktop entry's bare
+  `Exec=nautilus --new-window` therefore fails with
+  `execve: No such file or directory`. This predates this branch and is not a
+  keybinding regression.
+- Herdr restored workspaces and panes after reboot, but not the shell history in
+  each pane. Keep that persistence gap separate from this milestone.
 
 ## Gauss Portability
 
