@@ -11,8 +11,6 @@ Scheduled items go here (leave this comment)
 Desktop behavior work, in order. Preserve the completed harness as the
 regression boundary throughout; each item is also listed with its theme below.
 
-- `simplified-keybinding-model` — trial the native-Alt model on `hardy`, then
-  prove whether it generalizes to `gauss`
 - `paperwm-trial` — evaluate scrollable tiling inside the existing GNOME desktop
 
 Architecture learning may proceed alongside this sequence, but do not combine a
@@ -41,10 +39,6 @@ settled; a quick PaperWM trial does not wait for that refactor.
 
 ## Desktop
 
-- [ ] simplified-keybinding-model — determine whether native Alt can be the
-      shared physical primary modifier with fewer transformations and less
-      host-specific Nix; design:
-      [simplified-keybinding-model](design/simplified-keybinding-model.md)
 - [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
       standard keyboard and backported to `hardy`, before optimizing or
       generalizing it.
@@ -63,6 +57,13 @@ settled; a quick PaperWM trial does not wait for that refactor.
       Alt+Shift+Q cases do not visibly lock or open the logout dialog in the
       `--show` VM even though real Gauss handles both; ticket:
       [visible-vm-session-actions](tickets/visible-vm-session-actions.md)
+- [ ] hardy-external-keyboard-validation — complete the deferred real-hardware
+      pass for native Alt/Ctrl/Super identity, the covered application and
+      workspace chords, right Alt/AltGr, and isolation of the internal-only
+      Alt+F6/F7 illumination adapter.
+- [ ] vicinae-files-launch — fix the pre-existing Hardy Vicinae service PATH so
+      the Files desktop entry's bare `nautilus` command resolves; keep this
+      separate from keybinding behavior.
 - [ ] paperwm-trial — evaluate scrollable tiling without leaving GNOME, after
       the simplified keybinding model is settled; ticket:
       [paperwm-trial](tickets/paperwm-trial.md)
@@ -176,6 +177,12 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-28 simplified-keybinding-model — replaced the global Alt-to-Super
+  carrier with direct native Alt bindings on Hardy and Gauss, retained only
+  Brave's focused chord translation and Hardy's internal-keyboard illumination
+  adapter, and proved one 27-case host-selectable E2E contract plus complete
+  real-hardware acceptance; reference: [keybindings](../docs/keybindings.md);
+  plan: [simplified-keybinding-model](plans/simplified-keybinding-model.md)
 - 2026-07-26 current-state — added one command showing the running NixOS
   configuration and nixpkgs revisions beside the repository branch and
   dirty-aware description; plan: [quick-utilities](plans/quick-utilities.md)

@@ -47,12 +47,12 @@ were not changed.
 
 ## Target Physical Contract
 
-- [ ] Keep physical Alt as the primary shortcut modifier and bind it directly.
+- [x] Keep physical Alt as the primary shortcut modifier and bind it directly.
       Keep physical Ctrl native. Leave the physical Search/Windows-logo key
       native as Linux Super, restore ordinary GNOME Super defaults where the old
       carrier was the only reason for overriding them, and do not move any
       covered Alt action onto Super. `[tier: high]`
-- [ ] Require left Alt as the primary physical path. Do not specially remap
+- [x] Require left Alt as the primary physical path. Do not specially remap
       right Alt; application toolkits may treat both Alt keys alike under the US
       layout. Preserve AltGr on keyboards/layouts that provide it.
       `[tier: high]`
@@ -72,7 +72,7 @@ were not changed.
       Alt-to-Ctrl compatibility layer. Revisit that decision only if future
       named applications create substantial repeated configuration.
       `[tier: high]`
-- [ ] Converge both hosts on this physical desktop map: Alt+Space for Vicinae;
+- [x] Converge both hosts on this physical desktop map: Alt+Space for Vicinae;
       Alt+Shift+Space for 1Password Quick Access; Alt+Shift+L and the preserved
       Ctrl+Alt+Q fallback for lock; Alt+Shift+3/4 for screenshots; Alt+Shift+Q
       for the logout confirmation dialog; native Alt+Tab for application
@@ -156,7 +156,7 @@ were not changed.
 - [x] Keep Vicinae and 1Password out of VM automation. Their required physical
       checks need the real session; the VM has no authenticated Brave or
       1Password state. `[tier: med]`
-- [ ] Use Files as the sole required stock-GNOME negative control on real
+- [x] Use Files as the sole required stock-GNOME negative control on real
       hardware: native Ctrl behavior must remain, and Files must not inherit the
       targeted Alt translation. Do not expand the matrix to Clocks, Weather, or
       Settings. `[tier: low]`
@@ -283,12 +283,16 @@ Deferred, non-blocking observation from Gauss acceptance:
 
 ## Compare and Close Out
 
-- [ ] Compare Hardy and Gauss by observable behavior, the absence of a global
+- [x] Compare Hardy and Gauss by observable behavior, the absence of a global
       carrier, focused transformations that remain, exception reliability, and
       the genuine hardware-specific delta. Keep the native-Alt model only if it
       preserves the shared target and Brave remains reliable; otherwise restore
       the recorded carrier generation and document why the experiment was
-      rejected. `[tier: high]`
+      rejected. Both hosts passed the same 27-case suite and complete
+      real-hardware application/desktop map. Neither has a base carrier; both
+      retain the same focused Brave translation and pass-through exception.
+      Hardy alone identifies its internal keyboard for Alt+F6/F7 illumination.
+      `[tier: high]`
 - [ ] Run the final Hardy and Gauss suites and `just check`. Run a final
       `just plan` on each host and distinguish functional configuration drift
       from revision-only drift introduced by closeout documentation. Record
@@ -296,16 +300,17 @@ Deferred, non-blocking observation from Gauss acceptance:
       `main` after merge outside this plan. Any functional diff still requires
       the normal committed, pushed, host-specific approval boundary.
       `[tier: high]`
-- [ ] Rewrite current behavior in `docs/keybindings.md` using precise Linux
+- [x] Rewrite current behavior in `docs/keybindings.md` using precise Linux
       terminology. Retain a concise preamble explaining the macOS lineage and
       physical motivation, plus a brief historical note that the former design
       carried physical Alt through Super for compatibility. Let Git preserve
       detailed obsolete mechanics. `[tier: med]`
-- [ ] Harvest settled test commands, semantic versus guided evidence, fidelity
+- [x] Harvest settled test commands, semantic versus guided evidence, fidelity
       limits, displaced GNOME bindings, device scoping, debugging facts, and
       recovery results into `docs/e2e-testing.md` and other existing durable
-      pages only where useful. Update the backlog outcome, mark this plan
-      `done`, and remove the superseded design after harvesting. `[tier: med]`
+      pages only where useful. Update the backlog outcome and remove the
+      superseded design after harvesting; mark this plan `done` after the final
+      host plans. `[tier: med]`
 - [ ] Present the final physical behavior matrix, automated/guided/manual
       evidence, waivers, unresolved gaps, branch commits, and running
       generations for review. Stop with the verified feature branch; the

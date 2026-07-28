@@ -107,11 +107,11 @@ def send_chord(chord: str) -> None:
     the reply sees only silence -- which is exactly how the first run of this
     probe produced a confident false negative on 2026-07-25.
 
-    Write the PHYSICAL key, not the logical one. The current keyd configuration
-    maps `leftalt` to `layer(meta)` below the compositor, so a binding on Super
-    fires when Alt arrives. Under simplified-keybinding-model, application
-    chords remain physical `alt-*`; logical-binding assertions change, and
-    desktop-owned actions move to physical Super where the model requires it.
+    Write the PHYSICAL key, not the logical one. Physical Alt, Ctrl, and Super
+    remain distinct in the current model. QEMU's `meta_l` name injects the
+    physical key that produces Linux Super; it does not describe Alt. Only the
+    named Brave application map translates selected Alt chords after focus is
+    known.
     """
     machine.send_key(chord)  # noqa: F821
 

@@ -1,128 +1,131 @@
 # Keybindings
 
-macOS-equivalence keybinding map, tuned and validated on `gauss` and `hardy`
-2026-07-23. This page states the settled facts; Git history retains the full
-Gauss validation, Hardy backport, mechanism comparisons, and bugs found.
+Daniel's shortcut layout keeps the physical key beside Space in the role learned
+from macOS. On both managed NixOS hosts that key is Alt, and the active
+configuration describes it precisely as Alt rather than translating it through
+another modifier.
 
-## Modifier mapping
+The native-Alt model was validated on Hardy and Gauss on 2026-07-28. Git history
+retains the earlier experiments and the former implementation, which carried
+physical Alt through Linux Super before translating selected application chords
+again.
 
-Both hosts make physical Alt (next to Space, matching a real MacBook's Cmd
-position) the Cmd-equivalent `Super` modifier, matching Daniel's macOS modifier
-swap. The Option role depends on the physical keyboard:
+## Modifier Ownership
 
-| Host    | Physical Ctrl | Physical Alt  | Physical Win/Search | Scope                  |
-| ------- | ------------- | ------------- | ------------------- | ---------------------- |
-| `gauss` | native Ctrl   | Cmd / `Super` | Option / `Alt`      | all attached keyboards |
-| `hardy` | native Ctrl   | Cmd / `Super` | Option / `Alt`      | internal keyboard only |
+| Physical key                             | Logical modifier | Ownership                                     |
+| ---------------------------------------- | ---------------- | --------------------------------------------- |
+| Alt beside Space                         | Alt              | Covered application and desktop shortcuts     |
+| Ctrl                                     | Ctrl             | Native terminal and application Control input |
+| Hardy Search / Gauss Windows-logo        | Super            | Native GNOME behavior                         |
+| Right Alt, or AltGr when a layout has it | Native           | Unclaimed by the shared model                 |
 
-Hardy's Chromebook keyboard has no Cmd-labelled key, but raw capture proved its
-Search key emits `KEY_LEFTMETA`; `keyd` turns that distinct key into Option
-while preserving native Ctrl. External keyboards on Hardy remain native until
-one is attached and assessed.
+Neither host has a base Alt-to-Super mapping. Stock GNOME Super bindings that
+were displaced by the former carrier are available again, including Super+N,
+Super+V/Super+M, Super+Space, Super+L, and Super+Tab.
 
-Both mappings use [`services.keyd`](https://github.com/rvaiya/keyd), not xkb.
-`keyd` operates below the compositor and is also the established mechanism for
-focus-sensitive application remapping.
+Hardy's internal keyboard is identified by its observed keyd device ID only for
+the Chromebook-specific Alt+F6/F7 illumination chords. Ctrl, Alt, and Search
+remain native on that keyboard. Gauss leaves every attached keyboard's base
+modifiers native.
 
 ## Mechanism
 
-- **Ghostty** — native per-app config (`~/.config/ghostty/config`, deployed via
-  `systemd.tmpfiles.rules`). No remap layer needed.
-- **Brave** — Chromium hard-rejects Super/Meta as an extension-shortcut modifier
-  in its `chrome.commands` extension API, so an extension alone is insufficient.
-  [`keyd-application-mapper`](https://github.com/rvaiya/keyd) retranslates
-  Super-based chords into Brave's own native Ctrl-based ones, but only while a
-  Brave window has focus (a patched GNOME Shell extension feeds it window-focus
-  events — GNOME's Shell extension only officially supports up to version 49;
-  both hosts run 50.2, patched and confirmed working). Hardy uses a dedicated
-  `keyd` group and a `0660 root:keyd` socket; Gauss's broader socket permission
-  is tracked separately for security cleanup.
-- **Launcher** — [Vicinae](https://vicinae.com), chosen over Ulauncher (kept as
-  a documented lighter fallback, not installed) and rofi (ruled out —
-  hard-requires the wlr-layer-shell protocol GNOME's Mutter doesn't implement).
-- **1Password** — its own `--quick-access` CLI flag, no remapping needed.
+- **Ghostty** binds native Alt directly in its own configuration.
+- **Brave** uses Ctrl for the covered Linux actions. The focused
+  `keyd-application-mapper` translates only the declared native Alt chords while
+  Brave has focus. A patched keyd GNOME Shell extension supplies focus changes
+  on GNOME Shell 50. No unnamed application receives this translation.
+- **GNOME** owns the covered desktop actions through direct Alt bindings.
+  Vicinae takes Alt+Space, so GNOME's conflicting active-window-menu shortcut is
+  explicitly empty.
+- **Vicinae** uses a GNOME custom shortcut to call `vicinae toggle`.
+- **1Password** uses a GNOME custom shortcut to call its own `--quick-access`
+  entry point. Brave autofill still depends on the existing browser extension
+  and desktop-app handshake.
 
-## Equivalence map
+keyd remains necessary for Brave's focus-sensitive translation and for Hardy's
+internal-keyboard illumination adapter. It no longer changes the base modifier
+identity.
 
-| Function               | macOS                        | Ghostty       | Brave (`gauss`)          | Brave (`hardy`) | Launcher    | 1Password         |
-| ---------------------- | ---------------------------- | ------------- | ------------------------ | --------------- | ----------- | ----------------- |
-| Copy                   | Cmd+C                        | Super+C       | Ctrl+C (browser default) | Super+C         |             |                   |
-| Paste                  | Cmd+V                        | Super+V       | Ctrl+V (browser default) | Super+V         |             |                   |
-| New tab                | Cmd+T                        | Super+T       | Super+T                  | Super+T         |             |                   |
-| Close tab              | Cmd+W                        | Super+W       | Super+W                  | Super+W         |             |                   |
-| Reopen closed tab      | Cmd+Shift+T                  | n/a           | Super+Shift+T            | Super+Shift+T   | n/a         | n/a               |
-| New window             | Cmd+N                        | Super+N       | Super+N                  | Super+N         |             |                   |
-| Next tab               | Cmd+Shift+] / Ctrl+Tab       | Super+Shift+] | Super+Shift+]            | Super+Shift+]   |             |                   |
-| Previous tab           | Cmd+Shift+[ / Ctrl+Shift+Tab | Super+Shift+[ | Super+Shift+[            | Super+Shift+[   |             |                   |
-| Close window / context | Cmd+W                        | Super+W       | Super+W                  | Super+W         | n/a         | n/a               |
-| Address-bar focus      | Cmd+L                        | n/a           | Ctrl+L (browser default) | Super+L         | n/a         | n/a               |
-| Find                   | Cmd+F                        | n/a           | Ctrl+F (browser default) | Super+F         | n/a         | n/a               |
-| Clear / scrollback     | Cmd+K                        | Super+K       | n/a                      | n/a             | n/a         | n/a               |
-| Quit app               | Cmd+Q                        | Super+Q       |                          |                 |             |                   |
-| Launcher invoke        | Cmd+Space                    | n/a           | n/a                      | n/a             | Super+Space | n/a               |
-| Autofill / password    | Cmd+Shift+Space              | n/a           | via browser extension    | via extension   | n/a         | Super+Shift+Space |
+## Application Map
 
-Gauss still uses Brave's native Ctrl defaults for copy/paste, address focus, and
-Find. Hardy's dedicated focus-sensitive mapper closes those gaps, so Super+L and
-Super+F work there and not on Gauss. This asymmetry is unfinished work, not a
-chosen end state: the reason Gauss was left on Ctrl defaults is no longer
-recorded, and the intended behavior is the same on both hosts. Closing it
-belongs to
-[simplified-keybinding-model](../thoughts/design/simplified-keybinding-model.md),
-which already lists Brave's contextual map as shared. Do not treat the Gauss
-column as a requirement to preserve.
+| Function          | Ghostty     | Brave       |
+| ----------------- | ----------- | ----------- |
+| Copy              | Alt+C       | Alt+C       |
+| Paste             | Alt+V       | Alt+V       |
+| New tab           | Alt+T       | Alt+T       |
+| Close tab/context | Alt+W       | Alt+W       |
+| Reopen closed tab | —           | Alt+Shift+T |
+| New window        | Alt+N       | Alt+N       |
+| Next tab          | Alt+Shift+] | Alt+Shift+] |
+| Previous tab      | Alt+Shift+[ | Alt+Shift+[ |
+| Address-bar focus | —           | Alt+L       |
+| Find              | —           | Alt+F       |
+| Clear screen      | Alt+K       | —           |
+| Quit              | Alt+Q       | Unmapped    |
 
-Hardy also provides Super+Shift+W as a tested close-window convenience, but it
-is not presented as macOS equivalence: macOS uses contextual Cmd+W rather than a
-separate standard close-window chord.
+Brave deliberately has no Alt+Shift+W or Alt+Q mapping. Alt+W is the single
+close path; closing its final tab closes the window. The mapper explicitly
+passes Alt+Shift+L through as Alt+Shift+L so the global lock chord still works
+while Brave is focused.
 
-On Gauss, the application mapper also provides a best-effort Super+W → Ctrl+W
-catch-all for apps other than Ghostty and Brave. Linux has no universal
-quit/close convention, so this is not claimed as exhaustive.
+Ghostty leaves unbound Alt chords as terminal Alt input. The E2E fixture proves
+that Alt+D reaches the PTY as an Alt sequence and that Ctrl+C remains native
+Control-C. Files is the stock-GNOME negative control: its normal Ctrl shortcuts
+remain native, and it does not inherit Brave's Alt translation.
 
-## GNOME functions
+## Desktop Map
 
-| Function              | macOS         | `gauss`                   | `hardy`                       |
-| --------------------- | ------------- | ------------------------- | ----------------------------- |
-| Switch applications   | Cmd+Tab       | Super+Tab                 | Super+Tab                     |
-| Lock                  | Ctrl+Cmd+Q    | Super+Shift+L             | Ctrl+Super+Q                  |
-| Log out               | Cmd+Shift+Q   | no declared equivalent    | Super+Shift+Q                 |
-| Full-screen capture   | Cmd+Shift+3   | Shift+Print               | Super+Shift+3                 |
-| Screenshot selection  | Cmd+Shift+4   | Print screenshot UI       | Super+Shift+4                 |
-| Keyboard illumination | hardware keys | hardware-specific/default | Super+F6/F7 from physical Alt |
+| Function               | Physical chord                     | Notes                                        |
+| ---------------------- | ---------------------------------- | -------------------------------------------- |
+| Switch applications    | Alt+Tab                            | Native GNOME binding; Super+Tab also remains |
+| Vicinae                | Alt+Space                          | GNOME window-menu binding is cleared         |
+| 1Password Quick Access | Alt+Shift+Space                    | Requires the desktop app to be running       |
+| Lock                   | Alt+Shift+L                        | Super+L and Ctrl+Alt+Q remain fallbacks      |
+| Log out                | Alt+Shift+Q                        | Opens GNOME's confirmation dialog            |
+| Full-screen capture    | Alt+Shift+3                        | Shift+Print remains a fallback               |
+| Screenshot selection   | Alt+Shift+4                        | Print remains a fallback                     |
+| Switch workspace       | Alt+Search/Windows-logo+Left/Right | GNOME's native Super+Alt workspace binding   |
+| Keyboard illumination  | Hardy internal Alt+F6/F7           | Device-scoped; no Gauss adapter              |
 
-Hardy preserves GNOME's original Print variants and Super+Shift+L lock as
-fallbacks. Its screenshot and lock rows use physical Alt as Super/Cmd, so the
-physical positions match macOS. Logout is also forced visible in GNOME's system
-menu; Super+Shift+Q opens the standard confirmation dialog rather than ending
-the session immediately.
+The same physical application and desktop map is declared on both hosts. Hardy's
+only intended keybinding-specific delta is its internal-keyboard illumination
+adapter.
 
-## Known gaps
+## Validation Boundary
 
-- No date-math found in any launcher candidate tried (Vicinae, Ulauncher).
-- Vicinae's clipboard history needs its own separate GNOME extension
-  ([dagimg-dot/vicinae-gnome-extension](https://github.com/dagimg-dot/vicinae-gnome-extension)),
-  not yet pursued — degrades gracefully to no clipboard history rather than
-  failing.
-- Address-bar focus and Find cannot be supplied by Chromium's extension API.
-  Gauss keeps Brave's Ctrl+L/Ctrl+F defaults; Hardy's focus-sensitive `keyd`
-  mapper translates them.
-- Hardy's 1Password desktop app, Quick Access, browser-support wrapper, and
-  Brave extension handshake are validated.
+The shared headless suite passed 27/27 against both host configurations at
+feature closeout. It proves distinct Alt, Ctrl, and Super delivery; absence of
+the old carrier; declared GNOME and application bindings; semantic Ghostty and
+Brave behavior; and native Ctrl/terminal Alt paths. Guided cases and their
+limits are documented in [End-to-End Testing](e2e-testing.md).
+
+Real-hardware acceptance covered the complete shared map on both hosts,
+including Brave focus transitions, Files as the negative control, 1Password,
+logout/login, and reboot persistence. Gauss also passed its external-keyboard
+and right-Alt checks. Hardy's internal keyboard passed, including illumination,
+but its external-keyboard comparison was explicitly deferred and remains a
+follow-up.
+
+## Known Gaps
+
+- Complete Hardy external-keyboard validation remains open. Its declarations
+  leave external base modifiers native, but the physical Brave, workspace,
+  right-Alt/AltGr, and illumination-isolation pass has not been performed.
+- The visible VM does not show the guided Alt+Shift+L lock or Alt+Shift+Q logout
+  consequences even though the injected events are correct and both chords work
+  on real Gauss. See
+  [visible-vm-session-actions](../thoughts/tickets/visible-vm-session-actions.md).
+- Vicinae's clipboard history still needs its separate GNOME extension and is
+  not part of this model.
 
 ## Debugging
 
 - Runtime overrides applied by `keyd bind` survive the process that issued them.
-  Restart the `keyd` service before judging a clean configuration.
-- Local dconf values override declared system defaults. Inspect effective values
-  and use `gsettings reset` to remove a stale local override rather than writing
-  another one.
-
-## Adjacent state
-
-- `programs.firefox.enable` dropped (confirmed unused) on both hosts.
-- `org.gnome.shell.favorite-apps` pinned to Ghostty, Brave, and Files.
-- GNOME's existing `Super+Alt+Left/Right` / `Ctrl+Alt+Left/Right`
-  workspace-switch defaults already map cleanly onto Daniel's
-  Cmd+Option+Left/Right muscle memory once the modifier swap is applied — no new
-  binding needed.
+  Restart keyd before judging a clean declarative configuration.
+- Local dconf values override declared system defaults. Compare declared and
+  effective values, then reset only identified stale keys; stale carrier-era
+  overrides had to be removed on both hosts during this migration.
+- Mapper health is diagnostic, not behavioral proof. Check the GNOME extension,
+  `keyd-application-mapper`, and `~/.config/keyd/app.conf`, then reproduce the
+  focused application consequence.

@@ -149,12 +149,12 @@ in
           binding = "<Alt>space";
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
-          # Matches 1Password's own macOS default Quick Access shortcut
-          # exactly (not just a Cmd-equivalence guess). Requires 1Password
-          # already running (confirmed) -- the CLI flag reaches the existing
-          # instance via its own single-instance IPC. Autofill into Brave
-          # itself needs the 1Password browser extension, which arrives via
-          # Daniel's existing Brave sync chain -- nothing to package here.
+          # Preserve Daniel's physical Alt+Shift+Space Quick Access chord.
+          # Requires 1Password already running (confirmed) -- the CLI flag
+          # reaches the existing instance via its own single-instance IPC.
+          # Autofill into Brave itself needs the 1Password browser extension,
+          # which arrives via Daniel's existing Brave sync chain -- nothing to
+          # package here.
           name = "1Password quick access";
           command = "1password --quick-access";
           binding = "<Alt><Shift>space";
@@ -235,7 +235,7 @@ in
 
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
   # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
-  # (bound to Super+Space above) needs the server already running to have
+  # (bound to Alt+Space above) needs the server already running to have
   # anything to toggle.
   systemd.user.services.vicinae = {
     description = "Vicinae launcher server";
