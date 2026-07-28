@@ -1,6 +1,6 @@
 # Simplified Keybinding Model
 
-Status: active
+Status: done
 
 Goal: preserve Daniel's existing physical Alt-centered shortcuts on Hardy and
 Gauss while removing the global Alt-to-Super carrier and keeping Alt, Ctrl, and
@@ -293,13 +293,22 @@ Deferred, non-blocking observation from Gauss acceptance:
       retain the same focused Brave translation and pass-through exception.
       Hardy alone identifies its internal keyboard for Alt+F6/F7 illumination.
       `[tier: high]`
-- [ ] Run the final Hardy and Gauss suites and `just check`. Run a final
+- [x] Run the final Hardy and Gauss suites and `just check`. Run a final
       `just plan` on each host and distinguish functional configuration drift
       from revision-only drift introduced by closeout documentation. Record
       revision-only drift without extra applies; Daniel will reconcile from
       `main` after merge outside this plan. Any functional diff still requires
-      the normal committed, pushed, host-specific approval boundary.
-      `[tier: high]`
+      the normal committed, pushed, host-specific approval boundary. At pushed
+      closeout checkpoint `fa0c60b`, Hardy passed 27/27 in 91.8 seconds and
+      Gauss passed 27/27 in 79.2 seconds; both native `just check` runs passed.
+      Both host plans had empty closure diffs. Hardy remains on generation 25 at
+      revision `29f9c4c`, with desired store
+      `/nix/store/vkk5s3pyv954w9l338xag36hga7v43vz-nixos-system-hardy-26.11.20260723.e2587ca`;
+      Gauss remains on generation 23 at revision `b5002d2`, with desired store
+      `/nix/store/v6jwl441aiqwymawdpm4ha3qvarphwx3-nixos-system-gauss-26.11.20260723.e2587ca`.
+      The changed store paths contain only the embedded configuration revision,
+      so no apply was performed. This final plan-only record advances that
+      revision again without changing behavior. `[tier: high]`
 - [x] Rewrite current behavior in `docs/keybindings.md` using precise Linux
       terminology. Retain a concise preamble explaining the macOS lineage and
       physical motivation, plus a brief historical note that the former design
@@ -311,7 +320,7 @@ Deferred, non-blocking observation from Gauss acceptance:
       pages only where useful. Update the backlog outcome and remove the
       superseded design after harvesting; mark this plan `done` after the final
       host plans. `[tier: med]`
-- [ ] Present the final physical behavior matrix, automated/guided/manual
+- [x] Present the final physical behavior matrix, automated/guided/manual
       evidence, waivers, unresolved gaps, branch commits, and running
       generations for review. Stop with the verified feature branch; the
       coordinator owns merge, post-merge `main` planning/applying,
