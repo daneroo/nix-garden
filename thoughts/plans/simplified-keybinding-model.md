@@ -253,7 +253,7 @@ Deferred, non-blocking observations from Hardy acceptance:
       both Hardy and Gauss target suites green before the Gauss milestone is
       committed. Both Gauss runs and the Hardy regression run passed 27/27;
       Daniel accepted the visible Gauss guided cases. `[tier: high]`
-- [ ] Commit and push the Gauss milestone before planning it. Coordinate this
+- [x] Commit and push the Gauss milestone before planning it. Coordinate this
       phase from Galois, which has the required SSH authority, but execute
       checkout, test, `just plan`, and approved `just apply` commands on Gauss
       itself. Do not assume Hardy can reach Gauss. `[tier: high]`
