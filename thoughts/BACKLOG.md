@@ -8,6 +8,10 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
+- `e2e-fix-or-replace` — decide whether to repair, reduce, or replace the
+  desktop E2E harness; ticket:
+  [e2e-fix-or-replace](tickets/e2e-fix-or-replace.md)
+
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -64,6 +68,9 @@ Shared direction and comparison criteria:
 
 ## Virtualization
 
+- [ ] e2e-fix-or-replace — resolve the post-PaperWM `Super+N` expectation
+      failure as part of a broader maintainability decision; ticket:
+      [e2e-fix-or-replace](tickets/e2e-fix-or-replace.md)
 - [ ] incus-host — evaluate Incus as the homelab VM and system-container layer,
       including storage, networking, backup, and upgrades.
 - [ ] nixos-guests — decide how NixOS VM/container guests share the flake,
