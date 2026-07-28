@@ -1,9 +1,9 @@
 # Desktop VM Fidelity — When Is Remote/Virtual Good Enough?
 
-Research note, 2026-07-12, supporting `desktop-test-harness` and
-`compositor-selection`. Question: can Daniel judge keybinding and desktop UX
-through VNC or a VM, given that VNC/RustDesk to Proxmox VMs has felt too
-unrealistic to trust?
+Research note, 2026-07-12, supporting `desktop-test-harness` and the
+[scrolling-desktop](../design/scrolling-desktop.md) direction. Question: can
+Daniel judge keybinding and desktop UX through VNC or a VM, given that
+VNC/RustDesk to Proxmox VMs has felt too unrealistic to trust?
 
 ## Answer
 
@@ -34,11 +34,13 @@ The Proxmox VNC experience was diagnostic, not user error. Three stacked causes:
 
 From fastest iteration to highest fidelity; each rung has a distinct use.
 
-### L0 — Nested compositor (seconds per iteration)
+### L0 — Nested or disposable session (seconds per iteration)
 
-Niri and Hyprland both run as a window inside an existing Wayland/X session.
-Perfect for config syntax, layout behavior, and rapid binding edits. The parent
-compositor shadows some modifiers, so not for final binding judgment.
+Niri can run as a window inside an existing Wayland/X session. PaperWM can be
+enabled in a disposable GNOME session or its upstream NixOS VM. These are
+appropriate for config syntax, layout behavior, and rapid binding edits. A
+parent compositor or virtual input path shadows some modifiers, so this is not
+final binding judgment.
 
 ### L1 — Local QEMU with virtio-gpu (the agent tier)
 
@@ -51,18 +53,16 @@ virtual.
 
 ### L2 — Specialisations on real hardware (the UX judgment tier)
 
-NixOS `specialisation` builds Niri and Hyprland as additional boot entries on
-top of the base config. Select at the boot menu, or activate from the running
-system via the activation script under `/run/current-system/specialisation/`.
-Real GPU, real input path, zero virtualization artifacts, rollback by rebooting.
-This — not virtualization — is the right instrument for "does this binding feel
-right", and it needs no new machines: `hardy` or `gauss` today. Running the
-candidate compositor on a second VT is the same idea with less isolation.
+PaperWM can run in the real GNOME session with a tested disable path; NixOS
+`specialisation` can build a later Niri session as an additional boot entry on
+top of the base config. Real GPU, real input path, zero virtualization
+artifacts, and a known GNOME recovery session make this the right instrument for
+"does this feel right." It needs no new machines: `hardy` or `gauss` today.
 
 ### L3 — Dedicated bake-off metal
 
-`gauss` reinstalled via nixos-anywhere as a disposable desktop target, for
-week-long daily-use trials per compositor, per the design doc's
+An available physical host used for sustained daily work: PaperWM first inside
+GNOME, and a separate Niri session later only if justified, per the design doc's
 evidence-before-abstraction rule.
 
 ### Sidebar — fullscreen VM on `galois` (M2)
@@ -100,7 +100,8 @@ virtualization only on Apple hardware.
 
 - Agent/CI validation: L1 VM + NixOS test driver + OCR; VNC acceptable here.
 - Human binding iteration: L0 nested for edits; L2 specialisations for judgment.
-- Compositor decision: L3 daily use, one week each, per existing backlog.
+- Scrollable-desktop decisions: L3 daily use, with PaperWM and Niri evaluated as
+  separate scopes rather than one virtual bake-off.
 - Never conclude anything about feel through a remote framebuffer.
 
 ## Sources

@@ -1,7 +1,14 @@
 # Workflow
 
-Backlog -> plan -> implement -> done. Everything in `thoughts/` is transient
-except `BACKLOG.md`.
+```text
+state         backlogged -> planned -> active -> done -> closed
+backlog item  [-----------------------------------------------]
+ticket        [optional working detail------------------------]
+plan                       [planned -> active -> done] delete/archive
+```
+
+At closeout, harvest durable facts into `docs/` when useful, then remove
+transient artifacts.
 
 Files in `thoughts/` use lowercase kebab-case. Keep the backlog readable in one
 pass; move detail into a ticket when an entry grows beyond a few lines. See
@@ -26,6 +33,33 @@ skill copies or harness-specific instruction files the canonical source.
 
 Filename casing under `docs/` is a per-repository choice, not part of the shared
 workflow core.
+
+## Optional Coordinator Tasks
+
+Codex may keep one persistent project task as a coordination convenience. That
+task can retain working context across backlog refinement, sequencing,
+cross-feature decisions, and handoffs to narrower feature tasks or subagents.
+Naming it `<project> — coordinator` makes the role visible, but the name grants
+no special authority.
+
+The coordinator is tooling candy, not project state:
+
+- The repository's backlog, tickets, designs, plans, documentation, commits, and
+  checks remain authoritative and harness-neutral.
+- The coordinator owns project-level boundaries and integration; a feature task
+  may deepen its ticket, prepare its executable plan, implement, verify, and
+  report the outcome.
+- Handoffs must be understandable from the ticket or plan without access to the
+  coordinator transcript. Another agent harness or a human can therefore
+  participate at any point.
+- Compacted or resumed task context is useful continuity, never a substitute for
+  checking the repository and running the required quality gate.
+- Do not let multiple tasks edit the same checkout concurrently. Work
+  sequentially or use separate branches and worktrees with an explicit
+  integration owner.
+
+This pattern is optional and currently Codex-specific. The shared repository
+workflow must remain complete when no persistent coordinator exists.
 
 ## Required Invariants
 
@@ -62,15 +96,15 @@ and post-switch verification.
 ```
 
 The stable `<id>` is a lowercase kebab-case slug shared by its ticket, design,
-and plan. On completion, move the item to a newest-first `## Closed` section
-with its date, outcome, and archived-plan link when one remains useful.
+and plan. At closeout, move the item to a newest-first `## Closed` section with
+its date, outcome, and archived-plan link when one remains useful.
 
 ## Tickets
 
 `thoughts/tickets/<id>.md` holds working detail for one backlog item: evidence,
 constraints, options, and pending decisions. It has no required schema beyond a
-clear title. Delete it when the item closes after harvesting durable facts into
-`docs/`, code, or the executing plan; Git retains its history.
+clear title. Delete it at closeout after its durable facts have a stable home;
+Git retains its history.
 
 ## Designs
 
@@ -101,10 +135,11 @@ Create and commit tickets and plans on `main`. Before executing a plan, create a
 branch named after its slug unless a more specific name is useful or Daniel
 explicitly chooses the current branch.
 
-Keep the checkboxes current while executing. When complete, record the outcome
-in the backlog's `## Closed` section and harvest durable facts into `docs/` when
-appropriate. Daniel decides whether to delete the completed plan or move it to
-`thoughts/plans/archive/`; do not choose its disposition automatically.
+Keep the checkboxes current while executing. A `done` plan means its execution
+is complete; closeout may still include harvesting durable facts into `docs/`
+and recording the outcome in the backlog's `## Closed` section. Daniel decides
+whether to delete the completed plan or move it to `thoughts/plans/archive/`; do
+not choose its disposition automatically.
 
 Plan coding tasks for delegation and routing, not only sequencing. Give each
 task enough context to execute without reconstructing the design: boundaries,

@@ -2,7 +2,7 @@
 
 let
   # Validated 2026-07-23 against a real Ghostty window; see
-  # thoughts/tickets/keybinding-model.md for the per-binding test results.
+  # docs/keybindings.md for the settled per-binding results.
   ghosttyConfig = pkgs.writeText "ghostty-config" ''
     keybind = super+c=copy_to_clipboard:mixed
     keybind = super+v=paste_from_clipboard
@@ -31,7 +31,7 @@ let
   # runs 50.2 -- validated 2026-07-23: the extension's actual logic uses only
   # long-stable Shell APIs and ran correctly once the version string was
   # patched and keyd-application-mapper was made findable on PATH).
-  # See thoughts/tickets/keybinding-model.md for the full validation trail.
+  # See docs/keybindings.md for the settled mechanism; Git retains the trail.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
     import json, sys
     src, dst = sys.argv[1], sys.argv[2]
@@ -112,7 +112,7 @@ in
 
   services.printing.enable = true;
 
-  # macOS-equivalence keybinding-model work (thoughts/tickets/keybinding-model.md).
+  # macOS-equivalence keybinding model; see docs/keybindings.md.
   # Physical Alt key acts as the Cmd-equivalent Super modifier, matching
   # Daniel's existing macOS modifier swap; GNOME's own Super+V/Super+N
   # shortcuts are freed since they collided with Ghostty's paste/new-window
@@ -168,7 +168,7 @@ in
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
           # Launcher trial 2026-07-23: Vicinae won over Ulauncher (kept as a
-          # lighter documented backup, see thoughts/tickets/keybinding-model.md)
+          # lighter documented backup, see docs/keybindings.md)
           # and rofi (hard-requires the wlr-layer-shell protocol on Wayland,
           # same dead end as wofi/fuzzel/anyrun under Mutter). Confirmed
           # working: MRU-ordered app search, inline calculator ("Qalculate!"
@@ -329,8 +329,7 @@ in
   # browser extension integration actually requires. Confirmed missing
   # (/run/wrappers/bin/1Password-BrowserSupport didn't exist) after joining
   # Daniel's Brave sync chain, which installed the extension itself but had
-  # no working way to talk to the desktop app. See
-  # thoughts/tickets/keybinding-model.md and
+  # no working way to talk to the desktop app. See docs/keybindings.md and
   # https://wiki.nixos.org/wiki/1Password.
   programs._1password-gui = {
     enable = true;

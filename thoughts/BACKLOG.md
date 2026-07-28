@@ -8,11 +8,17 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
-Desktop work, in order. The harness comes first because it makes the other two
-reversible; each is listed with its theme below.
+Desktop behavior work, in order. Preserve the completed harness as the
+regression boundary throughout; each item is also listed with its theme below.
 
-1. `simplified-keybinding-model` — consolidate and simplify `gauss` and `hardy`
-2. `compositor-selection` — evaluate Niri and Hyprland
+- `simplified-keybinding-model` — trial the native-Alt model on `hardy`, then
+  prove whether it generalizes to `gauss`
+- `paperwm-trial` — evaluate scrollable tiling inside the existing GNOME desktop
+
+Architecture learning may proceed alongside this sequence, but do not combine a
+flake/module migration with either behavioral experiment. Revisit the
+`module-architecture` implementation boundary after the keybinding behavior is
+settled; a quick PaperWM trial does not wait for that refactor.
 
 ## Fleet and Recovery
 
@@ -53,9 +59,16 @@ reversible; each is listed with its theme below.
       declaring each parent directory explicitly, which grew the very block this
       item exists to delete. `just e2e-vm --no-test --host HOST` is now the
       empty-home validation instrument this item calls for.
-- [ ] compositor-selection — evaluate Niri and Hyprland against real desktop
-      workflows, hardware behavior, and testability; ticket:
-      [compositor-selection](tickets/compositor-selection.md)
+- [ ] paperwm-trial — evaluate scrollable tiling without leaving GNOME, after
+      the simplified keybinding model is settled; ticket:
+      [paperwm-trial](tickets/paperwm-trial.md)
+- [ ] niri-desktop — separately evaluate and, only if justified, assemble a
+      complete standalone Niri desktop after PaperWM establishes which
+      scrollable-workspace behavior matters; ticket:
+      [niri-desktop](tickets/niri-desktop.md)
+
+Shared direction and comparison criteria:
+[scrolling-desktop](design/scrolling-desktop.md).
 
 ## Virtualization
 
@@ -106,8 +119,10 @@ reversible; each is listed with its theme below.
       recoverable.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
-- [ ] module-architecture — evaluate flake-parts, import-tree, and wrapped
-      program modules after real host/feature boundaries emerge.
+- [ ] module-architecture — learn and choose a clearer flake/module structure
+      with explicit reuse between `hardy` and `gauss`; keep the migration
+      behavior-preserving and separate from keybinding and PaperWM experiments;
+      research: [module-architecture](research/module-architecture.md)
 - [ ] development-environments — harvest useful nixvana lessons into development
       shells exercised by real projects, CI, and agent workflows.
 - [ ] reconciliation-pattern — turn [reconciliation](../docs/reconciliation.md)
@@ -167,16 +182,12 @@ Prune old lines freely; Git keeps everything.
   1Password/Brave integration, validated a Chromebook-specific Ctrl/Cmd/Option
   model plus Ghostty, Brave, Vicinae, lock, screenshot, and logout bindings, and
   secured keyd's mapper socket with a dedicated group; settled map:
-  [docs/keybindings.md](../docs/keybindings.md); ticket:
-  [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
-  [hardy-keybinding-backport](plans/hardy-keybinding-backport.md)
+  [docs/keybindings.md](../docs/keybindings.md)
 - 2026-07-23 keybinding-model — validated a macOS-equivalence keybinding map for
   Ghostty, Brave, Vicinae, and 1Password on `gauss` (Alt↔Super swap via `keyd` +
   a patched GNOME Shell extension); settled facts harvested to
-  [docs/keybindings.md](../docs/keybindings.md); `hardy` backport split into its
-  own ticket/plan,
-  [hardy-keybinding-backport](tickets/hardy-keybinding-backport.md); plan:
-  [keybinding-model](plans/keybinding-model.md)
+  [docs/keybindings.md](../docs/keybindings.md); Hardy's completed backport is
+  recorded immediately above
 - 2026-07-23 gauss-onboarding — installed NixOS on `gauss` as a clone of
   `hardy`, generalized the flake/`Justfile`/bootstrap script to multi-host,
   verified `just check`/`just plan` on the host itself, and handed off execution

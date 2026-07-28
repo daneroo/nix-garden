@@ -11,8 +11,10 @@ for Daniel's homelab. `hardy` is the first managed host.
   it should be practical and routinely testable.
 - Operational handling for state Nix does not solve: disks, backups, secrets,
   workload data, migrations, and updates of running systems.
-- A usable Linux desktop alternative to macOS, initially exploring Niri or
-  Hyprland with deliberate cross-platform keybinding design.
+- A usable Linux desktop alternative to macOS, first testing PaperWM's
+  scrollable tiling inside GNOME and treating a standalone Niri desktop as a
+  separate, larger possibility, with deliberate cross-platform keybinding design
+  throughout.
 - Incus as the leading hypervisor/container candidate, with NixOS guests
   configured from the same flake where that remains coherent.
 - Network configuration and reconciliation, including Tailscale and selected
@@ -40,11 +42,12 @@ as it proves itself.
 
 - **A desktop worth using daily.** This is chiefly a keybindings and ergonomics
   problem: consistency with macOS across the compositor, terminal, editor,
-  browser, and launcher. `hardy` surfaced a confound rather than an answer — its
-  Chromebook keyboard has no Cmd/Super key, so keybinding decisions made there
-  are contaminated by that non-standard layout. Keybinding tuning should move to
-  `gauss`, which has a standard keyboard layout, and settled bindings should
-  then be backported to `hardy` and verified there.
+  browser, and launcher. Both hosts place physical Alt immediately left of
+  Space, which is the durable primary-modifier position. Trial the simpler
+  native-Alt model on `hardy`, where relying on that invariant removes the most
+  host-specific modifier machinery; then validate on `gauss`'s conventional PC
+  keyboard whether the result is genuinely portable rather than
+  Chromebook-specific.
 - **A virtualization platform.** `gauss` has the strongest hardware in the fleet
   (8 cores/16 threads, 27 GiB RAM) for driving Incus-based VM/container
   workflows, explicitly as a blueprint for, and possible eventual replacement

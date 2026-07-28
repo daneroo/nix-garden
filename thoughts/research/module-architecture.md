@@ -4,6 +4,27 @@ Research note, 2026-07-12, supporting `module-architecture` and informing
 `nix-formatting` and `development-environments`. What the newer refactor/reuse
 patterns buy, what they cost, and when this repo should adopt each.
 
+## 2026-07-27 Checkpoint
+
+The original note described a 44-line, effectively single-host flake. That
+premise has expired: `hardy` and `gauss` now expose real shared desktop
+configuration, the observable desktop harness supplies a behavior-preserving
+refactor boundary, and system-tmpfiles ownership beneath `/home/daniel` has
+failed on an empty home exactly as predicted.
+
+Architecture learning can begin now. The migration itself should remain a
+separate behavior-preserving task:
+
+- Do not mix it with the native-Alt experiment.
+- Do not make a quick PaperWM trial wait for it.
+- Use the settled keybinding behavior to identify the first genuine shared
+  feature boundary.
+- Before productionizing PaperWM across hosts, decide whether user/session
+  ownership belongs in Home Manager, wrapped programs, explicit NixOS modules,
+  or a combination.
+- Prefer explicit imports while learning; import-tree/Dendritic structure still
+  needs demonstrated wiring friction.
+
 ## flake-parts — the module system applied to the flake itself
 
 Plain flakes are untyped attribute sets built by hand; repetition across systems
@@ -63,13 +84,22 @@ wrapper-manager as the framework). Program + config becomes one derivation.
 
 ## Suggested Sequence
 
-1. Now: nothing. The thin flake is correct for one host.
-2. With `nix-formatting` + a devShell (especially macOS): adopt flake-parts +
-   treefmt-nix; that is the first real consumer of `perSystem`.
-3. When desktop work starts: pilot _one_ wrapped program (terminal or editor)
-   and run it on both `hardy` and `galois` as the keybinding-parity probe.
-4. At 3+ hosts: revisit import-tree/Dendritic if host/feature wiring has become
-   demonstrable friction.
+1. Now: learn the competing patterns and inventory the actual `hardy`/`gauss`
+   duplication, without migrating configuration.
+2. Settle the simplified keybinding behavior first; let the result identify host
+   adapters, shared semantic configuration, and application-specific hooks.
+3. Run the bounded PaperWM experiment without waiting for the architectural
+   migration.
+4. Before expanding successful desktop configuration across hosts, choose and
+   execute a behavior-preserving module/user-ownership refactor, guarded by the
+   existing E2E suite.
+5. Adopt flake-parts + treefmt-nix when `nix-formatting`, a cross-system
+   devShell, or another real `perSystem` consumer is included in that plan; do
+   not adopt flake-parts merely to relocate `nixosConfigurations`.
+6. Pilot one wrapped program only if its portability and independent testing
+   beat ordinary Home Manager or NixOS module ownership for that program.
+7. At 3+ hosts, revisit import-tree/Dendritic if explicit host/feature wiring
+   has become demonstrable friction.
 
 ## Sources
 

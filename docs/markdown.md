@@ -4,9 +4,11 @@ Authoring conventions for repository documentation:
 
 - Use lowercase kebab-case filenames. Reserve uppercase for recognized indexes
   or control files such as `README.md` and `BACKLOG.md`.
-- Prefer headings and `-` lists; use tables when comparison or alignment makes
-  them clearer.
+- Prefer headings and `-` lists. Use tables sparingly when alignment helps; move
+  verbose detail into prose rather than widening the table.
 - Use emphasis sparingly.
+- Avoid emoji, including check/x status glyphs; use words or Markdown
+  checkboxes. Other Unicode and literal output are fine.
 - Use one `#` heading per file.
 - Give fenced code blocks a language when one applies.
 - End files with one newline.

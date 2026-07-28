@@ -56,8 +56,9 @@ desktop VM.
 
 ## Deferred
 
-- Display-device and compositor-feel decisions belong to `compositor-selection`
-  and require real-hardware judgment.
+- Display-device and scrolling-desktop feel decisions belong to
+  [scrolling-desktop](../../design/scrolling-desktop.md) and require
+  real-hardware judgment.
 - Replacing the tmpfiles stopgap belongs to `home-config-ownership`.
 - Applying the merged configuration to gauss and hardy is a deployment step,
   performed only when Daniel explicitly requests it.

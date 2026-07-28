@@ -1,11 +1,8 @@
 # Keybindings
 
 macOS-equivalence keybinding map, tuned and validated on `gauss` and `hardy`
-2026-07-23. Hardy's full execution evidence is in
-[hardy-keybinding-backport](../thoughts/tickets/hardy-keybinding-backport.md).
-Full Gauss validation, mechanism comparisons, and bugs found stay in
-[keybinding-model](../thoughts/tickets/keybinding-model.md) (git history); this
-page states only the settled facts.
+2026-07-23. This page states the settled facts; Git history retains the full
+Gauss validation, Hardy backport, mechanism comparisons, and bugs found.
 
 ## Modifier mapping
 
@@ -112,6 +109,14 @@ the session immediately.
   mapper translates them.
 - Hardy's 1Password desktop app, Quick Access, browser-support wrapper, and
   Brave extension handshake are validated.
+
+## Debugging
+
+- Runtime overrides applied by `keyd bind` survive the process that issued them.
+  Restart the `keyd` service before judging a clean configuration.
+- Local dconf values override declared system defaults. Inspect effective values
+  and use `gsettings reset` to remove a stale local override rather than writing
+  another one.
 
 ## Adjacent state
 
