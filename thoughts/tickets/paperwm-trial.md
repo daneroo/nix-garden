@@ -1,52 +1,25 @@
-# paperwm-trial — Test Scrollable Tiling Inside GNOME
+# PaperWM Trial
 
 ## Outcome
 
-Determine whether PaperWM's horizontally scrollable window model improves
-Daniel's real desktop workflow enough to keep and productionize, without
-replacing the existing GNOME session.
+Get PaperWM usable on `gauss` quickly enough for Daniel to judge it through real
+work. Decide whether to abandon or productionize it only after that use.
 
 Shared rationale and the later Niri boundary are in
 [scrolling-desktop](../design/scrolling-desktop.md).
 
-## Boundaries
+## First Experiment
 
-- Run after `simplified-keybinding-model` settles Alt, Super, and Ctrl
-  ownership.
-- Keep GNOME, Mutter, and the current session services.
-- Preserve GNOME without PaperWM as a recoverable login/session baseline.
-- Do not include a flake-parts or broad module migration in the behavioral
-  trial.
-- Do not turn this into a Niri session scaffold.
+- Install and enable PaperWM declaratively on `gauss`.
+- Keep `hardy` unchanged.
+- Use PaperWM's defaults; do not design preferences or shared modules yet.
+- Validate only enough existing desktop behavior to begin real use.
+- Do not expand the VM E2E harness during the feasibility experiment.
+- Recover by applying clean `main` or selecting the previous NixOS generation.
 
-## Evidence to Collect
+## Deferred Until After Use
 
-- Daily-use feel of stable, comfortably sized horizontal windows.
-- Keyboard, pointer, and trackpad navigation.
-- Window opening, closing, moving, sizing, and workspace behavior.
-- Single- and multi-monitor behavior on available hardware.
-- PaperWM and patched application-mapper extension compatibility.
-- Existing lock, logout, screenshot, launcher, 1Password, and application
-  bindings.
-- Logout/login and reboot persistence.
-- Which existing headless E2E assertions transfer unchanged and which
-  PaperWM-specific window-state observations are needed.
-
-## Acceptance
-
-- The trial is reversible without endangering the GNOME baseline.
-- Existing application-keybinding behavior remains covered by the observable
-  desktop tests.
-- Daniel can judge the workflow on real hardware, not only through a VM.
-- The outcome records what was better, worse, or merely different.
-- A successful trial identifies the smallest reusable configuration boundary; it
-  does not automatically authorize fleet-wide adoption or Niri work.
-
-## Open
-
-- Which host should receive the first PaperWM session after keybindings settle?
-- Should the first real-hardware trial use an alternate session, specialisation,
-  or ordinary extension enablement with a tested disable path?
-- What exact compatibility check proves that both GNOME extensions remain
-  reliable together?
-- How long is enough daily use to distinguish novelty from durable ergonomics?
+- PaperWM preference design and declarative customization.
+- Multi-host adoption and reusable configuration boundaries.
+- Proportional automated regression coverage.
+- Any Niri session implementation.
