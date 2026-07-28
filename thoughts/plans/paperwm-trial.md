@@ -1,11 +1,11 @@
 # PaperWM Trial
 
-Status: planned
+Status: active
 
 Goal: make PaperWM usable on `gauss` for an immediate real-hardware trial.
 
 - [ ] Record the clean `gauss` baseline and current NixOS generation.
-- [ ] On `paperwm-trial`, install and enable PaperWM for `gauss` only; keep its
+- [x] On `paperwm-trial`, install and enable PaperWM for `gauss` only; keep its
       defaults and leave `hardy` and the E2E harness unchanged. `[tier: low]`
 - [ ] Run `just check`, commit, and push the branch.
 - [ ] On clean `gauss`, switch to the branch, run `just plan`, review the

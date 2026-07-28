@@ -97,7 +97,10 @@ in
           # carried this key since 38cdb98; gauss never had it, which is why
           # the menu differed between them rather than any regression.
           always-show-log-out = true;
-          enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
+          enabled-extensions = [
+            "keyd@keyd.rvaiya.github.com"
+            "paperwm@paperwm.github.com"
+          ];
           # Pinned to the dash 2026-07-23; Files (Nautilus) was already
           # there as a GNOME default, kept alongside Ghostty and Brave.
           favorite-apps = [
@@ -231,7 +234,10 @@ in
     UMask = lib.mkForce "0007";
   };
 
-  environment.systemPackages = [ pkgs.vicinae ];
+  environment.systemPackages = [
+    pkgs.gnomeExtensions.paperwm
+    pkgs.vicinae
+  ];
 
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
   # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
