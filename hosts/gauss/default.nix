@@ -48,8 +48,8 @@ let
         state="disabled"
       else
         gnome-extensions enable "$uuid" || fail "could not enable the extension"
-        gnome-extensions list --active | grep -Fxq "$uuid" ||
-          fail "extension enabled but did not become active"
+        gnome-extensions list --enabled | grep -Fxq "$uuid" ||
+          fail "extension still reports disabled after enable"
         state="enabled"
       fi
 
