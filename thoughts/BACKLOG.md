@@ -145,6 +145,10 @@ Shared direction and comparison criteria:
 - [ ] hardy-dev-loop — make `hardy` the primary editor and executor of this
       repo: clone, authenticate, edit, check, preview, apply, verify, commit,
       and push.
+- [ ] herdr-reboot-history — validate opt-in Herdr pane screen replay plus
+      append/synchronized Bash history so restored panes retain useful context
+      across server and host restarts; ticket:
+      [herdr-reboot-history](tickets/herdr-reboot-history.md)
 - [ ] remote-access — configure and verify SSH access suitable for development
       and recovery without weakening host security.
 
