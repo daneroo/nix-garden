@@ -1,18 +1,16 @@
 { pkgs, lib, ... }:
 
 let
-  # Validated 2026-07-23 against a real Ghostty window; see
-  # docs/keybindings.md for the settled per-binding results.
   ghosttyConfig = pkgs.writeText "ghostty-config" ''
-    keybind = super+c=copy_to_clipboard:mixed
-    keybind = super+v=paste_from_clipboard
-    keybind = super+t=new_tab
-    keybind = super+w=close_tab:this
-    keybind = super+shift+]=next_tab
-    keybind = super+shift+[=previous_tab
-    keybind = super+k=clear_screen
-    keybind = super+n=new_window
-    keybind = super+q=quit
+    keybind = alt+c=copy_to_clipboard:mixed
+    keybind = alt+v=paste_from_clipboard
+    keybind = alt+t=new_tab
+    keybind = alt+w=close_tab:this
+    keybind = alt+shift+]=next_tab
+    keybind = alt+shift+[=previous_tab
+    keybind = alt+k=clear_screen
+    keybind = alt+n=new_window
+    keybind = alt+q=quit
 
     # Pre-existing issue (not caused by keybinding-model), fixed alongside it:
     # default multiplier for "precision" scroll devices is 1, producing an
@@ -20,18 +18,8 @@ let
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
 
-  # keyd + keyd-application-mapper: the actual fix for Brave, since Chromium's
-  # chrome.commands API hard-rejects Super/Meta as a shortcut modifier (no
-  # policy or extension workaround exists -- confirmed against Chrome's own
-  # ExtensionSettings docs). keyd remaps physical Alt<->Super below the
-  # compositor (replacing the old xkb altwin:swap_alt_win, which this
-  # subsumes); keyd-application-mapper retranslates Super+key into Brave's
-  # native Ctrl+key ONLY while Brave has focus, via a patched GNOME Shell
-  # extension (upstream only declares support for Shell 45-49; this system
-  # runs 50.2 -- validated 2026-07-23: the extension's actual logic uses only
-  # long-stable Shell APIs and ran correctly once the version string was
-  # patched and keyd-application-mapper was made findable on PATH).
-  # See docs/keybindings.md for the settled mechanism; Git retains the trail.
+  # keyd ships a GNOME extension only for Shell 45-49. Gauss runs Shell 50.2;
+  # the extension uses stable APIs, so extend only its declared compatibility.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
     import json, sys
     src, dst = sys.argv[1], sys.argv[2]
@@ -51,37 +39,23 @@ let
       $out/metadata.json
   '';
 
-  # Brave's own Linux defaults (Ctrl+T/W/N, Ctrl+Shift+T, Ctrl+Tab/Ctrl+Shift+Tab)
-  # are the actual targets -- keyd-application-mapper rewrites our Super-based
-  # chords into these only while a Brave window has focus. Window-class
-  # confirmed via keyd-application-mapper's own -v output: "brave-browser"
-  # (all lowercase).
+  # Brave uses Ctrl for these actions. Translate native Alt only while Brave
+  # has focus, preserving native Alt and Ctrl everywhere else.
   keydAppConf = pkgs.writeText "keyd-app.conf" ''
     [brave-browser]
 
-    meta.t = C-t
-    meta.w = C-w
-    meta+shift.t = C-S-t
-    meta.n = C-n
-    meta+shift.rightbrace = C-tab
-    meta+shift.leftbrace = C-S-tab
-
-    # General close-window catch-all for every other app (2026-07-23):
-    # prior-art research (dannyfaris/nix-config's cross-platform keybind
-    # taxonomy) confirmed Linux has no reliable universal Ctrl+Q quit
-    # convention -- Super+Q was deliberately not attempted here for that
-    # reason. Ctrl+W, however, is already a common native "close" binding
-    # across many GTK apps, so it's the target rather than Alt+F4. Excludes
-    # Ghostty ("com-mitchellh-ghostty") and Brave ("brave-browser") -- both
-    # already have their own specific, validated Super+W handling above and
-    # in Ghostty's own config -- via a single first-letter character-class
-    # match rather than an exhaustive exclusion list; imperfect (would also
-    # skip any other app whose class happens to start with b/c) but matches
-    # the requested "simple, general" approach. Best-effort, not verified
-    # against every possible app.
-    [[!bc]*]
-
-    meta.w = C-w
+    alt.c = C-c
+    alt.v = C-v
+    alt.t = C-t
+    alt.w = C-w
+    alt+shift.t = C-S-t
+    alt.n = C-n
+    alt.l = C-l
+    alt.f = C-f
+    alt+shift.rightbrace = C-tab
+    alt+shift.leftbrace = C-S-tab
+    # Alt+L is translated above, so preserve GNOME's overlapping lock chord.
+    alt+shift.l = A-S-l
   '';
 in
 {
@@ -112,11 +86,6 @@ in
 
   services.printing.enable = true;
 
-  # macOS-equivalence keybinding model; see docs/keybindings.md.
-  # Physical Alt key acts as the Cmd-equivalent Super modifier, matching
-  # Daniel's existing macOS modifier swap; GNOME's own Super+V/Super+N
-  # shortcuts are freed since they collided with Ghostty's paste/new-window
-  # bindings before either reached the app.
   programs.dconf.enable = true;
   programs.dconf.profiles.user.databases = [
     {
@@ -138,32 +107,32 @@ in
           ];
         };
         "org/gnome/shell/keybindings" = {
-          toggle-message-tray = [ "<Super>m" ];
-          focus-active-notification =
-            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
-          # Cmd+Space on macOS is the launcher-invoke reflex. GNOME's own
-          # Activities overview was tried first here (zero-install baseline)
-          # but Vicinae won the trial (MRU app search + inline calculator
-          # confirmed working; Activities has neither) -- left unbound so it
-          # doesn't collide with Vicinae's custom keybinding below.
-          toggle-overview =
-            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
+          screenshot = [
+            "<Shift>Print"
+            "<Alt><Shift>3"
+          ];
+          screenshot-window = [ "<Alt>Print" ];
+          show-screenshot-ui = [
+            "Print"
+            "<Alt><Shift>4"
+          ];
         };
         "org/gnome/desktop/wm/keybindings" = {
-          # <Super>space was switch-input-source by default, colliding with
-          # the launcher-invoke binding above; kept the dedicated hardware
-          # key (XF86Keyboard) so the function isn't lost, just the trigger.
-          switch-input-source = [ "XF86Keyboard" ];
-          switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
+          # Vicinae owns native Alt+Space. Super+Space and the dedicated
+          # keyboard key return to GNOME's stock input-source behavior.
+          activate-window-menu =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
-          # Was <Super>l; freed for Brave's planned address-bar-focus binding
-          # (Cmd+L on macOS) -- moved, not dropped, since lock-screen is a
-          # function Daniel actually wants to keep.
-          screensaver = [ "<Super><Shift>l" ];
+          screensaver = [
+            "<Alt><Shift>l"
+            "<Super>l"
+            "<Control><Alt>q"
+          ];
           custom-keybindings = [
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+            "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2/"
           ];
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
@@ -177,7 +146,7 @@ in
           # (github.com/dagimg-dot/vicinae-gnome-extension, not yet pursued).
           name = "Vicinae toggle";
           command = "${pkgs.vicinae}/bin/vicinae toggle";
-          binding = "<Super>space";
+          binding = "<Alt>space";
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
           # Matches 1Password's own macOS default Quick Access shortcut
@@ -188,7 +157,12 @@ in
           # Daniel's existing Brave sync chain -- nothing to package here.
           name = "1Password quick access";
           command = "1password --quick-access";
-          binding = "<Super><Shift>space";
+          binding = "<Alt><Shift>space";
+        };
+        "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
+          name = "Log out";
+          command = "${pkgs.gnome-session}/bin/gnome-session-quit --logout";
+          binding = "<Alt><Shift>q";
         };
         "org/gnome/desktop/peripherals/mouse" = {
           # Pre-existing (not caused by keybinding-model work) but fixed
@@ -233,27 +207,10 @@ in
     enable = true;
     keyboards.default = {
       ids = [ "*" ];
-      settings = {
-        main = {
-          # Cmd-equivalence base layer: physical Alt <-> Super, replacing the
-          # old xkb altwin:swap_alt_win (keyd subsumes it). Symmetric on both
-          # sides since the "us" layout here has no AltGr distinction to
-          # preserve.
-          leftalt = "layer(meta)";
-          leftmeta = "layer(alt)";
-          rightalt = "layer(meta)";
-          rightmeta = "layer(alt)";
-        };
-        # Empty composite layer declaration -- required for
-        # keyd-application-mapper's "meta+shift.<key>" bindings (next/prev
-        # tab, reopen-closed-tab) to resolve at all. Confirmed via direct
-        # `keyd bind` test: referencing an undeclared composite layer fails
-        # outright ("meta+shift is not a valid layer"), silently passing the
-        # raw Shift+key through instead of the intended shortcut -- this was
-        # the cause of literal `{`/`}` characters typing into Brave's
-        # address bar instead of switching tabs.
-        "meta+shift" = { };
-      };
+      # keyd-application-mapper cannot dynamically bind a composite layer
+      # unless the static config declares it first. No base modifier mapping:
+      # Alt, Ctrl, both Windows-logo keys, and right Alt/AltGr stay native.
+      settings."alt+shift" = { };
     };
   };
 

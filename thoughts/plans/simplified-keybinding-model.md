@@ -240,18 +240,19 @@ Deferred, non-blocking observations from Hardy acceptance:
 
 ## Gauss Portability
 
-- [ ] Only after Hardy is accepted, run the identical target suite against
+- [x] Only after Hardy is accepted, run the identical target suite against
       unchanged Gauss and record the expected carrier-negative failure. Port the
       settled behavior without copying Hardy's hardware illumination adapter or
       refactoring the hosts into a shared module. `[tier: high]`
-- [ ] Remove Gauss's all-keyboards Alt/Super swap and unnamed-application Alt+W
+- [x] Remove Gauss's all-keyboards Alt/Super swap and unnamed-application Alt+W
       catch-all. Keep Alt, Ctrl, both Windows-logo keys, and right Alt/AltGr
       native; apply the converged Ghostty, fuller Brave, GNOME, and desktop
       chord maps. Preserve unrelated Gauss behavior. `[tier: med]`
-- [ ] Run `just check`, the headless Gauss suite, and the identical visible
+- [x] Run `just check`, the headless Gauss suite, and the identical visible
       Gauss suite. Daniel must observe and confirm the guided cases. Require
       both Hardy and Gauss target suites green before the Gauss milestone is
-      committed. `[tier: high]`
+      committed. Both Gauss runs and the Hardy regression run passed 27/27;
+      Daniel accepted the visible Gauss guided cases. `[tier: high]`
 - [ ] Commit and push the Gauss milestone before planning it. Coordinate this
       phase from Galois, which has the required SSH authority, but execute
       checkout, test, `just plan`, and approved `just apply` commands on Gauss
