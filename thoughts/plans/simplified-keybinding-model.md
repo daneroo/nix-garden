@@ -268,6 +268,14 @@ Deferred, non-blocking observations from Hardy acceptance:
       Real-hardware Gauss verification is mandatory for completion.
       `[tier: high]`
 
+Deferred, non-blocking observation from Gauss acceptance:
+
+- The guided Alt+Shift+L case did not visibly lock a post-apply
+  `just e2e-vm --host gauss --show` run, while the same binding locked real
+  Gauss correctly. This is logged as the
+  [visible-vm-lock](../tickets/visible-vm-lock.md) harness bug; do not fix or
+  reinvestigate it in this plan.
+
 ## Compare and Close Out
 
 - [ ] Compare Hardy and Gauss by observable behavior, the absence of a global
