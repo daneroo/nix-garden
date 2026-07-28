@@ -23,3 +23,14 @@ Shared rationale and the later Niri boundary are in
 - Multi-host adoption and reusable configuration boundaries.
 - Proportional automated regression coverage.
 - Any Niri session implementation.
+
+## Production Direction
+
+- Install PaperWM and its toggle on both hosts.
+- A fresh user profile starts with PaperWM enabled.
+- An established profile retains the user's last enabled or disabled choice; Nix
+  does not continuously enforce that choice.
+- Expose the same system-owned toggle executable to both the shell and Vicinae
+  through `bin` and `share/vicinae/scripts`. Removing its package must remove
+  both surfaces without leaving an artifact in the user's home.
+- Assess the existing E2E VM suite only after the feature lands on `main`.

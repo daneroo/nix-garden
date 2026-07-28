@@ -18,7 +18,7 @@ let
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
 
-  paperwmToggle = pkgs.writeShellApplication {
+  paperwmToggleCommand = pkgs.writeShellApplication {
     name = "paperwm-toggle";
     runtimeInputs = [
       pkgs.gnome-shell
@@ -29,8 +29,6 @@ let
       # @vicinae.title Toggle PaperWM Tiling
       # @vicinae.mode silent
 
-      # System-wide is a compromise while nix-garden does not manage Daniel's
-      # user scripts. A user-scoped command would be the natural home.
       uuid="paperwm@paperwm.github.com"
 
       fail() { printf 'PaperWM tiling: %s\n' "$1"; exit 1; }
@@ -56,6 +54,17 @@ let
       printf 'PaperWM tiling %s\n' "$state"
     '';
   };
+
+  # Vicinae searches XDG data directories rather than PATH for script commands.
+  # Keep both entry points in one system-owned package so removing the package
+  # removes its shell and launcher surfaces together.
+  paperwmToggle = pkgs.runCommand "paperwm-toggle-with-vicinae" { } ''
+    mkdir -p "$out/bin" "$out/share/vicinae/scripts"
+    ln -s ${paperwmToggleCommand}/bin/paperwm-toggle \
+      "$out/bin/paperwm-toggle"
+    ln -s "$out/bin/paperwm-toggle" \
+      "$out/share/vicinae/scripts/paperwm-toggle"
+  '';
 
   # keyd ships a GNOME extension only for Shell 45-49. Gauss runs Shell 50.2;
   # the extension uses stable APIs, so extend only its declared compatibility.
@@ -278,18 +287,6 @@ in
     pkgs.vicinae
     paperwmToggle
   ];
-
-  programs.bash.interactiveShellInit = ''
-    # Temporary user-state bridge: remove this when Home Manager owns Daniel's
-    # Vicinae scripts. Vicinae does not discover commands from PATH.
-    vicinae_scripts="''${XDG_DATA_HOME:-"$HOME/.local/share"}/vicinae/scripts"
-    paperwm_toggle="$vicinae_scripts/paperwm-toggle"
-    if [[ ! -e "$paperwm_toggle" && ! -L "$paperwm_toggle" ]]; then
-      mkdir -p "$vicinae_scripts"
-      ln -s /run/current-system/sw/bin/paperwm-toggle "$paperwm_toggle"
-    fi
-    unset vicinae_scripts paperwm_toggle
-  '';
 
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
   # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"

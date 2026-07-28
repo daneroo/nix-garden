@@ -12,8 +12,8 @@ Goal: make PaperWM usable on `gauss` for an immediate real-hardware trial.
       meaningful system diff, and apply it.
 - [x] Confirm PaperWM is active and basic window management works in the real
       GNOME session.
-- [ ] Expose the toggle through Vicinae with a temporary Bash-created link;
-      remove the bridge when Home Manager owns user state. `[tier: low]`
+- [ ] Expose the toggle through Vicinae from the system profile and remove the
+      temporary user-owned link from `gauss`. `[tier: low]`
 - [ ] Stop with PaperWM usable and switchable. Daniel's experience will decide
       the production keybindings and E2E impact later.
 
