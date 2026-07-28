@@ -279,6 +279,18 @@ in
     paperwmToggle
   ];
 
+  programs.bash.interactiveShellInit = ''
+    # Temporary user-state bridge: remove this when Home Manager owns Daniel's
+    # Vicinae scripts. Vicinae does not discover commands from PATH.
+    vicinae_scripts="''${XDG_DATA_HOME:-"$HOME/.local/share"}/vicinae/scripts"
+    paperwm_toggle="$vicinae_scripts/paperwm-toggle"
+    if [[ ! -e "$paperwm_toggle" && ! -L "$paperwm_toggle" ]]; then
+      mkdir -p "$vicinae_scripts"
+      ln -s /run/current-system/sw/bin/paperwm-toggle "$paperwm_toggle"
+    fi
+    unset vicinae_scripts paperwm_toggle
+  '';
+
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
   # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
   # (bound to Alt+Space above) needs the server already running to have
