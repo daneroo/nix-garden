@@ -18,6 +18,45 @@ let
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
 
+  paperwmToggle = pkgs.writeShellApplication {
+    name = "paperwm-toggle";
+    runtimeInputs = [
+      pkgs.gnome-shell
+      pkgs.gnugrep
+    ];
+    text = ''
+      # @vicinae.schemaVersion 1
+      # @vicinae.title Toggle PaperWM Tiling
+      # @vicinae.mode silent
+
+      # System-wide is a compromise while nix-garden does not manage Daniel's
+      # user scripts. A user-scoped command would be the natural home.
+      uuid="paperwm@paperwm.github.com"
+
+      fail() { printf 'PaperWM tiling: %s\n' "$1"; exit 1; }
+
+      command -v gnome-extensions >/dev/null 2>&1 ||
+        fail "gnome-extensions is unavailable"
+
+      gnome-extensions info "$uuid" >/dev/null 2>&1 ||
+        fail "extension is unavailable in this GNOME session"
+
+      if gnome-extensions list --enabled | grep -Fxq "$uuid"; then
+        gnome-extensions disable "$uuid" || fail "could not disable the extension"
+        ! gnome-extensions list --enabled | grep -Fxq "$uuid" ||
+          fail "extension still reports enabled after disable"
+        state="disabled"
+      else
+        gnome-extensions enable "$uuid" || fail "could not enable the extension"
+        gnome-extensions list --active | grep -Fxq "$uuid" ||
+          fail "extension enabled but did not become active"
+        state="enabled"
+      fi
+
+      printf 'PaperWM tiling %s\n' "$state"
+    '';
+  };
+
   # keyd ships a GNOME extension only for Shell 45-49. Gauss runs Shell 50.2;
   # the extension uses stable APIs, so extend only its declared compatibility.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
@@ -237,6 +276,7 @@ in
   environment.systemPackages = [
     pkgs.gnomeExtensions.paperwm
     pkgs.vicinae
+    paperwmToggle
   ];
 
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
