@@ -257,16 +257,21 @@ Deferred, non-blocking observations from Hardy acceptance:
       phase from Galois, which has the required SSH authority, but execute
       checkout, test, `just plan`, and approved `just apply` commands on Gauss
       itself. Do not assume Hardy can reach Gauss. `[tier: high]`
-- [ ] Review Gauss's closure diff, session/re-login implications, and rollback
+- [x] Review Gauss's closure diff, session/re-login implications, and rollback
       generation with Daniel; wait for a separate explicit approval before
       Gauss's `just apply`. Apply the same recovery and post-apply
-      reconciliation policy used for Hardy. `[tier: high]`
-- [ ] On Gauss hardware, verify the complete shared application and desktop map,
+      reconciliation policy used for Hardy. The clean pushed `b5002d2` plan had
+      no package closure changes; Daniel approved it, generation 23 was applied,
+      stale user dconf overrides were removed precisely, and the post-apply
+      Gauss suite passed 27/27. `[tier: high]`
+- [x] On Gauss hardware, verify the complete shared application and desktop map,
       native Alt/Ctrl/Windows-logo identity, right Alt/AltGr, Files as the
       negative control, 1Password's manual checks, logout/login, reboot
       persistence, and representative behavior on an external keyboard.
-      Real-hardware Gauss verification is mandatory for completion.
-      `[tier: high]`
+      Real-hardware Gauss verification is mandatory for completion. Daniel
+      accepted the complete real-hardware pass, including a created screenshot,
+      logout/login, generation-23 reboot persistence, and representative
+      post-reboot behavior. `[tier: high]`
 
 Deferred, non-blocking observation from Gauss acceptance:
 
