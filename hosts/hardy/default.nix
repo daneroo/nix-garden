@@ -123,7 +123,10 @@ in
       settings = {
         "org/gnome/shell" = {
           always-show-log-out = true;
-          enabled-extensions = [ "keyd@keyd.rvaiya.github.com" ];
+          enabled-extensions = [
+            "keyd@keyd.rvaiya.github.com"
+            "paperwm@paperwm.github.com"
+          ];
           favorite-apps = [
             "com.mitchellh.ghostty.desktop"
             "brave-browser.desktop"
@@ -139,6 +142,14 @@ in
           show-screenshot-ui = [
             "Print"
             "<Alt><Shift>4"
+          ];
+        };
+        "org/gnome/shell/extensions/paperwm" = {
+          winprops = [
+            (builtins.toJSON {
+              wm_class = "vicinae";
+              scratch_layer = true;
+            })
           ];
         };
         "org/gnome/desktop/wm/keybindings" = {

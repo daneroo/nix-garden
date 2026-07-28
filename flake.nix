@@ -50,6 +50,7 @@
         name:
         [
           (./hosts + "/${name}")
+          ./modules/paperwm.nix
           # Inert in a normal system/test build; used by `nixos-rebuild
           # build-vm`.
           ./modules/vm-variant.nix

@@ -18,54 +18,6 @@ let
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
 
-  paperwmToggleCommand = pkgs.writeShellApplication {
-    name = "paperwm-toggle";
-    runtimeInputs = [
-      pkgs.gnome-shell
-      pkgs.gnugrep
-    ];
-    text = ''
-      # @vicinae.schemaVersion 1
-      # @vicinae.title Toggle PaperWM Tiling
-      # @vicinae.mode silent
-
-      uuid="paperwm@paperwm.github.com"
-
-      fail() { printf 'PaperWM tiling: %s\n' "$1"; exit 1; }
-
-      command -v gnome-extensions >/dev/null 2>&1 ||
-        fail "gnome-extensions is unavailable"
-
-      gnome-extensions info "$uuid" >/dev/null 2>&1 ||
-        fail "extension is unavailable in this GNOME session"
-
-      if gnome-extensions list --enabled | grep -Fxq "$uuid"; then
-        gnome-extensions disable "$uuid" || fail "could not disable the extension"
-        ! gnome-extensions list --enabled | grep -Fxq "$uuid" ||
-          fail "extension still reports enabled after disable"
-        state="disabled"
-      else
-        gnome-extensions enable "$uuid" || fail "could not enable the extension"
-        gnome-extensions list --enabled | grep -Fxq "$uuid" ||
-          fail "extension still reports disabled after enable"
-        state="enabled"
-      fi
-
-      printf 'PaperWM tiling %s\n' "$state"
-    '';
-  };
-
-  # Vicinae searches XDG data directories rather than PATH for script commands.
-  # Keep both entry points in one system-owned package so removing the package
-  # removes its shell and launcher surfaces together.
-  paperwmToggle = pkgs.runCommand "paperwm-toggle-with-vicinae" { } ''
-    mkdir -p "$out/bin" "$out/share/vicinae/scripts"
-    ln -s ${paperwmToggleCommand}/bin/paperwm-toggle \
-      "$out/bin/paperwm-toggle"
-    ln -s "$out/bin/paperwm-toggle" \
-      "$out/share/vicinae/scripts/paperwm-toggle"
-  '';
-
   # keyd ships a GNOME extension only for Shell 45-49. Gauss runs Shell 50.2;
   # the extension uses stable APIs, so extend only its declared compatibility.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
@@ -166,6 +118,14 @@ in
           show-screenshot-ui = [
             "Print"
             "<Alt><Shift>4"
+          ];
+        };
+        "org/gnome/shell/extensions/paperwm" = {
+          winprops = [
+            (builtins.toJSON {
+              wm_class = "vicinae";
+              scratch_layer = true;
+            })
           ];
         };
         "org/gnome/desktop/wm/keybindings" = {
@@ -282,11 +242,7 @@ in
     UMask = lib.mkForce "0007";
   };
 
-  environment.systemPackages = [
-    pkgs.gnomeExtensions.paperwm
-    pkgs.vicinae
-    paperwmToggle
-  ];
+  environment.systemPackages = [ pkgs.vicinae ];
 
   # No NixOS module ships for Vicinae (only a Home Manager one, which this
   # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
