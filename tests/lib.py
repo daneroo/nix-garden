@@ -92,6 +92,12 @@ def visible_pause(seconds: int, message: str) -> None:
         machine.sleep(seconds)  # noqa: F821
 
 
+def guided_pause(message: str) -> None:
+    """Hold a guided case for the contracted four seconds in every mode."""
+    machine.log(message)  # noqa: F821
+    machine.sleep(4)  # noqa: F821
+
+
 def send_chord(chord: str) -> None:
     """Inject one physical chord at the guest's keyboard.
 

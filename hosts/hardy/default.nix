@@ -2,15 +2,15 @@
 
 let
   ghosttyConfig = pkgs.writeText "ghostty-config" ''
-    keybind = super+c=copy_to_clipboard:mixed
-    keybind = super+v=paste_from_clipboard
-    keybind = super+t=new_tab
-    keybind = super+w=close_tab:this
-    keybind = super+shift+]=next_tab
-    keybind = super+shift+[=previous_tab
-    keybind = super+k=clear_screen
-    keybind = super+n=new_window
-    keybind = super+q=quit
+    keybind = alt+c=copy_to_clipboard:mixed
+    keybind = alt+v=paste_from_clipboard
+    keybind = alt+t=new_tab
+    keybind = alt+w=close_tab:this
+    keybind = alt+shift+]=next_tab
+    keybind = alt+shift+[=previous_tab
+    keybind = alt+k=clear_screen
+    keybind = alt+n=new_window
+    keybind = alt+q=quit
 
     mouse-scroll-multiplier = precision:3,discrete:5
   '';
@@ -36,24 +36,25 @@ let
       $out/metadata.json
   '';
 
-  # Brave has no native Super bindings. Translate only while Brave has focus,
-  # preserving native Ctrl globally and closing the macOS-equivalence gaps that
-  # Chromium's chrome.commands API cannot accept.
+  # Brave uses Ctrl for these actions. Translate native Alt only while Brave
+  # has focus, preserving native Alt and Ctrl everywhere else.
   keydAppConf = pkgs.writeText "keyd-app.conf" ''
     [brave-browser]
 
-    meta.c = C-c
-    meta.v = C-v
-    meta.t = C-t
-    meta.w = C-w
-    meta+shift.t = C-S-t
-    meta+shift.w = C-S-w
-    meta.n = C-n
-    meta.l = C-l
-    meta.f = C-f
-    meta+shift.rightbrace = C-tab
-    meta+shift.leftbrace = C-S-tab
+    alt.c = C-c
+    alt.v = C-v
+    alt.t = C-t
+    alt.w = C-w
+    alt+shift.t = C-S-t
+    alt.n = C-n
+    alt.l = C-l
+    alt.f = C-f
+    alt+shift.rightbrace = C-tab
+    alt+shift.leftbrace = C-S-tab
+    # Alt+L is translated above, so preserve GNOME's overlapping lock chord.
+    alt+shift.l = A-S-l
   '';
+
 in
 {
   imports = [
@@ -81,32 +82,24 @@ in
   services.printing.enable = true;
 
   # The internal keyboard has distinct Ctrl, Alt, and Search keys; Search emits
-  # left Meta. Physical Alt (beside Space, Daniel's Cmd position) becomes Meta,
-  # Search becomes Alt/Option, and both physical Ctrl keys stay native. This
-  # preserves all three roles without the per-app Ctrl compromise considered
-  # before the hardware events were captured.
+  # Linux Super. Keep all three native and use this device-specific declaration
+  # only for its Chromebook keyboard-illumination chord.
   #
   # The Chromebook top-row brightness keys arrive as plain F6/F7. ChromeOS's
-  # keyboard-illumination convention is physical Alt+F6/F7, so those bindings
-  # live in the resulting Meta layer and emit standard Linux illumination
-  # events. Limit the entire mapping to the observed internal keyboard.
+  # keyboard-illumination convention is physical Alt+F6/F7. Emit the standard
+  # Linux illumination events only for the observed internal keyboard.
   services.keyd = {
     enable = true;
     keyboards.internal = {
       ids = [ "0001:0001:09b4e68d" ];
       settings = {
-        main = {
-          leftalt = "layer(meta)";
-          rightalt = "layer(meta)";
-          leftmeta = "layer(alt)";
-        };
-        meta = {
+        alt = {
           f6 = "kbdillumdown";
           f7 = "kbdillumup";
         };
         # keyd-application-mapper cannot dynamically bind a composite layer
         # unless the static config declares it first.
-        "meta+shift" = { };
+        "alt+shift" = { };
       };
     };
   };
@@ -138,29 +131,27 @@ in
           ];
         };
         "org/gnome/shell/keybindings" = {
-          toggle-message-tray = [ "<Super>m" ];
-          focus-active-notification =
-            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
-          toggle-overview =
-            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
           screenshot = [
             "<Shift>Print"
-            "<Super><Shift>3"
+            "<Alt><Shift>3"
           ];
           screenshot-window = [ "<Alt>Print" ];
           show-screenshot-ui = [
             "Print"
-            "<Super><Shift>4"
+            "<Alt><Shift>4"
           ];
         };
         "org/gnome/desktop/wm/keybindings" = {
-          switch-input-source = [ "XF86Keyboard" ];
-          switch-input-source-backward = [ "<Shift>XF86Keyboard" ];
+          # Vicinae owns native Alt+Space. Super+Space and the dedicated
+          # keyboard key return to GNOME's stock input-source behavior.
+          activate-window-menu =
+            lib.gvariant.mkEmptyArray lib.gvariant.type.string;
         };
         "org/gnome/settings-daemon/plugins/media-keys" = {
           screensaver = [
-            "<Super><Shift>l"
-            "<Control><Super>q"
+            "<Alt><Shift>l"
+            "<Super>l"
+            "<Control><Alt>q"
           ];
           custom-keybindings = [
             "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
@@ -171,17 +162,17 @@ in
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0" = {
           name = "Vicinae toggle";
           command = "${pkgs.vicinae}/bin/vicinae toggle";
-          binding = "<Super>space";
+          binding = "<Alt>space";
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1" = {
           name = "1Password quick access";
           command = "1password --quick-access";
-          binding = "<Super><Shift>space";
+          binding = "<Alt><Shift>space";
         };
         "org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom2" = {
           name = "Log out";
           command = "${pkgs.gnome-session}/bin/gnome-session-quit --logout";
-          binding = "<Super><Shift>q";
+          binding = "<Alt><Shift>q";
         };
         "org/gnome/desktop/peripherals/mouse" = {
           natural-scroll = true;

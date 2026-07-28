@@ -8,7 +8,6 @@ main() {
   local mode="test"
   local show=false
   local host
-  local host_was_set=false
   host="$(hostname)"
 
   while (($#)); do
@@ -26,11 +25,9 @@ main() {
           fail "--host requires a hostname"
         fi
         host="$1"
-        host_was_set=true
         ;;
       --host=*)
         host="${1#--host=}"
-        host_was_set=true
         ;;
       -h | --help)
         usage
@@ -43,21 +40,21 @@ main() {
     shift
   done
 
-  if [[ "$mode" == "test" && "$host_was_set" == true ]]; then
-    fail "--host is valid only with --no-test"
+  if [[ " $blessed_hosts " != *" $host "* ]]; then
+    fail "unrecognized host '$host'; blessed hosts: $blessed_hosts"
   fi
 
   if [[ "$mode" == "explore" ]]; then
     run_exploration "$host"
   else
-    run_tests "$show"
+    run_tests "$show" "$host"
   fi
 }
 
 usage() {
   cat <<'EOF'
 Usage:
-  just e2e-vm [--show]
+  just e2e-vm [--show] [--host HOST]
   just e2e-vm --no-test [--host HOST]
 
 Modes:
@@ -102,6 +99,7 @@ require_display() {
 
 run_tests() {
   local show="$1"
+  local host="$2"
   local out
   local driver
   local started_ns
@@ -110,18 +108,23 @@ run_tests() {
 
   test_artifact_root="$(mktemp -d)"
   trap cleanup_test_artifacts EXIT
-  out="$test_artifact_root/test-desktop"
+  out="$test_artifact_root/test-desktop-$host"
   mkdir -p "$out"
 
   if [[ "$show" == true ]]; then
     require_display
-    echo "== show: test-desktop =="
+    echo "== show: test-desktop-$host =="
     driver="$(
-      nix build .#test-desktop.driverInteractive --no-link --print-out-paths
+      nix build \
+        ".#test-desktop-$host.driverInteractive" \
+        --no-link \
+        --print-out-paths
     )"
   else
-    echo "== running: test-desktop =="
-    driver="$(nix build .#test-desktop.driver --no-link --print-out-paths)"
+    echo "== running: test-desktop-$host =="
+    driver="$(
+      nix build ".#test-desktop-$host.driver" --no-link --print-out-paths
+    )"
   fi
 
   started_ns="$(date +%s%N)"
@@ -156,10 +159,6 @@ run_tests() {
 run_exploration() {
   local host="$1"
   local image_dir
-
-  if [[ " $blessed_hosts " != *" $host "* ]]; then
-    fail "unrecognized host '$host'; blessed hosts: $blessed_hosts"
-  fi
 
   require_display
   echo "== vm: nix build .#nixosConfigurations.$host.config.system.build.vm =="

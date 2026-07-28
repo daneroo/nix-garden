@@ -93,13 +93,21 @@
         let
           testLib = pkgs.callPackage ./tests/lib.nix { inherit pkgs; };
 
-          desktopTest = testLib {
-            hostModules = hostModules "gauss";
-            vmLayer = ./modules/vm-layer.nix;
-          };
+          desktopTests = nixpkgs.lib.genAttrs hosts (
+            hostName:
+            testLib {
+              inherit hostName;
+              hostModules = hostModules hostName;
+              vmLayer = ./modules/vm-layer.nix;
+            }
+          );
         in
         {
-          test-desktop = desktopTest;
+          # Keep the original output as a compatibility alias while the public
+          # recipe selects a host-specific instance.
+          test-desktop = desktopTests.gauss;
+          test-desktop-hardy = desktopTests.hardy;
+          test-desktop-gauss = desktopTests.gauss;
 
           # Renders the JUnit artifacts a run leaves behind. Provided by the
           # flake rather than installed on the hosts: this is a repository tool,

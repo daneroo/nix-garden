@@ -16,29 +16,29 @@ were not changed.
 
 - [x] After Daniel approves this revised draft, commit it on `main`.
       `[tier: low]`
-- [ ] Daniel pushes the approved plan commit. In the separate Hardy execution
+- [x] Daniel pushes the approved plan commit. In the separate Hardy execution
       session, fast-forward a clean `main` to that commit and create the exact
       branch `simplified-keybinding-model`. Do not implement on `main`.
       `[tier: low]`
-- [ ] At implementation start on Hardy, require a clean checkout containing the
+- [x] At implementation start on Hardy, require a clean checkout containing the
       approved plan, then record `git status`, `git rev-parse HEAD`,
       `just current-state`, and the running generation. Rerun `just check` and
       the unchanged headless E2E suite; stop on drift or an unexplained baseline
       failure. `[tier: high]`
-- [ ] Treat [docs/keybindings.md](../../docs/keybindings.md) as the current
+- [x] Treat [docs/keybindings.md](../../docs/keybindings.md) as the current
       behavioral inventory, not an implementation blueprint. Preserve the
       covered physical behavior except for the two explicitly removed Brave
       conveniences below. `[tier: high]`
-- [ ] Use precise Linux terminology throughout implementation: Alt, Ctrl, and,
+- [x] Use precise Linux terminology throughout implementation: Alt, Ctrl, and,
       when relevant, the physical Search key on Hardy or Windows-logo key on
       Gauss that produces Linux Super. Do not use macOS modifier names or "Meta"
       as active key terminology. `[tier: high]`
-- [ ] Keep PaperWM, Home Manager, flake-parts, module extraction/refactoring,
+- [x] Keep PaperWM, Home Manager, flake-parts, module extraction/refactoring,
       home-config ownership, unrelated keyd security work, VS Code behavior, and
       Codex image paste out of scope. The two independent host profiles may
       duplicate the proven behavior until module architecture is addressed
       separately. `[tier: high]`
-- [ ] Treat maintainability as an acceptance constraint. If an automated
+- [x] Treat maintainability as an acceptance constraint. If an automated
       consequence requires private internals, pixel matching, extensive timing,
       or a new general-purpose harness, stop and present Daniel with the
       evidence, cost, and recommendation to waive or defer it. Do not escalate
@@ -56,16 +56,16 @@ were not changed.
       right Alt; application toolkits may treat both Alt keys alike under the US
       layout. Preserve AltGr on keyboards/layouts that provide it.
       `[tier: high]`
-- [ ] Preserve this Ghostty map with direct Alt bindings: Alt+C/V/T/W/N,
+- [x] Preserve this Ghostty map with direct Alt bindings: Alt+C/V/T/W/N,
       Alt+Shift+]/Alt+Shift+[, Alt+K, and Alt+Q. Alt+Q remains declarative but
       is not exercised in the normal behavioral sequence because it destroys
       fixture state. Alt+D is the representative unbound terminal Alt chord;
       Ctrl+C is the representative native terminal Control chord. `[tier: med]`
-- [ ] Use Hardy's fuller Brave map as the converged target: Alt+C/V/T/W/N/L/F,
+- [x] Use Hardy's fuller Brave map as the converged target: Alt+C/V/T/W/N/L/F,
       Alt+Shift+T, and Alt+Shift+]/Alt+Shift+[. Remove Hardy's redundant,
       destructive Alt+Shift+W convenience, leave Alt+Q unmapped, and remove
       Gauss's best-effort catch-all for unnamed applications. `[tier: high]`
-- [ ] Translate Alt only in named applications that require it. Ghostty binds
+- [x] Translate Alt only in named applications that require it. Ghostty binds
       Alt directly; Brave may retain its focused keyd application mapper and
       patched GNOME Shell focus extension, translating selected native Alt
       chords to Brave's native Ctrl chords. Do not add a broad default
@@ -78,73 +78,82 @@ were not changed.
       for the logout confirmation dialog; native Alt+Tab for application
       switching; and Alt+Search/Windows-logo+Left/Right for workspaces. Preserve
       Print Screen fallbacks. `[tier: high]`
-- [ ] Give Vicinae ownership of native Alt+Space by explicitly clearing GNOME's
+- [x] Give Vicinae ownership of native Alt+Space by explicitly clearing GNOME's
       conflicting active-window-menu binding. For any other stock GNOME
       collision, the covered Alt chord wins, the displaced binding is
       documented, and no replacement chord is invented unless it is required for
       recovery or Daniel demonstrates that he uses it. `[tier: high]`
-- [ ] Keep Hardy's observed internal-keyboard ID only for hardware-specific
+- [x] Keep Hardy's observed internal-keyboard ID only for hardware-specific
       Alt+F6/F7 keyboard illumination. Modifier ownership is not
       device-specific. External keyboards receive no Chromebook illumination
       rule. `[tier: med]`
 
 ## Test Contract First
 
-- [ ] Parameterize the existing desktop test with the smallest public change:
+- [x] Parameterize the existing desktop test with the smallest public change:
       publish Hardy and Gauss instances of the same contract, accept
       `--host hardy|gauss` in headless and visible assertion modes, and retain
       the existing `test-desktop` output as a compatibility alias. Bare
       `just e2e-vm` selects the current blessed NixOS host; an explicit host
       selects the other configuration. Galois is a coordinator, not a NixOS test
       executor. `[tier: med]`
-- [ ] Add a test-only GTK/GDK probe that records the relevant logical modifier
+- [x] Add a test-only GTK/GDK probe that records the relevant logical modifier
       mask after QEMU injects physical left Alt, left Ctrl, and the physical key
       that produces Super. Assert exact, distinct Alt-only, Ctrl-only, and
       Super-only results. Do not infer modifier identity from successful
       injection or process state. `[tier: med]`
-- [ ] Add a narrow declarative invariant that neither host contains the old base
+- [x] Add a narrow declarative invariant that neither host contains the old base
       Alt-to-Super mapping. This complements the behavioral probe because QEMU's
       Virtio keyboard cannot match Hardy's real internal-keyboard ID.
       `[tier: med]`
-- [ ] Before production changes, run the new modifier contract against unchanged
+- [x] Before production changes, run the new modifier contract against unchanged
       Gauss and record its expected red result: physical Alt arrives as Super
       under the carrier. Observe test-first red results without committing a
       deliberately broken checkpoint. `[tier: high]`
-- [ ] Retain the keyd application-map delivery, patched extension, and mapper
+- [x] Retain the keyd application-map delivery, patched extension, and mapper
       process checks as cheap supplemental diagnostics because the target still
       uses them for Brave. They are preconditions, never proof of Brave
       behavior. Replace their former acceptance role with observed or explicitly
       guided application consequences. `[tier: med]`
-- [ ] Extend the Ghostty protocol fixture and its semantic observations:
+- [x] Extend the Ghostty protocol fixture and its semantic observations:
       preserve copy, paste, tab creation/closure/selection, window creation, and
       tab navigation; assert that Ctrl+C reaches the PTY as Control-C; and
       assert that Alt+D reaches the PTY as an unbound terminal Alt sequence.
       Keep every shared-state precondition explicit. `[tier: med]`
-- [ ] Keep a declarative assertion for Ghostty Alt+K, then populate the fixture,
+- [x] Keep a declarative assertion for Ghostty Alt+K, then populate the fixture,
       inject Alt+K, and pause four seconds as a guided clear-screen case near
       the end of the Ghostty sequence. Do not semantically claim that
       inaccessible terminal cells were observed. `[tier: med]`
-- [ ] Add a deterministic local Brave fixture. Keep a cheap declarative
+- [x] Add a deterministic local Brave fixture. Keep a cheap declarative
       assertion for the complete intended chord table, then seek stable semantic
       observations for each consequence family: clipboard, tab
       creation/closure/reopen/navigation, window creation, address focus, and
       find. Prefer clipboard contents, active document/title, tab/window counts,
       and accessibility state. `[tier: med]`
-- [ ] When a Brave consequence lacks a maintainable semantic boundary, retain
+- [x] When a Brave consequence lacks a maintainable semantic boundary, retain
       automated setup, focus, chord injection, and a four-second guided pause.
       Run the same action and pause in headless and `--show` modes, place guided
       cases after asserted state, and allow them to appear as passing subtests
       without claiming their consequence was asserted. `[tier: med]`
-- [ ] Keep the full Alt+Shift+L lock, password authentication, and unlock
-      assertion. For Alt+Shift+Q, assert the session precondition, attempt a
-      stable semantic observation of GNOME's confirmation dialog, send Escape,
-      and assert that the session survived. Use the same guided fallback if the
-      dialog has no proportional semantic boundary; never confirm logout inside
-      the shared regression VM. `[tier: med]`
-- [ ] For Alt+Shift+3, assert that a new screenshot file appears. Preserve
-      Alt+Shift+4 and Print Screen fallbacks declaratively but omit them from
-      automated and required manual acceptance. `[tier: med]`
-- [ ] Keep Vicinae and 1Password out of VM automation. Their required physical
+- [x] Inject Alt+Shift+L identically in headless and visible modes, assert the
+      exact native Alt+Shift+L event sequence, pause four seconds for guided
+      lock observation, then send the fixture password and restore the unlocked
+      session. The visible VM requires confirmation of the lock consequence;
+      headless GNOME ignored the correctly emitted accelerator, so it must not
+      claim a semantic lock assertion. For Alt+Shift+Q, assert the session
+      precondition, use the same four-second guided observation, send Escape,
+      and assert that the session survived; never confirm logout inside the
+      shared regression VM. `[tier: med]`
+- [x] Preserve Alt+Shift+3, Alt+Shift+4, and Print Screen fallbacks
+      declaratively. The planned headless Alt+Shift+3 file assertion is waived:
+      both its unchanged Shift+Print positive control and the target chord
+      failed to produce file evidence in the headless VM, while the Screenshot
+      app and Hardy's carrier-era physical chord produced screenshots in
+      visible/real sessions. GNOME Shell 50 also restricts its screenshot D-Bus
+      methods to MediaKeys and the desktop portal, so a direct test-process
+      invocation is not a valid substitute. Require the target physical chord to
+      create a new file on real Hardy after apply. `[tier: med]`
+- [x] Keep Vicinae and 1Password out of VM automation. Their required physical
       checks need the real session; the VM has no authenticated Brave or
       1Password state. `[tier: med]`
 - [ ] Use Files as the sole required stock-GNOME negative control on real
@@ -154,24 +163,27 @@ were not changed.
 
 ## Hardy Experiment
 
-- [ ] Remove Hardy's Alt/Super base swap while retaining its internal-keyboard
+- [x] Remove Hardy's Alt/Super base swap while retaining its internal-keyboard
       device scope for illumination. Physical Alt remains Alt, Ctrl remains
       Ctrl, Search remains Super, internal Alt+F6/F7 still emits keyboard
       illumination events, and external keyboards remain native. `[tier: med]`
-- [ ] Bind Ghostty and the covered GNOME actions directly to native Alt. Restore
+- [x] Bind Ghostty and the covered GNOME actions directly to native Alt. Restore
       carrier-era GNOME Super defaults that no longer collide, clear the native
       Alt+Space window menu for Vicinae, and retain the established physical
       fallbacks. `[tier: med]`
-- [ ] Change Brave's focused source chords from the old carrier to native Alt.
+- [x] Change Brave's focused source chords from the old carrier to native Alt.
       Keep the focused mapper and Shell extension only where required for the
       complete Brave map. Complete, reliable Brave behavior is a hard acceptance
       requirement; do not close with missing chords or replace the carrier with
       another broad transformation. `[tier: high]`
-- [ ] Run `just check`, the headless Hardy suite, and the identical visible
+- [x] Run `just check`, the headless Hardy suite, and the identical visible
       Hardy suite before the first apply. Daniel must observe and confirm all
       guided cases. Require Hardy green; the same target contract may remain
       deliberately red on unchanged Gauss during this intermediate branch
-      milestone. `[tier: high]`
+      milestone. Both Hardy runs passed 27/27. Daniel observed the Ghostty and
+      Brave guided consequences and accepted the four-second lock/logout
+      injections without visual confirmation as sufficient for this pre-apply
+      gate. `[tier: high]`
 - [ ] Commit and push the Hardy milestone before planning it. Run `just plan` on
       Hardy, review the closure diff, session/re-login implications, affected
       keyd and dconf state, and rollback generation with Daniel, then wait for
