@@ -1,5 +1,11 @@
 import { afterAll, beforeAll, describe, test } from "bun:test";
 import {
+  type ClipboardBaseline,
+  captureClipboard,
+  restoreClipboard,
+  writeClipboard,
+} from "./clipboard.ts";
+import {
   type AccessibleWindow,
   errorMessage,
   focusAccessibleWindow,
@@ -8,6 +14,7 @@ import {
   sameAccessibleRef,
   step,
   waitFor,
+  waitForExactOutput,
 } from "./desktop.ts";
 import {
   injectPhysicalChord,
@@ -65,6 +72,10 @@ async function createFixture(): Promise<Fixture> {
       `command = direct:/run/current-system/sw/bin/bun ${fixtureProgram}`,
       "shell-integration = none",
       "confirm-close-surface = false",
+      "clipboard-read = allow",
+      "clipboard-write = allow",
+      "clipboard-paste-protection = false",
+      "copy-on-select = false",
       "gtk-single-instance = false",
       `class = ${fixtureAppId}`,
       "",
@@ -169,17 +180,23 @@ afterAll(() => {
 });
 
 describe("deployed Ghostty keyboard behavior", () => {
-  test("physical Ghostty lifecycle and terminal chords traverse keyd", async () => {
+  test("physical Ghostty lifecycle, terminal, and clipboard chords traverse keyd", async () => {
     const started = performance.now();
     let fixture: Fixture | undefined;
     let baseline: AccessibleWindow | undefined;
     let fixtureFocused = false;
     let fixtureLaunched = false;
     let monitor: KeydMonitor | undefined;
+    let clipboardBaseline: ClipboardBaseline | undefined;
     let originalFailure: unknown;
     const cleanupErrors: Error[] = [];
 
     try {
+      clipboardBaseline = await step(
+        "Capture the restorable text clipboard baseline",
+        captureClipboard,
+      );
+
       const initialDesktop = await listAccessibleWindows(
         capabilities.atSpiAddress,
       );
@@ -196,9 +213,11 @@ describe("deployed Ghostty keyboard behavior", () => {
         await runCommand(["ghostty", "+list-keybinds", "--plain"])
       ).stdout;
       for (const binding of [
+        "keybind = alt+c=copy_to_clipboard:mixed",
         "keybind = alt+n=new_window",
         "keybind = alt+q=quit",
         "keybind = alt+t=new_tab",
+        "keybind = alt+v=paste_from_clipboard",
         "keybind = alt+w=close_tab:this",
         "keybind = alt+shift+]=next_tab",
         "keybind = alt+shift+[=previous_tab",
@@ -364,6 +383,44 @@ describe("deployed Ghostty keyboard behavior", () => {
       });
 
       await injectPhysicalChord(
+        { keys: ["leftCtrl", "leftShift", "a"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftCtrl", "leftShift", "a"],
+      });
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "c"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitForExactOutput(["wl-paste", "--no-newline"], "COPY_PROBE");
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "c"],
+      });
+
+      await step("Set the fixture paste probe clipboard", async () => {
+        await writeClipboard("PASTE_PROBE");
+      });
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "v"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+V to deliver the clipboard text to the fixture PTY",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.title === `${initialWindow.title}-paste`,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "v"],
+      });
+
+      await injectPhysicalChord(
         { keys: ["leftAlt", "n"] },
         capabilities.ydotoolSocket,
       );
@@ -496,6 +553,13 @@ describe("deployed Ghostty keyboard behavior", () => {
             (windows) => windows.length === 0,
           );
         },
+        cleanupErrors,
+      );
+    }
+    if (clipboardBaseline !== undefined) {
+      await cleanupAction(
+        "Restore the captured clipboard baseline",
+        async () => restoreClipboard(clipboardBaseline!),
         cleanupErrors,
       );
     }

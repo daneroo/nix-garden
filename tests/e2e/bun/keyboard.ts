@@ -1,6 +1,7 @@
 import { runCommand, step, waitFor } from "./desktop.ts";
 
 export type PhysicalKey =
+  | "a"
   | "c"
   | "d"
   | "leftAlt"
@@ -11,9 +12,11 @@ export type PhysicalKey =
   | "q"
   | "rightBracket"
   | "t"
+  | "v"
   | "w";
 
 const keyCodes: Readonly<Record<PhysicalKey, number>> = {
+  a: 30,
   c: 46,
   d: 32,
   leftAlt: 56,
@@ -24,10 +27,12 @@ const keyCodes: Readonly<Record<PhysicalKey, number>> = {
   q: 16,
   rightBracket: 27,
   t: 20,
+  v: 47,
   w: 17,
 };
 
 const displayNames: Readonly<Record<PhysicalKey, string>> = {
+  a: "A",
   c: "C",
   d: "D",
   leftAlt: "Alt",
@@ -38,10 +43,12 @@ const displayNames: Readonly<Record<PhysicalKey, string>> = {
   q: "Q",
   rightBracket: "]",
   t: "T",
+  v: "V",
   w: "W",
 };
 
 const evidenceNames: Readonly<Record<PhysicalKey, string>> = {
+  a: "a",
   c: "c",
   d: "d",
   leftAlt: "leftalt",
@@ -52,6 +59,7 @@ const evidenceNames: Readonly<Record<PhysicalKey, string>> = {
   q: "q",
   rightBracket: "]",
   t: "t",
+  v: "v",
   w: "w",
 };
 

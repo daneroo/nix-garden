@@ -29,6 +29,8 @@ const requiredExecutables = [
   "sudo",
   "systemctl",
   "systemd-run",
+  "wl-copy",
+  "wl-paste",
   "ydotool",
 ] as const;
 

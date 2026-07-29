@@ -42,6 +42,7 @@
         lazygit
         ripgrep
         vim
+        wl-clipboard
       ];
       hosts = [
         "hardy"

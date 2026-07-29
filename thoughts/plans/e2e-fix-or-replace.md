@@ -88,7 +88,7 @@ Do not cross group boundaries during a failure.
       that same fixture for native `Ctrl+C` and unbound `Alt+D` pass-through.
       Stop if top-level semantic titles cannot distinguish the selected surface;
       do not add a new accessibility or window mechanism. `[tier: med]`
-- [ ] **Group 3 — clipboard boundary:** add one baseline/restore helper for the
+- [x] **Group 3 — clipboard boundary:** add one baseline/restore helper for the
       user's clipboard, then cover Ghostty `Alt+C` and `Alt+V` together using
       the Group 2 fixture acknowledgements. Restoration must run on success or
       failure; do not proceed if the prior clipboard cannot be preserved.

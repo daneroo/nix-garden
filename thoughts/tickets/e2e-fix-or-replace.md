@@ -273,6 +273,18 @@ names for brackets. After the one allowed local correction from
 native `Ctrl+C`, unbound `Alt+D`, and the existing window lifecycle, with keyd
 evidence and complete cleanup on standard GNOME.
 
+The clipboard group added `wl-clipboard` declaratively after Daniel approved the
+system change, and the activation diff contained only that package. The first
+live run proved `Alt+C` but timed out because the forked `wl-copy` owner
+inherited captured output pipes; Bun's timeout prevented the cleanup path from
+restoring the pre-run clipboard. The original text was intentionally never
+logged and could not be reconstructed. The residual fixture unit and runtime
+directory were removed directly. After the one local pipe-handling correction,
+the second and final run passed in 2.05 seconds on standard GNOME: `Alt+C`
+copied the selected `COPY_PROBE`, `Alt+V` delivered `PASTE_PROBE` to the fixture
+PTY, keyd retained both physical chords, and fixture, focus, and the captured
+run baseline were restored.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -360,6 +372,14 @@ the failed runs counts as a passing behavioral assertion.
 16. Daniel explicitly directed completion. The corrected direct-sudo test then
     passed twice consecutively, including pre-keyd monitor evidence, the Ghostty
     window/focus outcome, and complete cleanup.
+17. The first clipboard run timed out after proving `Alt+C`. `wl-copy` forked
+    normally, but its clipboard-owning child inherited stdout and stderr pipes
+    that the helper was waiting to drain. The forced timeout bypassed cleanup,
+    leaving the fixture unit and `PASTE_PROBE` clipboard state. The exact unit
+    and runtime directory were removed directly. Because clipboard contents were
+    deliberately not logged, the pre-run text could not be recovered. Ignoring
+    the unused inherited pipes fixed the helper without changing the mechanism;
+    the second and final bounded run passed and restored its captured baseline.
 
 Current state:
 
@@ -367,9 +387,10 @@ Current state:
 - the bounded Alt+W extension has also passed twice consecutively;
 - the bounded Alt+Q extension has passed twice consecutively on standard GNOME;
 - the grouped Ghostty tab and PTY extension passed within its two-run budget;
+- the grouped Ghostty clipboard extension passed within its two-run budget;
 - no E2E fixture or monitor process remains;
-- Gauss currently has Gum, ydotool, and the rootless ydotoold configuration
-  activated;
+- Gauss currently has Gum, ydotool, wl-clipboard, and the rootless ydotoold
+  configuration activated;
 - the obsolete keyd-monitor service and polkit grant have been removed from the
   running system;
 - the direct-sudo implementation exists in the uncommitted feature branch and is
@@ -438,8 +459,8 @@ keeping.
 | Driver command, retry, exact-output, readiness, and failure helpers | `desktop.ts` command and bounded-wait helpers plus capability setup       | Implemented for the slice.                                                                                                                                                         |
 | QEMU physical keyboard injection                                    | ydotool virtual keyboard plus retained `keyd monitor` evidence            | Implemented but requires activation and the live proof. The VM can continue using its virtio keyboard through a thin bridge.                                                       |
 | Dogtail top-level frame names                                       | Direct AT-SPI calls through `busctl`                                      | Implemented for Ghostty window identity and focus; also suitable for Brave frames.                                                                                                 |
-| Ghostty PTY title fixture                                           | Bun terminal-protocol fixture using OSC titles and a fixture class        | The slice only needs fixed window titles. Tab selection, paste, Control-C, unbound Alt, and clear-screen cases need the richer monotonic surface protocol from the old fixture.    |
-| Clipboard copy/paste                                                | `wl-copy`/`wl-paste` plus fixture titles                                  | Must record and restore the user's clipboard before live use.                                                                                                                      |
+| Ghostty PTY title fixture                                           | Bun terminal-protocol fixture using OSC titles and a fixture class        | Implemented for tab selection, paste, Control-C, and unbound Alt; clear-screen remains deferred.                                                                                   |
+| Clipboard copy/paste                                                | `wl-copy`/`wl-paste` plus fixture titles                                  | Implemented with a plain-text-only baseline guard and cleanup restoration.                                                                                                         |
 | Logical Alt/Ctrl/Super mask probe                                   | A small packaged semantic key-event observer                              | AT-SPI cannot expose raw modifier masks. Reusing Python GI would defeat the replacement boundary; a later language-neutral helper or sibling Go implementation is a plausible fit. |
 | Lock and unlock                                                     | ScreenSaver D-Bus state plus explicit attended recovery                   | Never inject a live credential.                                                                                                                                                    |
 | Brave local pages, tabs, and windows                                | Bun HTTP fixture, isolated profile, DevTools page list, and AT-SPI frames | Straightforward, but profile/process/clipboard cleanup must become independently repeatable.                                                                                       |
