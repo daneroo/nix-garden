@@ -9,7 +9,7 @@ default:
     @just --list --unsorted
 
 # Check pre-commit invariants: shell, formatting, Markdown, and flake.
-check: _shell-check _fmt-check _lint-md _flake-check
+check: _shell-check _fmt-check _lint-md _typecheck-e2e-bun _flake-check
 
 # Format supported repository files.
 fmt:
@@ -120,6 +120,15 @@ _lint-md:
     @echo "== markdown: bunx markdownlint-cli2 =="
     # The shorter Prosodio glob missed nested thoughts files here; keep explicit depths.
     bunx markdownlint-cli2 "*.md" "**/*.md" "**/**/*.md" "**/**/**/*.md"
+
+[private]
+[script('bash')]
+_typecheck-e2e-bun:
+    set -euo pipefail
+    echo "== TypeScript: strict Bun E2E project =="
+    (cd tests/e2e/bun && bun install --frozen-lockfile)
+    typescript_store="$(nix build --no-link --print-out-paths .#nixosConfigurations.gauss.pkgs.typescript)"
+    "$typescript_store/bin/tsc" --noEmit --project tests/e2e/bun/tsconfig.json
 
 [private]
 _flake-check:

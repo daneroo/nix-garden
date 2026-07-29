@@ -33,11 +33,17 @@ work, not a general desktop-automation platform.
 ## Primary Execution Contract
 
 - The first execution target is Gauss's currently deployed desktop.
+- `tests/e2e/` is the language-neutral suite boundary. The Bun project root is
+  `tests/e2e/bun/`; its private manifest, lockfile, and strict project settings
+  live beside the test sources. This gives a later Nix derivation a narrow
+  source boundary and leaves room for a sibling implementation such as
+  `tests/e2e/go/` without relocating Bun.
 - `scripts/e2e.sh` is the public entry point.
 - The script warns that the suite will take control of the visible desktop and
   uses Gum to request confirmation.
 - The harness runs as Daniel from the active graphical user session.
-- The default path never uses `sudo`.
+- After explicit confirmation, the script obtains attended sudo authorization so
+  the test can run the deployed keyd binary's monitor command directly.
 - Tests run with concurrency fixed at one.
 - The rapid development loop is direct source execution through `bun test`; it
   never requires a Nix build or a VM.
@@ -57,8 +63,11 @@ the session returns. Do not store or inject live credentials.
 
 ## Dependency Boundary
 
-The Bun project carries no third-party package dependencies. Use `bun:test`,
-Bun's standard APIs, and small repository-owned TypeScript utilities.
+The Bun project carries no third-party runtime package dependencies. Use
+`bun:test`, Bun's standard APIs, and small repository-owned TypeScript
+utilities. The first-party `@types/bun` package is the only development
+dependency; pin it in the Bun lockfile and use nixpkgs's TypeScript compiler
+rather than maintaining local ambient declarations for Bun APIs.
 
 System executables are allowed and should be installed declaratively when they
 are the clearest mechanism. Add Gum to the shared system packages for invocation
@@ -72,9 +81,11 @@ UX; this may also include an input-injection tool. Global test setup must:
 - skip with an explicit reason when a test does not apply to the detected
   platform or desktop mode.
 
-Prefer narrow declarative permissions over runtime elevation. If a later test
-unavoidably requires elevation, it must be explicitly opted into and skipped
-under the default no-sudo invocation.
+Prefer narrow declarative permissions over runtime elevation. For this spike,
+Daniel explicitly selected attended sudo for direct keyd monitor evidence after
+the declarative monitor service proved disproportionate. The guarded entry point
+obtains authorization only after confirmation; ydotool injection remains
+unprivileged.
 
 ## Test Shape
 
@@ -89,11 +100,27 @@ scripts/
 
 tests/
 └── e2e/
-    ├── setup.ts
-    ├── desktop.ts
-    ├── keyboard.ts
-    └── ghostty.test.ts
+    └── bun/
+        ├── .gitignore
+        ├── bun.lock
+        ├── package.json
+        ├── tsconfig.json
+        ├── setup.ts
+        ├── desktop.ts
+        ├── keyboard.ts
+        └── ghostty.test.ts
 ```
+
+The project manifest owns the canonical source-test command. Its lockfile pins
+the first-party Bun type declarations; it has no runtime dependencies.
+`scripts/e2e.sh` enters the project explicitly. A later Nix package should be
+added to the repository's existing flake rather than making the Bun project a
+nested flake.
+
+If another implementation is justified, add it as a sibling beneath `tests/e2e/`
+and let the repository flake package each implementation independently. Keep
+`scripts/e2e.sh` as the stable guarded interface. Hoist fixtures to a
+language-neutral location only when demonstrated sharing warrants it.
 
 Split files or directories only as demonstrated reuse or readability demands.
 TypeScript should be strict, idiomatic, and explicit about capability, key, and
@@ -185,7 +212,7 @@ controlled Ghostty window has focus
 The spike is successful when:
 
 - `scripts/e2e.sh` provides the guarded public invocation;
-- the Bun source runs with concurrency one and no third-party package
+- the Bun source runs with concurrency one and no third-party runtime
   dependencies;
 - global setup validates commands, the graphical session, D-Bus, Wayland,
   permissions, and required desktop capabilities;
@@ -203,6 +230,433 @@ The spike is successful when:
 Stop at this gate long enough to assess speed, clarity, fidelity, and extension
 cost. Do not make complete behavioral parity a prerequisite for learning whether
 the approach works.
+
+## Spike Evidence
+
+### Final feasibility result
+
+On 2026-07-29 the direct source test passed twice consecutively on Gauss in
+PaperWM mode:
+
+- run one: scenario 0.91 seconds, one test passed;
+- run two: scenario 0.93 seconds, one test passed;
+- direct sudo `keyd monitor -t` attached to the ydotool virtual keyboard and
+  retained `leftalt down` and `n down`;
+- ydotool injected before keyd;
+- exactly one second fixture-owned Ghostty window appeared;
+- the new window held active focus;
+- both fixture windows were removed and the original baseline focus was restored
+  after each run.
+
+The spike therefore has a practical passing vertical slice. This does not
+override Daniel's assessment below about the excessive cost of reaching it or
+imply that the branch should land without review.
+
+The first bounded post-gate extension reused the same scenario for physical
+`Alt+W`. On two consecutive runs, keyd retained `leftalt down` and `w down`, the
+new fixture window closed, focus returned to the initial fixture window, and
+full cleanup succeeded. Scenario times were 1.15 and 1.18 seconds. No new
+permission, injection, observation, fixture, or cleanup mechanism was added.
+
+With PaperWM disabled, the existing fixture lifecycle then added physical
+`Alt+Q`. Two consecutive standard-GNOME runs retained `leftalt down` and
+`q down`, quit only the isolated fixture application, restored baseline focus,
+and completed cleanup in 1.07 seconds. This group added no helper, permission,
+service, package, or observer.
+
+The richer Ghostty terminal fixture added per-surface OSC titles and raw PTY
+acknowledgements without changing the desktop mechanisms. Its first bounded run
+reached tab creation and previous-tab selection but used the wrong expected keyd
+names for brackets. After the one allowed local correction from
+`leftbrace`/`rightbrace` to literal `[`/`]`, the second and final run passed in
+1.69 seconds. It covered `Alt+T`, `Alt+Shift+[`/`]`, selected-tab `Alt+W`,
+native `Ctrl+C`, unbound `Alt+D`, and the existing window lifecycle, with keyd
+evidence and complete cleanup on standard GNOME.
+
+The clipboard group added `wl-clipboard` declaratively after Daniel approved the
+system change, and the activation diff contained only that package. The first
+live run proved `Alt+C` but timed out because the forked `wl-copy` owner
+inherited captured output pipes; Bun's timeout prevented the cleanup path from
+restoring the pre-run clipboard. The original text was intentionally never
+logged and could not be reconstructed. The residual fixture unit and runtime
+directory were removed directly. After the one local pipe-handling correction,
+the second and final run passed in 2.05 seconds on standard GNOME: `Alt+C`
+copied the selected `COPY_PROBE`, `Alt+V` delivered `PASTE_PROBE` to the fixture
+PTY, keyd retained both physical chords, and fixture, focus, and the captured
+run baseline were restored.
+
+Daniel's first public-script regression then stopped safely during preflight:
+the clipboard contained only text but advertised the standard `UTF8_STRING`,
+`STRING`, and `TEXT` aliases that the narrow MIME allowlist rejected. Accepting
+those aliases made the same scenario pass in 2.07 seconds with exact baseline
+restoration. That verification exposed the baseline value in the generic
+exact-output progress message, so clipboard verification now reports only exit,
+timeout, and equality state; clipboard contents remain redacted.
+
+The first Brave lifecycle slice now passes on native Wayland without commanding
+window focus. A direct child launch from the visibly focused Ghostty gives the
+initial fixture document focus. Physical `Alt+N` creates exactly one additional
+isolated DevTools page and AT-SPI frame; a focused AT-SPI descendant proves
+keyboard focus remains inside that exact new frame even though Brave's omnibox,
+not its document, owns internal focus. Physical `Alt+W` then closes only the new
+window, the initial document regains focus, and keyd retains both chords. The
+Brave-only run passed in 1.70 seconds. The guarded public suite subsequently
+passed Brave in 1.81 seconds and the complete Ghostty regression in 2.22
+seconds, 2 tests total in 4.45 seconds, with complete cleanup and baseline
+restoration.
+
+The first Brave navigation extension reused that passing lifecycle. Physical
+`Alt+T` created a second tab, ydotool typed only local fixture URLs through the
+existing pre-keyd device, and physical `Alt+L` moved address entry from a
+document-focused tab. Exact DevTools target IDs and URLs proved both
+navigations. Physical `Alt+Shift+[` and `Alt+Shift+]` then selected the exact
+initial and address-navigated documents; keyd exposed the configured
+Ctrl+Shift+Tab and Ctrl+Tab output. The corrected bounded run passed in 4.88
+seconds with complete cleanup and baseline restoration.
+
+The guarded public entry now accepts `-y`/`--yes` and `--slow [SECONDS]`. Slow
+mode pauses only at labelled visual checkpoints and holds a failed fixture open
+before cleanup, leaving semantic wait timeouts unchanged. The entry warns before
+desktop control that it overwrites the clipboard and restores only a plain-text
+representation when the original owner also offered rich formats. It detects
+existing non-interactive sudo authorization before explaining the password and
+Ctrl+C abort path. Daniel validated the flags from the direct Ghostty session
+and separately confirmed that the same test invoked from the old Herdr session
+fails the launch-lineage preflight.
+
+### Owner assessment
+
+Daniel considers the current result unacceptable. The LLM switched to a direct
+sudo method only after spending excessive time and tokens on permission
+machinery without producing one passing behavioral assertion. Treat the direct
+method as a provisional expedient to review later with a more capable LLM that
+may find an obvious solution to the permission problem.
+
+Do not assume this ticket should land. Codex may exhaust the available token
+limits before completing the simplest part of the spike. Before resuming,
+evaluate another LLM and agent harness for this work.
+
+### Attempt ledger
+
+This ledger preserves receipts for the work and discarded approaches. None of
+the failed runs counts as a passing behavioral assertion.
+
+1. The Bun package was initially treated as if the repository root were its
+   project root. After Daniel objected, it moved to `tests/e2e/`, then to the
+   correct language-specific root at `tests/e2e/bun/`, leaving room for a future
+   `tests/e2e/go/`.
+2. A handwritten `tests/e2e/bun/runtime.d.ts` ambient shim was created to avoid
+   package dependencies. Daniel objected. It was deleted and replaced with a
+   pinned official `@types/bun` development dependency and `bun.lock`.
+3. Read-only investigation covered the graphical session, PaperWM, input-device
+   ownership, `/dev/uinput`, keyd, Ghostty, GNOME D-Bus, AT-SPI, ydotool,
+   dotool, and wtype. Direct AT-SPI calls were selected for window identity and
+   focus observation; ydotool was selected for pre-keyd injection.
+4. A declarative ydotool daemon and a bounded keyd-monitor system service were
+   designed. The first monitor design ran as root and contained an ownership
+   flaw discovered during generated-unit review. It was replaced before
+   deployment with a Daniel-owned service carrying service-only `input`
+   membership, a private evidence file, a polkit start/stop rule, and extensive
+   systemd hardening.
+5. Several `just check` and `just plan` cycles built and audited these designs.
+   Generated units were inspected with `systemd-analyze verify` and
+   `systemd-analyze security`. This work produced no key assertion.
+6. The first guarded `scripts/e2e.sh` attempt stalled while Gum queried terminal
+   capabilities through the remote PTY. Interrupting it produced a safe
+   cancellation before desktop control. It was rerun by sending confirmation
+   directly through the PTY.
+7. Live run one failed before launching Ghostty because `ghostty +list-keybinds`
+   does not accept `--config-file`. Cleanup also tried to restore focus even
+   though fixture focus had never changed, and Ghostty rejected AT-SPI
+   `GrabFocus`.
+8. The binding inspection was changed to read the deployed configuration, and
+   cleanup gained lifecycle guards. Live run two launched and removed the
+   fixture but failed because the test still called Ghostty's unsupported
+   `GrabFocus`.
+9. Focus setup changed to semantically observe the focus PaperWM already gives a
+   newly launched fixture. Cleanup first accepted GNOME's automatic return to
+   the baseline. Live run three reached the visible outcome: physical `Alt+N`
+   created exactly one second fixture window, the new window became active, and
+   cleanup removed both fixture windows and restored the baseline. The test
+   still failed because its separate keyd-monitor evidence file contained
+   device-open failures, so the outcome was not accepted as a passing assertion.
+10. The monitor service's device ACL was changed from read-only to read-write
+    after inspecting locked keyd source and finding that monitor mode opens
+    event devices with `O_RDWR`. The system was rebuilt and switched again.
+11. More live diagnostics followed instead of stopping: process credentials and
+    generated units were inspected; an already-exited process briefly produced a
+    misleading root/zombie reading; the locked keyd source was searched; and
+    disposable one-second systemd probes tested direct event-device open, keyd
+    under the base identity, `ProtectSystem`, the syscall filter, the full
+    hardening set, and an empty capability set. One probe first used the wrong
+    keyd path and was repeated. Another was interrupted by an accidental Escape
+    and repeated. These probes showed the hardened identity could open the
+    devices and exposed a stale preserved evidence-file race.
+12. A semantic readiness change was drafted to wait for keyd's fresh
+    `device added` line. Before proving it, Daniel challenged the uncontrolled
+    scope and the live work stopped. No fixture or monitor remained.
+13. When Daniel said to use sudo directly, Codex instead drafted another
+    overengineered design: an immutable timeout wrapper, a permanent sudoers
+    rule, and a streamed monitor abstraction. It was typechecked but never
+    applied. Daniel objected, and the wrapper and sudoers rule were removed.
+14. The practical direct design then made `scripts/e2e.sh` run `sudo -v` after
+    confirmation. Bun resolves the running keyd binary and directly launches
+    `sudo -n <keyd-binary> monitor -t`, capturing its output in memory. The old
+    monitor service, evidence file, device ACL, and polkit rule were removed
+    from the desired configuration, and Gauss was switched again.
+15. The first direct-sudo live run failed during preflight because Daniel cannot
+    read the root keyd process's `/proc/<pid>/exe` link under the host's process
+    visibility policy. Resolving that one link with the already-authorized sudo
+    was implemented and passed `just check`.
+16. Daniel explicitly directed completion. The corrected direct-sudo test then
+    passed twice consecutively, including pre-keyd monitor evidence, the Ghostty
+    window/focus outcome, and complete cleanup.
+17. The first clipboard run timed out after proving `Alt+C`. `wl-copy` forked
+    normally, but its clipboard-owning child inherited stdout and stderr pipes
+    that the helper was waiting to drain. The forced timeout bypassed cleanup,
+    leaving the fixture unit and `PASTE_PROBE` clipboard state. The exact unit
+    and runtime directory were removed directly. Because clipboard contents were
+    deliberately not logged, the pre-run text could not be recovered. Ignoring
+    the unused inherited pipes fixed the helper without changing the mechanism;
+    the second and final bounded run passed and restored its captured baseline.
+18. The committed public script rejected a restorable text clipboard because
+    `wl-copy` also advertised standard text aliases. The expanded text-only
+    allowlist passed the full live scenario. Its restoration progress then
+    revealed that the generic exact-output reporter printed the clipboard
+    payload; the clipboard helper was narrowed to retain only redacted
+    match/exit/timeout diagnostics.
+19. The first Brave lifecycle run reached the Bun-served page and isolated
+    DevTools page-count assertion, but no Brave AT-SPI frame appeared. Read-only
+    comparison found that the old VM explicitly enables GNOME toolkit
+    accessibility while Gauss leaves it disabled. The fixture and profile were
+    removed without injecting a chord.
+20. Daniel approved a temporary toolkit-accessibility baseline/restore boundary.
+    The first public-entry run stopped before changing it because `dconf read`
+    represents Gauss's default setting as unset rather than explicit `false`.
+    The correction preserves unset, explicit false, and explicit true exactly,
+    restoring unset with `dconf reset`. The serial Ghostty regression passed.
+21. The corrected public run exposed the exact Brave frame through AT-SPI and
+    restored the accessibility baseline, but GNOME left the verified fixture
+    frame inactive. Daniel approved using the existing AT-SPI focus helper on
+    that fixture only. The next public run proved Brave returns `false` from
+    `Component.GrabFocus`; no chord was injected. Cleanup and the serial Ghostty
+    regression passed again. A different focus mechanism would cross the
+    approved Group 4 foundation, so lifecycle work stopped without a commit.
+22. Daniel selected DevTools target activation as the only efficient focus
+    option worth exploring. The Brave-only run successfully activated the exact
+    isolated page target through DevTools, but AT-SPI still reported its frame
+    inactive for the complete bounded wait. No keyd monitor or chord was
+    started, and fixture, profile, and toolkit-accessibility cleanup succeeded.
+    The disproven activation path was removed and Group 4 stopped for
+    reassessment.
+23. Ordered Phase 0 recon found native Wayland on GNOME Shell 50.2,
+    `focus-new-windows` already set to `smart`, Shell window introspection
+    access-denied, and no installed `xdotool`. A CDP `document.hasFocus()`
+    oracle was added alongside the AT-SPI active-state gate. An attempted direct
+    spawn waited until both the exact DevTools page and AT-SPI frame existed;
+    both focus oracles remained false, so no keyd monitor or chord started.
+    Brave ignored the parent's initial SIGTERM long enough for bounded cleanup
+    to report failure, then exited; after confirming no Brave process remained,
+    the exact retained profile was removed and toolkit accessibility was
+    restored.
+24. Daniel identified that the attempted Phase 1.2 spawn did not originate in
+    the focused GNOME terminal at all. Read-only ancestry confirmed the tool
+    shell was a no-TTY child of Codex in the Herdr session, unrelated to the
+    visible Ghostty process; Herdr also survives graphical logout. Therefore the
+    run did not test launch eligibility from a focused terminal, and Phase 1.2
+    remains open. The public test was prepared for Daniel to invoke manually
+    from the visibly focused terminal, with CDP page closure and bounded
+    TERM/KILL cleanup replacing the failed direct-parent teardown.
+25. After resuming Codex directly under the visible Ghostty process, host
+    ancestry showed `Ghostty -> bash -> codex -> tool shell`, with Herdr in a
+    separate tree. The first valid Phase 1.2 launch made the fixture page's
+    `document.hasFocus()` return true while Brave's AT-SPI frame still reported
+    inactive, proving AT-SPI active state is not a usable Brave focus oracle.
+    With CDP as the gate, the next run started keyd and physical `Alt+N` created
+    exactly two isolated DevTools pages and AT-SPI frames. The new page then
+    reported `document.hasFocus()` false for the bounded wait, so `Alt+W` was
+    not injected. Chromium opens a new window with browser chrome such as the
+    omnibox focused, making a false page result ambiguous rather than proof that
+    the OS window lacks focus. Direct-process, frame, server, focus,
+    toolkit-accessibility, and profile cleanup all passed.
+26. One Brave preflight overlapped a separately invoked public suite and found
+    no active AT-SPI baseline window. That contaminated result was discarded;
+    both runs cleaned up. A clean rerun confirmed that DevTools target
+    activation still could not give the new page document focus. Reviewing the
+    old Python scenario exposed its actual assumption: it counted the new page
+    and frame, then sent `Alt+W` without ever requiring page focus. The Bun
+    scenario replaced that missing safety assertion with a read-only
+    focused-descendant query scoped to the exact new AT-SPI frame. It did not
+    inject F6 or switch windows. The Brave-only run and the complete guarded
+    public suite both passed, retaining keyd evidence for `Alt+N` and `Alt+W`
+    and restoring every captured baseline.
+27. The first bounded Brave navigation run behaviorally passed `Alt+T`, two
+    local address navigations including `Alt+L`, and `Alt+Shift+[` tab
+    selection. Its final evidence wait incorrectly expected the consumed
+    physical `[` from keyd's output stream instead of the configured
+    Ctrl+Shift+Tab result. The local correction checkpoints monitor output
+    before each tab chord and expects the mapped Ctrl/Shift/Tab keys. The second
+    and final bounded run passed all four navigation chords in 4.88 seconds with
+    exact target focus, mapped keyd output, and complete cleanup.
+28. Daniel requested the already-noted public-entry quality-of-life work while
+    validating the navigation group. `-y` now accepts the warning,
+    `--slow [SECONDS]` adds bounded post-chord observation pauses, and sudo
+    guidance distinguishes existing authorization from an attended password
+    prompt. The same warning and confirmation explicitly disclose clipboard
+    overwrite: a rich clipboard with a plain-text representation is restored as
+    plain text, losing its rich formats. Daniel then validated the direct
+    Ghostty invocation and proved that an invocation from the old persistent
+    Herdr session fails immediately at the lineage guard.
+29. The bounded Brave clipboard group proved physical `Alt+C` end to end:
+    `COPY_PROBE` reached `wl-paste` and keyd retained the chord. Both attempts
+    then set and independently verified `PASTE_PROBE`; the second additionally
+    reselected the exact textarea through the existing CDP connection and proved
+    that its document retained OS focus. keyd observed physical `Alt+V`, but
+    Brave produced neither textarea input nor the expected title change. Both
+    runs restored the clipboard, focus, toolkit accessibility, processes,
+    frames, server, and profile. Distinguishing an incorrect logical keyd output
+    from Brave rejecting paste requires a new control or diagnostic, so the
+    group stopped after its two-run budget and remains uncommitted.
+30. Daniel's attended slow run first exposed `application/x-zerosize`, the
+    Wayland empty-clipboard marker. Both tests stopped during capture before
+    desktop control; empty is now a valid baseline restored with
+    `wl-copy --clear`. The next attended run reached the checkpointed
+    post-`Alt+V` evidence and failed before the Brave textarea assertion because
+    keyd did not report the expected logical Ctrl+V. The output obscured that
+    boundary by beginning cleanup before presenting the saved failure. Slow mode
+    now pauses only when a chord has an explicit visible expectation, prints
+    that expectation before injection, marks clipboard translation and outcome
+    assertions as steps, and holds a failed fixture open before cleanup.
+    Ghostty's raw fixture deliberately does not echo pasted input; its visible
+    proof is the window-title `-paste` suffix, now stated at its checkpoint.
+31. Root-caused the synthetic `Alt+V` failure and confirmed it with a bounded
+    Brave-only experiment. Read-only inspection of the deployed binaries showed
+    that `keyd monitor -t` prints a mixture of pre-keyd input and keyd's own
+    virtual-output events (`-t` only adds inter-event timing), and that
+    `keyd-application-mapper` is dynamic: it reads active-window changes from
+    the keyd GNOME shell extension via `/run/user/1000/keyd.fifo` and runs
+    `keyd bind reset <bindings>` on every change, so the `[brave-browser]` layer
+    (`alt.v = C-v`, etc.) exists only while Brave is the reported active window.
+    The synthetic path differs from a physical `Alt+V` because the harness's own
+    external clipboard client changes the reported active window between the
+    initial `Alt+C` and `Alt+V`, making the mapper wipe the Brave layer; CDP DOM
+    refocus does not re-fire a Brave window activation, so keyd stays reset and
+    `Alt+V` traverses unmapped. `Alt+C` succeeded because it ran before any
+    external clipboard client; native `Ctrl+V` succeeded because it needs no app
+    binding; a human's `Alt+V` never involves such a client. The experiment
+    re-probed with a second `Alt+C` immediately after the external clipboard
+    step: fresh `Ctrl+C` evidence was absent and the clipboard did not change,
+    proving the entire Brave layer — not `Alt+V` specifically — was gone.
+    Because the re-probe could not by itself distinguish `wl-copy` from
+    `wl-paste`, the fix removes every external clipboard client between Brave
+    gaining app-mapper context and `Alt+V`: the copy step is now verified
+    in-page through a CDP-observed `copy` event on `COPY_PROBE` plus keyd
+    `Ctrl+C` evidence; `PASTE_PROBE` is seeded with
+    `navigator.clipboard.writeText` through CDP in the already-focused page;
+    `Alt+V` then requires fresh keyd `Ctrl+V` evidence and the textarea
+    `-PASTE_PROBE` title. `wl-copy`/`wl-paste` remain only in the pre-launch
+    baseline capture and post-run cleanup. One Brave-only validation passed the
+    complete lifecycle, navigation, and clipboard scenario in 5.23 seconds with
+    full cleanup and baseline restoration; strict typecheck passes.
+32. Daniel ran the guarded public entry, `./scripts/e2e.sh -y`, from the direct
+    visible Ghostty session after the CDP clipboard fix. The complete Brave and
+    Ghostty regression passed, including cleanup and baseline restoration. This
+    closes the live Gauss spike gate.
+
+Current state:
+
+- the Bun Alt+N behavioral test has passed twice consecutively;
+- the bounded Alt+W extension has also passed twice consecutively;
+- the bounded Alt+Q extension has passed twice consecutively on standard GNOME;
+- the grouped Ghostty tab and PTY extension passed within its two-run budget;
+- the grouped Ghostty clipboard extension passed within its two-run budget;
+- the first Brave lifecycle slice passes through the guarded public suite on
+  native Wayland;
+- the first Brave navigation extension passed within its two-run budget;
+- the Brave clipboard extension now proves `Alt+C` and `Alt+V` end to end by
+  removing external clipboard clients between Brave's app-mapper context and
+  `Alt+V` (in-page CDP copy-event verification and a CDP `writeText` paste
+  seed); the Brave-only run and Daniel's complete guarded public regression both
+  passed;
+- the guarded public entry supports confirmed, slow-observation, sudo-guidance,
+  and disclosed plain-text clipboard fallback paths;
+- no E2E fixture or monitor process remains;
+- Gauss currently has Gum, ydotool, wl-clipboard, and the rootless ydotoold
+  configuration activated;
+- the obsolete keyd-monitor service and polkit grant have been removed from the
+  running system;
+- the provisional direct-sudo implementation is committed on the feature branch
+  and behaviorally proven on the live Gauss session;
+- the ticket's older pre-deployment evidence below is historical and partly
+  superseded by this ledger.
+
+### Live Gauss baseline
+
+Read-only inspection established the following before implementation:
+
+- Gauss runs Daniel's active local Wayland session. The invoking Herdr terminal
+  does not carry `XDG_SESSION_ID`, so the harness resolves the one active,
+  non-remote Daniel Wayland session through `loginctl` rather than trusting that
+  variable.
+- The deployed tools are Bun 1.3.13, Ghostty 1.3.1, and keyd 2.6.0. Gum and the
+  candidate injection tools are absent until the proposed system closure is
+  activated.
+- PaperWM is enabled and Daniel confirmed that the current desktop is in PaperWM
+  mode. `gnome-extensions list --active` is not a trustworthy runtime oracle in
+  this session, so the spike records the enabled PaperWM extension as its mode
+  and does not switch it.
+- `/dev/uinput` is writable by `uinput`; physical event devices are readable by
+  `input`; Daniel belongs to neither group. An ordinary `keyd monitor -t`
+  therefore cannot open the physical devices. The proposed configuration gives
+  those groups only to two fixed, sandboxed services, not to Daniel's login.
+- A direct AT-SPI connection obtained from `org.a11y.Bus.GetAddress` works with
+  `busctl`. Ghostty exposes its application ID, top-level window title,
+  identity, active state, and `Component.GrabFocus`. GNOME Shell's window
+  introspection interface denies this caller, so AT-SPI is the semantic
+  observer.
+- A fixture can use a separate Ghostty class, `org.nixgarden.e2e.Ghostty`, with
+  single-instance behavior disabled, a random title, and a transient user unit.
+  This isolates its windows without touching the existing personal Ghostty
+  process.
+
+The input candidates resolved as follows:
+
+| Candidate | keyd boundary                                                          | Permission and packaging result                                                                                                                                  |
+| --------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ydotool` | Before keyd: its persistent virtual uinput keyboard is matched by keyd | Chosen. nixpkgs provides the client, daemon, and NixOS module. A Daniel-owned mode-0600 socket exposes only injection, while the daemon alone receives `uinput`. |
+| `dotool`  | Before keyd through a uinput keyboard                                  | Rejected for the spike because the caller itself needs broad `/dev/uinput` access or another repository-owned broker.                                            |
+| `wtype`   | After keyd, through the Wayland virtual-keyboard protocol              | Rejected because it cannot prove the production keyd mapping.                                                                                                    |
+
+`keyd monitor -t` observes keyd's event stream while the daemon is running. A
+bounded monitor service with private evidence and an exact polkit grant was
+built and audited, then discarded in favor of the direct attended-sudo command
+recorded above.
+
+The initial pre-deployment source loop was 0.03 seconds. It stopped before
+fixture creation, focus, monitoring, or injection with the direct error
+`required executable is unavailable: gum`. Strict compilation against the locked
+official Bun declarations, `just check`, and the non-destructive `just plan`
+passed at that point. This historical pre-deployment result was superseded by
+the two live passing runs above.
+
+### Remaining Python behavioral inventory
+
+The configuration-health assertions are not migration targets: declared
+bindings, store-backed dotfiles, extension/process presence, and inspection of
+keyd application-map text remain ordinary configuration checks if they are worth
+keeping.
+
+| Existing behavior or mechanism                                      | Likely replacement                                                        | Constraint                                                                                                                                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Driver command, retry, exact-output, readiness, and failure helpers | `desktop.ts` command and bounded-wait helpers plus capability setup       | Implemented for the slice.                                                                                                                                                         |
+| QEMU physical keyboard injection                                    | ydotool virtual keyboard plus retained `keyd monitor` evidence            | Implemented but requires activation and the live proof. The VM can continue using its virtio keyboard through a thin bridge.                                                       |
+| Dogtail top-level frame names                                       | Direct AT-SPI calls through `busctl`                                      | Implemented for Ghostty window identity and focus; also suitable for Brave frames.                                                                                                 |
+| Ghostty PTY title fixture                                           | Bun terminal-protocol fixture using OSC titles and a fixture class        | Implemented for tab selection, paste, Control-C, and unbound Alt; clear-screen remains deferred.                                                                                   |
+| Clipboard copy/paste                                                | `wl-copy`/`wl-paste` plus fixture titles                                  | Implemented with a plain-text-only baseline guard and cleanup restoration.                                                                                                         |
+| Logical Alt/Ctrl/Super mask probe                                   | A small packaged semantic key-event observer                              | AT-SPI cannot expose raw modifier masks. Reusing Python GI would defeat the replacement boundary; a later language-neutral helper or sibling Go implementation is a plausible fit. |
+| Lock and unlock                                                     | ScreenSaver D-Bus state plus explicit attended recovery                   | Never inject a live credential.                                                                                                                                                    |
+| Brave local pages, tabs, and windows                                | Bun HTTP fixture, isolated profile, DevTools page list, and AT-SPI frames | Straightforward, but profile/process/clipboard cleanup must become independently repeatable.                                                                                       |
+| Clear-screen, browser find, and logout dialog guided checks         | Attended mode unless a stable semantic observer is found                  | GNOME exposes no stable public logout-modal property; do not replace these with pixel or timing assertions.                                                                        |
 
 ## VM Replacement and Python Deletion
 
@@ -259,13 +713,15 @@ actually help. Commit the ticket and plan on `main`, then create the exact branc
 `e2e-fix-or-replace` with no prefix.
 
 The spike target is the live Gauss desktop. Use `scripts/e2e.sh` as the guarded
-public entry point and ordinary `bun:test` sources under `tests/e2e/`. The rapid
-loop is direct `bun test`, never a Nix build or VM boot. Keep the code compact,
-strict, idiomatic TypeScript with no third-party Bun dependencies. System tools
-are allowed when declaratively installed and must be asserted by global test
-setup. Add Gum to the shared system packages and use it for the confirmation UX.
-Tests run with concurrency one and report every invisible desktop action before
-it occurs.
+public entry point and ordinary `bun:test` sources under `tests/e2e/bun/`. The
+rapid loop is direct `bun test`, never a Nix build or VM boot. Keep the code
+compact, strict, idiomatic TypeScript with no third-party runtime dependencies.
+Keep the Bun project root and its private manifest, lockfile, and strict settings
+under `tests/e2e/bun/`; pin the official Bun type declarations. System tools are
+allowed when declaratively installed and must be asserted by global test setup.
+Add Gum to the shared system packages and use it for the confirmation UX. Tests
+run with concurrency one and report every invisible desktop action before it
+occurs.
 
 First investigate Gauss read-only to establish facts instead of asking Daniel:
 
