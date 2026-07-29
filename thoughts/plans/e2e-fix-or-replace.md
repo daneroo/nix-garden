@@ -1,9 +1,9 @@
 # E2E Bun Replacement Spike
 
-Status: done
+Status: active
 
-Goal: prove a small Bun harness can exercise Gauss's deployed Ghostty `Alt+N`
-binding through keyd and restore its fixture-owned desktop state.
+Goal: extend the proven Bun harness across the highest-value desktop chords
+without changing its working input, observation, or cleanup foundation.
 
 - [x] Record the live Gauss baseline without changing it: graphical-session
       environment, GNOME and PaperWM state, available Bun/system tools, input
@@ -67,11 +67,52 @@ binding through keyd and restore its fixture-owned desktop state.
       retain keyd evidence, and reuse the existing cleanup path. Evidence: two
       consecutive direct-source passes without new infrastructure. `[tier: low]`
 
-Deferred beyond the gate: final regression breadth, automatic PaperWM mode
-switching, a dedicated workspace, attended-mode recovery, custom presentation,
-canonical Nix packaging of the Bun project, non-GNOME/macOS invocation, complete
-behavioral parity, a possible sibling Go implementation, VM invocation of the
-same suite, and deletion of the Python behavioral implementation.
+## Ordered Replacement Extension
+
+The passing ydotool, direct-sudo keyd monitor, AT-SPI window observer, Ghostty
+fixture identity, baseline focus, and cleanup paths are frozen. Each group below
+gets one targeted TypeScript check, at most two live runs, one final
+`just check`, and one commit. A local assertion mistake may receive one
+correction; any need for a new unplanned mechanism stops that group for review.
+Do not cross group boundaries during a failure.
+
+- [ ] **Group 1 — existing Ghostty lifecycle:** append physical `Alt+Q` to the
+      existing fixture sequence, semantically observe that only the isolated
+      fixture application exits, retain keyd evidence, and confirm baseline
+      focus. Add no helper, permission, service, package, or observer.
+      `[tier: low]`
+- [ ] **Group 2 — one richer Ghostty terminal fixture:** add only the monotonic
+      surface titles and PTY acknowledgements already proven by the old fixture.
+      In one independently repeatable scenario, cover `Alt+T` tab creation,
+      `Alt+Shift+[`/`]` selection, and `Alt+W` selected-tab closure. Then reuse
+      that same fixture for native `Ctrl+C` and unbound `Alt+D` pass-through.
+      Stop if top-level semantic titles cannot distinguish the selected surface;
+      do not add a new accessibility or window mechanism. `[tier: med]`
+- [ ] **Group 3 — clipboard boundary:** add one baseline/restore helper for the
+      user's clipboard, then cover Ghostty `Alt+C` and `Alt+V` together using
+      the Group 2 fixture acknowledgements. Restoration must run on success or
+      failure; do not proceed if the prior clipboard cannot be preserved.
+      `[tier: med]`
+- [ ] **Group 4 — isolated Brave lifecycle:** add one Bun-served local page, one
+      disposable Brave profile, DevTools page counts, and existing AT-SPI frame
+      observation. First prove focused-app translation with `Alt+N` open and
+      `Alt+W` close. Only after that passes, extend the same fixture with
+      `Alt+T`, `Alt+L`, `Alt+Shift+[`/`]`, and `Alt+Shift+T`. Reuse Group 3's
+      clipboard boundary for `Alt+C`/`Alt+V`; do not create a second clipboard
+      mechanism. Commit lifecycle, navigation, and clipboard as separate
+      subgroups. `[tier: high]`
+- [ ] **Group 5 — GNOME globals, attended:** select only global chords with a
+      semantic D-Bus outcome and safe recovery. Start with `Alt+Shift+L` lock,
+      require Daniel to unlock normally, and inject no credential. Keep the
+      logout dialog, clear-screen, browser-find, screenshots, and any action
+      lacking a stable observer deferred rather than using pixels or delays.
+      `[tier: high]`
+
+Deferred beyond these ordered groups: automatic PaperWM mode switching, a
+dedicated workspace, custom presentation, canonical Nix packaging of the Bun
+project, non-GNOME/macOS invocation, complete behavioral parity, a sibling Go
+implementation, VM invocation of the same suite, deletion of the Python
+behavioral implementation, and every guided action without a semantic observer.
 
 No subagent assignment is planned: the risky work is one coupled live-session
 state transition, and parallel ownership would weaken the fixture and cleanup
