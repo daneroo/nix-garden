@@ -252,6 +252,12 @@ The spike therefore has a practical passing vertical slice. This does not
 override Daniel's assessment below about the excessive cost of reaching it or
 imply that the branch should land without review.
 
+The first bounded post-gate extension reused the same scenario for physical
+`Alt+W`. On two consecutive runs, keyd retained `leftalt down` and `w down`, the
+new fixture window closed, focus returned to the initial fixture window, and
+full cleanup succeeded. Scenario times were 1.15 and 1.18 seconds. No new
+permission, injection, observation, fixture, or cleanup mechanism was added.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -343,6 +349,7 @@ the failed runs counts as a passing behavioral assertion.
 Current state:
 
 - the Bun Alt+N behavioral test has passed twice consecutively;
+- the bounded Alt+W extension has also passed twice consecutively;
 - no E2E fixture or monitor process remains;
 - Gauss currently has Gum, ydotool, and the rootless ydotoold configuration
   activated;

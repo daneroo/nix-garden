@@ -62,6 +62,10 @@ binding through keyd and restore its fixture-owned desktop state.
       Assess the spike's speed, clarity, input fidelity, reliability, and
       extension cost in the ticket, then pause at the feasibility gate.
       `[tier: med]`
+- [x] Extend the proven fixture scenario with physical `Alt+W`: close only the
+      newly created fixture window, observe focus return to the initial fixture,
+      retain keyd evidence, and reuse the existing cleanup path. Evidence: two
+      consecutive direct-source passes without new infrastructure. `[tier: low]`
 
 Deferred beyond the gate: final regression breadth, automatic PaperWM mode
 switching, a dedicated workspace, attended-mode recovery, custom presentation,

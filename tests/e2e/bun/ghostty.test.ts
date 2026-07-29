@@ -167,7 +167,7 @@ afterAll(() => {
 });
 
 describe("deployed Ghostty keyboard behavior", () => {
-  test("physical Alt+N creates and focuses a fixture-owned window through keyd", async () => {
+  test("physical Alt+N creates a focused window and Alt+W closes it through keyd", async () => {
     const started = performance.now();
     let fixture: Fixture | undefined;
     let baseline: AccessibleWindow | undefined;
@@ -193,10 +193,15 @@ describe("deployed Ghostty keyboard behavior", () => {
       const loadedBindings = (
         await runCommand(["ghostty", "+list-keybinds", "--plain"])
       ).stdout;
-      if (!loadedBindings.includes("keybind = alt+n=new_window")) {
-        throw new Error(
-          `fixture Ghostty did not load the deployed Alt+N binding:\n${loadedBindings}`,
-        );
+      for (const binding of [
+        "keybind = alt+n=new_window",
+        "keybind = alt+w=close_tab:this",
+      ]) {
+        if (!loadedBindings.includes(binding)) {
+          throw new Error(
+            `fixture Ghostty did not load ${binding}:\n${loadedBindings}`,
+          );
+        }
       }
 
       await step("Launch the fixture-owned Ghostty process", async () => {
@@ -269,12 +274,39 @@ describe("deployed Ghostty keyboard behavior", () => {
           ),
       );
 
-      const evidence = await waitForKeydChordEvidence(monitor);
+      const newWindowEvidence = await waitForKeydChordEvidence(monitor, "n");
       console.log(
-        `  • keyd evidence retained: ${evidence
+        `  • keyd evidence retained: ${newWindowEvidence
           .split("\n")
           .filter(
             (line) => line.includes("leftalt down") || line.includes("n down"),
+          )
+          .join(" | ")}`,
+      );
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "w"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+W to close the new window and return focus to the initial fixture",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.active === true &&
+          sameAccessibleRef(windows[0].ref, initialWindow.ref),
+      );
+
+      const closeWindowEvidence = await waitForKeydChordEvidence(monitor, "w");
+      console.log(
+        `  • keyd evidence retained: ${closeWindowEvidence
+          .split("\n")
+          .filter(
+            (line) => line.includes("leftalt down") || line.includes("w down"),
           )
           .join(" | ")}`,
       );

@@ -1,15 +1,17 @@
 import { runCommand, step, waitFor } from "./desktop.ts";
 
-export type PhysicalKey = "leftAlt" | "n";
+export type PhysicalKey = "leftAlt" | "n" | "w";
 
 const keyCodes: Readonly<Record<PhysicalKey, number>> = {
   leftAlt: 56,
   n: 49,
+  w: 17,
 };
 
 const displayNames: Readonly<Record<PhysicalKey, string>> = {
   leftAlt: "Alt",
   n: "N",
+  w: "W",
 };
 
 export interface KeydMonitor {
@@ -100,12 +102,13 @@ export async function injectPhysicalChord(
 
 export async function waitForKeydChordEvidence(
   monitor: KeydMonitor,
+  key: Exclude<PhysicalKey, "leftAlt">,
 ): Promise<string> {
   return waitFor(
-    "keyd monitor to report the injected physical Alt+N output",
+    `keyd monitor to report the injected physical Alt+${displayNames[key]} output`,
     async () => monitor.evidence(),
     (evidence) =>
-      evidence.includes("leftalt down") && evidence.includes("n down"),
+      evidence.includes("leftalt down") && evidence.includes(`${key} down`),
     { timeoutMs: 5_000 },
   );
 }
