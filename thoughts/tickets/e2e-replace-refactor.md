@@ -56,6 +56,11 @@ reducing Python to a boot / invoke / report bridge and deleting the duplicated
 Python behavioral tests once parity holds. Otherwise the Python suite stays
 frozen (already unmaintained) and is deprecated later when a cheap path appears.
 
+The runtime cost looks low: the VM inherits the host's `bun` system package, the
+Bun project has no runtime dependencies, and `@types/bun` / `tsc` are dev-only
+(typechecking never runs in the VM). VM invocation therefore needs only `bun`
+plus the sources — no runtime packaging to design.
+
 ### Hardy capability preflight fails
 
 After deploying the merged configuration to Hardy, `./scripts/e2e.sh` fails at
