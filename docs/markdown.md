@@ -17,3 +17,7 @@ Authoring conventions for repository documentation:
 The repository's formatting tool owns spacing and prose wrapping. Its Markdown
 linter owns document structure and must use formatting-compatible rules. The
 repository quality gate verifies both.
+
+Exception: preserve installer-managed skills with a tracked upstream exactly as
+pinned instead of reformatting them. This currently applies only to
+`.agents/skills/grilling/`; repository-authored skills follow the normal rules.

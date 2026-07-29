@@ -11,10 +11,9 @@ result in the repository only when it produces project state worth preserving.
 
 Installer-managed skills are pinned in `skills-lock.json` and stored under
 `.agents/skills/`. Harness-specific paths may link to that shared copy. Review
-third-party instructions and changes before installing or updating them. Keep
-installer-managed copies with a tracked upstream unchanged; update them through
-the skill manager. This currently applies only to `grilling`. Skills authored in
-this repository remain subject to its normal formatting rules.
+third-party instructions and changes before installing or updating them. Update
+tracked upstream copies through the skill manager rather than editing them in
+place.
 
 Prefer reputable, reviewed existing skills while learning what is useful. A
 personal skill is a later refinement for a proven need that existing skills do
