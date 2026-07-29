@@ -18,11 +18,10 @@ import {
   waitForExactOutput,
 } from "./desktop.ts";
 import {
-  injectPhysicalChord,
   type KeydMonitor,
+  pressChord,
   startKeydMonitor,
   stopKeydMonitor,
-  waitForKeydChordEvidence,
 } from "./keyboard.ts";
 import { type Capabilities, validateCapabilities } from "./setup.ts";
 
@@ -264,10 +263,9 @@ describe("deployed Ghostty keyboard behavior", () => {
 
       monitor = await startKeydMonitor(capabilities.keydBinary);
 
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "t"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "t"],
+      });
       const newTabWindows = await waitFor(
         "Alt+T to create and select a second fixture tab",
         async () =>
@@ -281,14 +279,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows[0].title !== initialWindow.title,
       );
       const newTabTitle = newTabWindows[0]!.title;
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "t"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "leftShift", "leftBracket"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "leftShift", "leftBracket"],
+      });
       await waitFor(
         "Alt+Shift+[ to select the initial fixture tab",
         async () =>
@@ -301,14 +295,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows[0]?.active === true &&
           windows[0].title === initialWindow.title,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "leftShift", "leftBracket"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "leftShift", "rightBracket"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "leftShift", "rightBracket"],
+      });
       await waitFor(
         "Alt+Shift+] to select the second fixture tab",
         async () =>
@@ -321,14 +311,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows[0]?.active === true &&
           windows[0].title === newTabTitle,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "leftShift", "rightBracket"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "w"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "w"],
+      });
       await waitFor(
         "Alt+W to close the selected tab and reveal the initial fixture tab",
         async () =>
@@ -341,14 +327,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows[0]?.active === true &&
           windows[0].title === initialWindow.title,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "w"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftCtrl", "c"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftCtrl", "c"],
+      });
       await waitFor(
         "native Ctrl+C to reach the fixture PTY",
         async () =>
@@ -360,14 +342,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows.length === 1 &&
           windows[0]?.title === `${initialWindow.title}-control-c`,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftCtrl", "c"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "d"] },
-        capabilities.ydotoolSocket,
-      );
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "d"],
+      });
       await waitFor(
         "unbound Alt+D to reach the fixture PTY",
         async () =>
@@ -379,32 +357,22 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows.length === 1 &&
           windows[0]?.title === `${initialWindow.title}-alt-d`,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "d"],
-      });
 
-      await injectPhysicalChord(
-        { keys: ["leftCtrl", "leftShift", "a"] },
-        capabilities.ydotoolSocket,
-      );
-      await waitForKeydChordEvidence(monitor, {
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
         keys: ["leftCtrl", "leftShift", "a"],
       });
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "c"] },
-        capabilities.ydotoolSocket,
-      );
-      await waitForExactOutput(["wl-paste", "--no-newline"], "COPY_PROBE");
-      await waitForKeydChordEvidence(monitor, {
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
         keys: ["leftAlt", "c"],
       });
+      await waitForExactOutput(["wl-paste", "--no-newline"], "COPY_PROBE");
 
       await step("Set the fixture paste probe clipboard", async () => {
         await writeClipboard("PASTE_PROBE");
       });
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "v"] },
+      await pressChord(
+        monitor!,
         capabilities.ydotoolSocket,
+        { keys: ["leftAlt", "v"] },
         {
           watch:
             "Ghostty raw fixture does not echo paste; watch its title gain the -paste suffix",
@@ -421,15 +389,10 @@ describe("deployed Ghostty keyboard behavior", () => {
           windows.length === 1 &&
           windows[0]?.title === `${initialWindow.title}-paste`,
       );
-      await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "v"],
+
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "n"],
       });
-
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "n"] },
-        capabilities.ydotoolSocket,
-      );
-
       const resultingWindows = await waitFor(
         "exactly two fixture-owned Ghostty windows",
         async () =>
@@ -462,22 +425,9 @@ describe("deployed Ghostty keyboard behavior", () => {
           ),
       );
 
-      const newWindowEvidence = await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "n"],
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "w"],
       });
-      console.log(
-        `  • keyd evidence retained: ${newWindowEvidence
-          .split("\n")
-          .filter(
-            (line) => line.includes("leftalt down") || line.includes("n down"),
-          )
-          .join(" | ")}`,
-      );
-
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "w"] },
-        capabilities.ydotoolSocket,
-      );
       await waitFor(
         "Alt+W to close the new window and return focus to the initial fixture",
         async () =>
@@ -491,22 +441,9 @@ describe("deployed Ghostty keyboard behavior", () => {
           sameAccessibleRef(windows[0].ref, initialWindow.ref),
       );
 
-      const closeWindowEvidence = await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "w"],
+      await pressChord(monitor!, capabilities.ydotoolSocket, {
+        keys: ["leftAlt", "q"],
       });
-      console.log(
-        `  • keyd evidence retained: ${closeWindowEvidence
-          .split("\n")
-          .filter(
-            (line) => line.includes("leftalt down") || line.includes("w down"),
-          )
-          .join(" | ")}`,
-      );
-
-      await injectPhysicalChord(
-        { keys: ["leftAlt", "q"] },
-        capabilities.ydotoolSocket,
-      );
       await waitFor(
         "Alt+Q to quit only the isolated fixture application",
         async () =>
@@ -515,18 +452,6 @@ describe("deployed Ghostty keyboard behavior", () => {
             fixture!,
           ),
         (windows) => windows.length === 0,
-      );
-
-      const quitEvidence = await waitForKeydChordEvidence(monitor, {
-        keys: ["leftAlt", "q"],
-      });
-      console.log(
-        `  • keyd evidence retained: ${quitEvidence
-          .split("\n")
-          .filter(
-            (line) => line.includes("leftalt down") || line.includes("q down"),
-          )
-          .join(" | ")}`,
       );
     } catch (error) {
       originalFailure = error;

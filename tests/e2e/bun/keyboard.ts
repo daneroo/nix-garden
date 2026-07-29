@@ -200,3 +200,22 @@ export async function waitForKeydChordEvidence(
     { timeoutMs: 5_000 },
   );
 }
+
+// Inject a physical chord and confirm keyd carried it, from a fresh checkpoint
+// so evidence from earlier chords cannot satisfy the wait. `expect` is the
+// logical output keyd should emit (e.g. Alt+C mapped to Ctrl+C); omit it when
+// the chord is expected to pass through unchanged.
+export async function pressChord(
+  monitor: KeydMonitor,
+  ydotoolSocket: string,
+  chord: PhysicalChord,
+  options: { readonly expect?: PhysicalChord; readonly watch?: string } = {},
+): Promise<void> {
+  const since = monitor.evidence().length;
+  await injectPhysicalChord(
+    chord,
+    ydotoolSocket,
+    options.watch === undefined ? {} : { watch: options.watch },
+  );
+  await waitForKeydChordEvidence(monitor, options.expect ?? chord, since);
+}

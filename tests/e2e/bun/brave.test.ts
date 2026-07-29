@@ -21,9 +21,9 @@ import {
   injectPhysicalChord,
   injectPhysicalText,
   type KeydMonitor,
+  pressChord,
   startKeydMonitor,
   stopKeydMonitor,
-  waitForKeydChordEvidence,
 } from "./keyboard.ts";
 import { type Capabilities, validateCapabilities } from "./setup.ts";
 
@@ -706,17 +706,11 @@ describe("deployed Brave keyboard behavior", () => {
         console.log(
           "    • BRAVE COPY: COPY_PROBE is selected; the page will not visibly change",
         );
-        const copyEvidence = monitor.evidence().length;
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "c"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
-        );
-        await step("Confirm keyd translated Brave Alt+C to Ctrl+C", async () =>
-          waitForKeydChordEvidence(
-            monitor!,
-            { keys: ["leftCtrl", "c"] },
-            copyEvidence,
-          ),
+          { keys: ["leftAlt", "c"] },
+          { expect: { keys: ["leftCtrl", "c"] } },
         );
         await step(
           "Confirm Brave fired a copy event for COPY_PROBE (verified in-page, no external clipboard client)",
@@ -750,21 +744,15 @@ describe("deployed Brave keyboard behavior", () => {
           "    • BRAVE PASTE: the selected textarea should visibly change to PASTE_PROBE",
         );
         const expectedPasteTitle = `${fixture!.title}-initial-PASTE_PROBE`;
-        const pasteEvidence = monitor.evidence().length;
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "v"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
+          { keys: ["leftAlt", "v"] },
           {
+            expect: { keys: ["leftCtrl", "v"] },
             watch:
               "Brave textarea should visibly change from COPY_PROBE to PASTE_PROBE",
           },
-        );
-        await step("Confirm keyd translated Brave Alt+V to Ctrl+V", async () =>
-          waitForKeydChordEvidence(
-            monitor!,
-            { keys: ["leftCtrl", "v"] },
-            pasteEvidence,
-          ),
         );
         await step(
           "Confirm Brave pasted PASTE_PROBE into the textarea",
@@ -777,9 +765,10 @@ describe("deployed Brave keyboard behavior", () => {
           async () => documentHasFocus(initialPage),
           (focused) => focused,
         );
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "n"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
+          { keys: ["leftAlt", "n"] },
           { watch: "a second isolated Brave window should appear" },
         );
         const pagesAfterNewWindow = await waitForPageCount(fixturePort, 2);
@@ -812,17 +801,16 @@ describe("deployed Brave keyboard behavior", () => {
             accessibleSubtreeHasFocus(capabilities.atSpiAddress, newWindow.ref),
           (focused) => focused,
         );
-        await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "n"] });
-
         await waitFor(
           "keyboard focus to remain inside the new Brave frame before Alt+W",
           async () =>
             accessibleSubtreeHasFocus(capabilities.atSpiAddress, newWindow.ref),
           (focused) => focused,
         );
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "w"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
+          { keys: ["leftAlt", "w"] },
           { watch: "the second Brave window should close" },
         );
         const pagesAfterClose = await waitForPageCount(fixturePort, 1);
@@ -852,11 +840,10 @@ describe("deployed Brave keyboard behavior", () => {
           async () => documentHasFocus(initialPage),
           (focused) => focused,
         );
-        await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "w"] });
-
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "t"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
+          { keys: ["leftAlt", "t"] },
           { watch: "a new Brave tab should appear in the remaining window" },
         );
         const pagesAfterNewTab = await waitForPageCount(fixturePort, 2);
@@ -887,8 +874,6 @@ describe("deployed Brave keyboard behavior", () => {
           },
           (observed) => observed.focused,
         );
-        await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "t"] });
-
         await injectPhysicalText(
           fixture.navigationUrl,
           capabilities.ydotoolSocket,
@@ -908,12 +893,12 @@ describe("deployed Brave keyboard behavior", () => {
           (focused) => focused,
         );
 
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "l"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
+          { keys: ["leftAlt", "l"] },
           { watch: "Brave should select the address bar" },
         );
-        await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "l"] });
         await waitFor(
           "Alt+L to retain keyboard focus inside the fixture-owned Brave frame",
           async () =>
@@ -942,42 +927,34 @@ describe("deployed Brave keyboard behavior", () => {
           (focused) => focused,
         );
 
-        const previousTabEvidence = monitor.evidence().length;
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "leftShift", "leftBracket"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
-          { watch: "Brave should select the initial COPY_PROBE tab" },
+          { keys: ["leftAlt", "leftShift", "leftBracket"] },
+          {
+            expect: { keys: ["leftCtrl", "leftShift", "tab"] },
+            watch: "Brave should select the initial COPY_PROBE tab",
+          },
         );
         await waitFor(
           "Alt+Shift+[ to select the initial Brave tab",
           async () => documentHasFocus(initialPage),
           (focused) => focused,
         );
-        await waitForKeydChordEvidence(
-          monitor,
-          {
-            keys: ["leftCtrl", "leftShift", "tab"],
-          },
-          previousTabEvidence,
-        );
 
-        const nextTabEvidence = monitor.evidence().length;
-        await injectPhysicalChord(
-          { keys: ["leftAlt", "leftShift", "rightBracket"] },
+        await pressChord(
+          monitor!,
           capabilities.ydotoolSocket,
-          { watch: "Brave should return to the address-navigated tab" },
+          { keys: ["leftAlt", "leftShift", "rightBracket"] },
+          {
+            expect: { keys: ["leftCtrl", "tab"] },
+            watch: "Brave should return to the address-navigated tab",
+          },
         );
         await waitFor(
           "Alt+Shift+] to select the address-navigated Brave tab",
           async () => documentHasFocus(selectedTab),
           (focused) => focused,
-        );
-        await waitForKeydChordEvidence(
-          monitor,
-          {
-            keys: ["leftCtrl", "tab"],
-          },
-          nextTabEvidence,
         );
       } catch (error) {
         originalFailure = error;
