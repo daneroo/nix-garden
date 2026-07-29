@@ -52,7 +52,7 @@ The three headline recommendations, expanded below:
 ### Process weight
 
 The workflow docs are well-written, but items like `shared-repo-workflow`,
-`shared-workflow-skill`, and `concise-agent-docs` are meta-work with no homelab
+`agent-skills-workflow`, and `concise-agent-docs` are meta-work with no homelab
 outcome. Suggested rule: at most one process item in flight at a time, and never
 in `## Now` while a platform item is available. The workflow will settle faster
 through use than through refinement.

@@ -9,10 +9,16 @@ durable documentation, backlog state, plans, quality gates, or Daniel's
 decisions. Use a skill when its interaction model fits the work, and keep the
 result in the repository only when it produces project state worth preserving.
 
-Installed skills are pinned in `skills-lock.json` and stored under
+Installer-managed skills are pinned in `skills-lock.json` and stored under
 `.agents/skills/`. Harness-specific paths may link to that shared copy. Review
 third-party instructions and changes before installing or updating them. Keep
-installed third-party copies unchanged; update them through the skill manager.
+installer-managed copies with a tracked upstream unchanged; update them through
+the skill manager. This currently applies only to `grilling`. Skills authored in
+this repository remain subject to its normal formatting rules.
+
+Prefer reputable, reviewed existing skills while learning what is useful. A
+personal skill is a later refinement for a proven need that existing skills do
+not serve, not a separate starting track.
 
 ## Current Pilot
 

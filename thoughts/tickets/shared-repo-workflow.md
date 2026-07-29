@@ -21,8 +21,8 @@ local commands or constraints.
 
 ## Candidate Distribution
 
-Agent Skill exploration is tracked separately in
-[shared-workflow-skill](shared-workflow-skill.md). This ticket first establishes
+An Agent Skill is one possible later distribution mechanism tracked by
+[agent-skills-workflow](agent-skills-workflow.md). This ticket first establishes
 what is actually shared and proves the convention in both repositories.
 
 ## Next Work

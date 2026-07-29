@@ -162,9 +162,6 @@ Shared direction and comparison criteria:
 - [ ] concise-agent-docs — make agent-facing instructions in nix-garden and
       Prosodio substantially shorter and easier to scan; ticket:
       [concise-agent-docs](tickets/concise-agent-docs.md)
-- [ ] shared-workflow-skill — explore packaging the settled repository workflow
-      as a personal, harness-neutral Agent Skill shared through Git; ticket:
-      [shared-workflow-skill](tickets/shared-workflow-skill.md)
 
 ## Documentation
 
