@@ -1,11 +1,17 @@
-import { runCommand, waitForExactOutput } from "./desktop.ts";
+import { runCommand, waitFor } from "./desktop.ts";
 
 export interface ClipboardBaseline {
   readonly text: string;
   readonly types: readonly string[];
 }
 
-const supportedTypes = new Set(["text/plain", "text/plain;charset=utf-8"]);
+const supportedTypes = new Set([
+  "STRING",
+  "TEXT",
+  "UTF8_STRING",
+  "text/plain",
+  "text/plain;charset=utf-8",
+]);
 
 export async function captureClipboard(): Promise<ClipboardBaseline> {
   const types = (await runCommand(["wl-paste", "--list-types"])).stdout
@@ -35,7 +41,22 @@ export async function writeClipboard(text: string): Promise<void> {
     throw new Error(`wl-copy exited ${exitCode}`);
   }
 
-  await waitForExactOutput(["wl-paste", "--no-newline"], text);
+  await waitFor(
+    "clipboard text to match the requested value",
+    async () => {
+      const result = await runCommand(["wl-paste", "--no-newline"], {
+        check: false,
+        timeoutMs: 2_000,
+      });
+      return {
+        exitCode: result.exitCode,
+        matches: result.stdout === text,
+        timedOut: result.timedOut,
+      };
+    },
+    (observed) =>
+      !observed.timedOut && observed.exitCode === 0 && observed.matches,
+  );
 }
 
 export async function restoreClipboard(

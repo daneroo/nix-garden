@@ -285,6 +285,14 @@ copied the selected `COPY_PROBE`, `Alt+V` delivered `PASTE_PROBE` to the fixture
 PTY, keyd retained both physical chords, and fixture, focus, and the captured
 run baseline were restored.
 
+Daniel's first public-script regression then stopped safely during preflight:
+the clipboard contained only text but advertised the standard `UTF8_STRING`,
+`STRING`, and `TEXT` aliases that the narrow MIME allowlist rejected. Accepting
+those aliases made the same scenario pass in 2.07 seconds with exact baseline
+restoration. That verification exposed the baseline value in the generic
+exact-output progress message, so clipboard verification now reports only exit,
+timeout, and equality state; clipboard contents remain redacted.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -380,6 +388,12 @@ the failed runs counts as a passing behavioral assertion.
     deliberately not logged, the pre-run text could not be recovered. Ignoring
     the unused inherited pipes fixed the helper without changing the mechanism;
     the second and final bounded run passed and restored its captured baseline.
+18. The committed public script rejected a restorable text clipboard because
+    `wl-copy` also advertised standard text aliases. The expanded text-only
+    allowlist passed the full live scenario. Its restoration progress then
+    revealed that the generic exact-output reporter printed the clipboard
+    payload; the clipboard helper was narrowed to retain only redacted
+    match/exit/timeout diagnostics.
 
 Current state:
 
