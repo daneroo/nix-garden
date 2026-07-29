@@ -24,7 +24,7 @@ let capabilities: Capabilities;
 interface Fixture {
   readonly configPath: string;
   readonly directory: string;
-  readonly title: string;
+  readonly titlePrefix: string;
   readonly unit: string;
 }
 
@@ -33,7 +33,9 @@ function fixtureWindows(
   fixture: Fixture,
 ): AccessibleWindow[] {
   return windows.filter(
-    (window) => window.appId === fixtureAppId && window.title === fixture.title,
+    (window) =>
+      window.appId === fixtureAppId &&
+      window.title.startsWith(fixture.titlePrefix),
   );
 }
 
@@ -51,7 +53,7 @@ async function createFixture(): Promise<Fixture> {
     ])
   ).stdout.trim();
   const runId = directory.slice(directory.lastIndexOf(".") + 1);
-  const title = `nix-garden-e2e-${runId}`;
+  const titlePrefix = `nix-garden-e2e-${runId}`;
   const configPath = `${directory}/ghostty.conf`;
   const unit = `nix-garden-e2e-ghostty-${runId}.service`;
   const fixtureProgram = `${import.meta.dir}/fixture.ts`;
@@ -65,12 +67,11 @@ async function createFixture(): Promise<Fixture> {
       "confirm-close-surface = false",
       "gtk-single-instance = false",
       `class = ${fixtureAppId}`,
-      `title = ${title}`,
       "",
     ].join("\n"),
   );
 
-  return { configPath, directory, title, unit };
+  return { configPath, directory, titlePrefix, unit };
 }
 
 async function launchFixture(fixture: Fixture): Promise<void> {
@@ -81,6 +82,7 @@ async function launchFixture(fixture: Fixture): Promise<void> {
     `--unit=${fixture.unit}`,
     "--property=KillMode=mixed",
     "--property=TimeoutStopSec=3s",
+    `--setenv=NIX_GARDEN_E2E_TITLE_PREFIX=${fixture.titlePrefix}`,
     "ghostty",
     `--config-file=${fixture.configPath}`,
     "--gtk-single-instance=false",
@@ -167,7 +169,7 @@ afterAll(() => {
 });
 
 describe("deployed Ghostty keyboard behavior", () => {
-  test("physical Alt+N, Alt+W, and Alt+Q control fixture windows through keyd", async () => {
+  test("physical Ghostty lifecycle and terminal chords traverse keyd", async () => {
     const started = performance.now();
     let fixture: Fixture | undefined;
     let baseline: AccessibleWindow | undefined;
@@ -196,7 +198,10 @@ describe("deployed Ghostty keyboard behavior", () => {
       for (const binding of [
         "keybind = alt+n=new_window",
         "keybind = alt+q=quit",
+        "keybind = alt+t=new_tab",
         "keybind = alt+w=close_tab:this",
+        "keybind = alt+shift+]=next_tab",
+        "keybind = alt+shift+[=previous_tab",
       ]) {
         if (!loadedBindings.includes(binding)) {
           throw new Error(
@@ -238,6 +243,126 @@ describe("deployed Ghostty keyboard behavior", () => {
       );
 
       monitor = await startKeydMonitor(capabilities.keydBinary);
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "t"] },
+        capabilities.ydotoolSocket,
+      );
+      const newTabWindows = await waitFor(
+        "Alt+T to create and select a second fixture tab",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.active === true &&
+          windows[0].title !== initialWindow.title,
+      );
+      const newTabTitle = newTabWindows[0]!.title;
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "t"],
+      });
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "leftShift", "leftBracket"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+Shift+[ to select the initial fixture tab",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.active === true &&
+          windows[0].title === initialWindow.title,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "leftShift", "leftBracket"],
+      });
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "leftShift", "rightBracket"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+Shift+] to select the second fixture tab",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.active === true &&
+          windows[0].title === newTabTitle,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "leftShift", "rightBracket"],
+      });
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "w"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+W to close the selected tab and reveal the initial fixture tab",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.active === true &&
+          windows[0].title === initialWindow.title,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "w"],
+      });
+
+      await injectPhysicalChord(
+        { keys: ["leftCtrl", "c"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "native Ctrl+C to reach the fixture PTY",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.title === `${initialWindow.title}-control-c`,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftCtrl", "c"],
+      });
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "d"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "unbound Alt+D to reach the fixture PTY",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) =>
+          windows.length === 1 &&
+          windows[0]?.title === `${initialWindow.title}-alt-d`,
+      );
+      await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "d"],
+      });
+
       await injectPhysicalChord(
         { keys: ["leftAlt", "n"] },
         capabilities.ydotoolSocket,
@@ -275,7 +400,9 @@ describe("deployed Ghostty keyboard behavior", () => {
           ),
       );
 
-      const newWindowEvidence = await waitForKeydChordEvidence(monitor, "n");
+      const newWindowEvidence = await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "n"],
+      });
       console.log(
         `  • keyd evidence retained: ${newWindowEvidence
           .split("\n")
@@ -302,7 +429,9 @@ describe("deployed Ghostty keyboard behavior", () => {
           sameAccessibleRef(windows[0].ref, initialWindow.ref),
       );
 
-      const closeWindowEvidence = await waitForKeydChordEvidence(monitor, "w");
+      const closeWindowEvidence = await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "w"],
+      });
       console.log(
         `  • keyd evidence retained: ${closeWindowEvidence
           .split("\n")
@@ -326,7 +455,9 @@ describe("deployed Ghostty keyboard behavior", () => {
         (windows) => windows.length === 0,
       );
 
-      const quitEvidence = await waitForKeydChordEvidence(monitor, "q");
+      const quitEvidence = await waitForKeydChordEvidence(monitor, {
+        keys: ["leftAlt", "q"],
+      });
       console.log(
         `  • keyd evidence retained: ${quitEvidence
           .split("\n")

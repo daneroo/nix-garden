@@ -264,6 +264,15 @@ With PaperWM disabled, the existing fixture lifecycle then added physical
 and completed cleanup in 1.07 seconds. This group added no helper, permission,
 service, package, or observer.
 
+The richer Ghostty terminal fixture added per-surface OSC titles and raw PTY
+acknowledgements without changing the desktop mechanisms. Its first bounded run
+reached tab creation and previous-tab selection but used the wrong expected keyd
+names for brackets. After the one allowed local correction from
+`leftbrace`/`rightbrace` to literal `[`/`]`, the second and final run passed in
+1.69 seconds. It covered `Alt+T`, `Alt+Shift+[`/`]`, selected-tab `Alt+W`,
+native `Ctrl+C`, unbound `Alt+D`, and the existing window lifecycle, with keyd
+evidence and complete cleanup on standard GNOME.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -357,6 +366,7 @@ Current state:
 - the Bun Alt+N behavioral test has passed twice consecutively;
 - the bounded Alt+W extension has also passed twice consecutively;
 - the bounded Alt+Q extension has passed twice consecutively on standard GNOME;
+- the grouped Ghostty tab and PTY extension passed within its two-run budget;
 - no E2E fixture or monitor process remains;
 - Gauss currently has Gum, ydotool, and the rootless ydotoold configuration
   activated;

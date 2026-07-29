@@ -81,7 +81,7 @@ Do not cross group boundaries during a failure.
       fixture application exits, retain keyd evidence, and confirm baseline
       focus. Add no helper, permission, service, package, or observer.
       `[tier: low]`
-- [ ] **Group 2 — one richer Ghostty terminal fixture:** add only the monotonic
+- [x] **Group 2 — one richer Ghostty terminal fixture:** add only the monotonic
       surface titles and PTY acknowledgements already proven by the old fixture.
       In one independently repeatable scenario, cover `Alt+T` tab creation,
       `Alt+Shift+[`/`]` selection, and `Alt+W` selected-tab closure. Then reuse

@@ -1,19 +1,58 @@
 import { runCommand, step, waitFor } from "./desktop.ts";
 
-export type PhysicalKey = "leftAlt" | "n" | "q" | "w";
+export type PhysicalKey =
+  | "c"
+  | "d"
+  | "leftAlt"
+  | "leftBracket"
+  | "leftCtrl"
+  | "leftShift"
+  | "n"
+  | "q"
+  | "rightBracket"
+  | "t"
+  | "w";
 
 const keyCodes: Readonly<Record<PhysicalKey, number>> = {
+  c: 46,
+  d: 32,
   leftAlt: 56,
+  leftBracket: 26,
+  leftCtrl: 29,
+  leftShift: 42,
   n: 49,
   q: 16,
+  rightBracket: 27,
+  t: 20,
   w: 17,
 };
 
 const displayNames: Readonly<Record<PhysicalKey, string>> = {
+  c: "C",
+  d: "D",
   leftAlt: "Alt",
+  leftBracket: "[",
+  leftCtrl: "Ctrl",
+  leftShift: "Shift",
   n: "N",
   q: "Q",
+  rightBracket: "]",
+  t: "T",
   w: "W",
+};
+
+const evidenceNames: Readonly<Record<PhysicalKey, string>> = {
+  c: "c",
+  d: "d",
+  leftAlt: "leftalt",
+  leftBracket: "[",
+  leftCtrl: "leftcontrol",
+  leftShift: "leftshift",
+  n: "n",
+  q: "q",
+  rightBracket: "]",
+  t: "t",
+  w: "w",
 };
 
 export interface KeydMonitor {
@@ -104,13 +143,14 @@ export async function injectPhysicalChord(
 
 export async function waitForKeydChordEvidence(
   monitor: KeydMonitor,
-  key: Exclude<PhysicalKey, "leftAlt">,
+  chord: PhysicalChord,
 ): Promise<string> {
+  const label = chord.keys.map((key) => displayNames[key]).join("+");
+  const expected = chord.keys.map((key) => `${evidenceNames[key]} down`);
   return waitFor(
-    `keyd monitor to report the injected physical Alt+${displayNames[key]} output`,
+    `keyd monitor to report the injected physical ${label} output`,
     async () => monitor.evidence(),
-    (evidence) =>
-      evidence.includes("leftalt down") && evidence.includes(`${key} down`),
+    (evidence) => expected.every((event) => evidence.includes(event)),
     { timeoutMs: 5_000 },
   );
 }
