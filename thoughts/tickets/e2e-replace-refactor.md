@@ -6,6 +6,17 @@ items make it broader, simpler, clearer, and reusable in the VM. Each is
 independent; do not reopen the solved focus or permission investigations without
 new evidence.
 
+## Hardy capability preflight fails
+
+After deploying the merged configuration to Hardy, `./scripts/e2e.sh` fails at
+the first gate — the `validateCapabilities` step "Validate the live
+graphical-session capabilities". That single step bundles roughly a dozen
+assertions (executables, session env, Wayland socket, GNOME Shell bus,
+keyd/ydotoold services, sudo, ydotool, the keyd↔ydotoold device match, AT-SPI,
+extensions), so the failure does not name which assumption breaks on Hardy.
+Making the check report the exact failing capability is the first simplification
+and readability win.
+
 ## Remaining GNOME global bindings
 
 Cover the global chords not yet tested:
