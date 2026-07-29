@@ -1,4 +1,4 @@
-import { runCommand, step, waitFor } from "./desktop.ts";
+import { observationDelayMs, runCommand, step, waitFor } from "./desktop.ts";
 
 export type PhysicalKey =
   | "a"
@@ -84,15 +84,8 @@ export interface PhysicalChord {
   readonly keys: readonly [PhysicalKey, ...PhysicalKey[]];
 }
 
-function observationDelayMs(): number {
-  const value = Bun.env.NIX_GARDEN_E2E_SLOW_SECONDS ?? "0";
-  const seconds = Number(value);
-  if (!Number.isFinite(seconds) || seconds < 0) {
-    throw new Error(
-      `NIX_GARDEN_E2E_SLOW_SECONDS must be non-negative, got ${JSON.stringify(value)}`,
-    );
-  }
-  return seconds * 1_000;
+export interface InjectionOptions {
+  readonly watch?: string;
 }
 
 export async function startKeydMonitor(
@@ -159,9 +152,16 @@ export async function stopKeydMonitor(monitor: KeydMonitor): Promise<void> {
 export async function injectPhysicalChord(
   chord: PhysicalChord,
   ydotoolSocket: string,
+  options: InjectionOptions = {},
 ): Promise<void> {
   const label = chord.keys.map((key) => displayNames[key]).join("+");
   await step(`Inject physical ${label} before keyd`, async () => {
+    const delayMs = observationDelayMs();
+    if (delayMs > 0 && options.watch !== undefined) {
+      console.log(
+        `    • WATCH NOW: ${options.watch} (${delayMs / 1_000}s after injection)`,
+      );
+    }
     const presses = chord.keys.map((key) => `${keyCodes[key]}:1`);
     const releases = [...chord.keys]
       .reverse()
@@ -169,9 +169,7 @@ export async function injectPhysicalChord(
     await runCommand(["ydotool", "key", ...presses, ...releases], {
       env: { YDOTOOL_SOCKET: ydotoolSocket },
     });
-    const delayMs = observationDelayMs();
-    if (delayMs > 0) {
-      console.log(`  • observing chord outcome for ${delayMs / 1_000}s`);
+    if (delayMs > 0 && options.watch !== undefined) {
       await Bun.sleep(delayMs);
     }
   });
@@ -196,7 +194,7 @@ export async function waitForKeydChordEvidence(
   const label = chord.keys.map((key) => displayNames[key]).join("+");
   const expected = chord.keys.map((key) => `${evidenceNames[key]} down`);
   return waitFor(
-    `keyd monitor to report the injected physical ${label} output`,
+    `keyd monitor to report ${label} evidence`,
     async () => monitor.evidence().slice(since),
     (evidence) => expected.every((event) => evidence.includes(event)),
     { timeoutMs: 5_000 },

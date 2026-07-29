@@ -12,7 +12,7 @@ usage() {
 Usage: ./scripts/e2e.sh [-y|--yes] [--slow [SECONDS]]
 
   -y, --yes        accept the guarded workspace and clipboard confirmation
-  --slow [SECONDS] pause after each injected chord (default: 1 second)
+  --slow [SECONDS] pause at labelled visual checkpoints (default: 1 second)
   -h, --help       show this help
 EOF
 }

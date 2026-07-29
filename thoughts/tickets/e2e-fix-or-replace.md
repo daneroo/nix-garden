@@ -315,14 +315,14 @@ Ctrl+Shift+Tab and Ctrl+Tab output. The corrected bounded run passed in 4.88
 seconds with complete cleanup and baseline restoration.
 
 The guarded public entry now accepts `-y`/`--yes` and `--slow [SECONDS]`. Slow
-mode adds observation time only after physical chord injection, leaving semantic
-wait timeouts unchanged. The entry warns before desktop control that it
-overwrites the clipboard and restores only a plain-text representation when the
-original owner also offered rich formats. It detects existing non-interactive
-sudo authorization before explaining the password and Ctrl+C abort path. Daniel
-validated the flags from the direct Ghostty session and separately confirmed
-that the same test invoked from the old Herdr session fails the launch-lineage
-preflight.
+mode pauses only at labelled visual checkpoints and holds a failed fixture open
+before cleanup, leaving semantic wait timeouts unchanged. The entry warns before
+desktop control that it overwrites the clipboard and restores only a plain-text
+representation when the original owner also offered rich formats. It detects
+existing non-interactive sudo authorization before explaining the password and
+Ctrl+C abort path. Daniel validated the flags from the direct Ghostty session
+and separately confirmed that the same test invoked from the old Herdr session
+fails the launch-lineage preflight.
 
 ### Owner assessment
 
@@ -507,6 +507,61 @@ the failed runs counts as a passing behavioral assertion.
     plain text, losing its rich formats. Daniel then validated the direct
     Ghostty invocation and proved that an invocation from the old persistent
     Herdr session fails immediately at the lineage guard.
+29. The bounded Brave clipboard group proved physical `Alt+C` end to end:
+    `COPY_PROBE` reached `wl-paste` and keyd retained the chord. Both attempts
+    then set and independently verified `PASTE_PROBE`; the second additionally
+    reselected the exact textarea through the existing CDP connection and proved
+    that its document retained OS focus. keyd observed physical `Alt+V`, but
+    Brave produced neither textarea input nor the expected title change. Both
+    runs restored the clipboard, focus, toolkit accessibility, processes,
+    frames, server, and profile. Distinguishing an incorrect logical keyd output
+    from Brave rejecting paste requires a new control or diagnostic, so the
+    group stopped after its two-run budget and remains uncommitted.
+30. Daniel's attended slow run first exposed `application/x-zerosize`, the
+    Wayland empty-clipboard marker. Both tests stopped during capture before
+    desktop control; empty is now a valid baseline restored with
+    `wl-copy --clear`. The next attended run reached the checkpointed
+    post-`Alt+V` evidence and failed before the Brave textarea assertion because
+    keyd did not report the expected logical Ctrl+V. The output obscured that
+    boundary by beginning cleanup before presenting the saved failure. Slow mode
+    now pauses only when a chord has an explicit visible expectation, prints
+    that expectation before injection, marks clipboard translation and outcome
+    assertions as steps, and holds a failed fixture open before cleanup.
+    Ghostty's raw fixture deliberately does not echo pasted input; its visible
+    proof is the window-title `-paste` suffix, now stated at its checkpoint.
+31. Root-caused the synthetic `Alt+V` failure and confirmed it with a bounded
+    Brave-only experiment. Read-only inspection of the deployed binaries showed
+    that `keyd monitor -t` prints a mixture of pre-keyd input and keyd's own
+    virtual-output events (`-t` only adds inter-event timing), and that
+    `keyd-application-mapper` is dynamic: it reads active-window changes from
+    the keyd GNOME shell extension via `/run/user/1000/keyd.fifo` and runs
+    `keyd bind reset <bindings>` on every change, so the `[brave-browser]` layer
+    (`alt.v = C-v`, etc.) exists only while Brave is the reported active window.
+    The synthetic path differs from a physical `Alt+V` because the harness's own
+    external clipboard client changes the reported active window between the
+    initial `Alt+C` and `Alt+V`, making the mapper wipe the Brave layer; CDP DOM
+    refocus does not re-fire a Brave window activation, so keyd stays reset and
+    `Alt+V` traverses unmapped. `Alt+C` succeeded because it ran before any
+    external clipboard client; native `Ctrl+V` succeeded because it needs no app
+    binding; a human's `Alt+V` never involves such a client. The experiment
+    re-probed with a second `Alt+C` immediately after the external clipboard
+    step: fresh `Ctrl+C` evidence was absent and the clipboard did not change,
+    proving the entire Brave layer — not `Alt+V` specifically — was gone.
+    Because the re-probe could not by itself distinguish `wl-copy` from
+    `wl-paste`, the fix removes every external clipboard client between Brave
+    gaining app-mapper context and `Alt+V`: the copy step is now verified
+    in-page through a CDP-observed `copy` event on `COPY_PROBE` plus keyd
+    `Ctrl+C` evidence; `PASTE_PROBE` is seeded with
+    `navigator.clipboard.writeText` through CDP in the already-focused page;
+    `Alt+V` then requires fresh keyd `Ctrl+V` evidence and the textarea
+    `-PASTE_PROBE` title. `wl-copy`/`wl-paste` remain only in the pre-launch
+    baseline capture and post-run cleanup. One Brave-only validation passed the
+    complete lifecycle, navigation, and clipboard scenario in 5.23 seconds with
+    full cleanup and baseline restoration; strict typecheck passes.
+32. Daniel ran the guarded public entry, `./scripts/e2e.sh -y`, from the direct
+    visible Ghostty session after the CDP clipboard fix. The complete Brave and
+    Ghostty regression passed, including cleanup and baseline restoration. This
+    closes the live Gauss spike gate.
 
 Current state:
 
@@ -518,6 +573,11 @@ Current state:
 - the first Brave lifecycle slice passes through the guarded public suite on
   native Wayland;
 - the first Brave navigation extension passed within its two-run budget;
+- the Brave clipboard extension now proves `Alt+C` and `Alt+V` end to end by
+  removing external clipboard clients between Brave's app-mapper context and
+  `Alt+V` (in-page CDP copy-event verification and a CDP `writeText` paste
+  seed); the Brave-only run and Daniel's complete guarded public regression both
+  passed;
 - the guarded public entry supports confirmed, slow-observation, sudo-guidance,
   and disclosed plain-text clipboard fallback paths;
 - no E2E fixture or monitor process remains;

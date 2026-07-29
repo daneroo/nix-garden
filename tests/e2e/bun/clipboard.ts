@@ -1,9 +1,15 @@
 import { runCommand, waitFor } from "./desktop.ts";
 
-export interface ClipboardBaseline {
-  readonly text: string;
-  readonly types: readonly string[];
-}
+export type ClipboardBaseline =
+  | {
+      readonly kind: "empty";
+      readonly types: readonly string[];
+    }
+  | {
+      readonly kind: "text";
+      readonly text: string;
+      readonly types: readonly string[];
+    };
 
 const plainTextTypes = [
   "text/plain;charset=utf-8",
@@ -18,6 +24,10 @@ export async function captureClipboard(): Promise<ClipboardBaseline> {
     .trim()
     .split("\n")
     .filter((type) => type !== "");
+
+  if (types.length === 1 && types[0] === "application/x-zerosize") {
+    return { kind: "empty", types };
+  }
 
   const plainTextType = plainTextTypes.find((type) => types.includes(type));
   if (plainTextType === undefined) {
@@ -40,7 +50,7 @@ export async function captureClipboard(): Promise<ClipboardBaseline> {
   const text = (
     await runCommand(["wl-paste", "--type", plainTextType, "--no-newline"])
   ).stdout;
-  return { text, types };
+  return { kind: "text", text, types };
 }
 
 export async function writeClipboard(text: string): Promise<void> {
@@ -55,6 +65,10 @@ export async function writeClipboard(text: string): Promise<void> {
     throw new Error(`wl-copy exited ${exitCode}`);
   }
 
+  await waitForClipboardText(text);
+}
+
+export async function waitForClipboardText(text: string): Promise<void> {
   await waitFor(
     "clipboard text to match the requested value",
     async () => {
@@ -76,5 +90,19 @@ export async function writeClipboard(text: string): Promise<void> {
 export async function restoreClipboard(
   baseline: ClipboardBaseline,
 ): Promise<void> {
-  await writeClipboard(baseline.text);
+  if (baseline.kind === "text") {
+    await writeClipboard(baseline.text);
+    return;
+  }
+
+  await runCommand(["wl-copy", "--clear"]);
+  await waitFor(
+    "clipboard to return to its empty baseline",
+    async () =>
+      (await runCommand(["wl-paste", "--list-types"])).stdout
+        .trim()
+        .split("\n")
+        .filter((type) => type !== ""),
+    (types) => types.length === 1 && types[0] === "application/x-zerosize",
+  );
 }

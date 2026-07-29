@@ -9,6 +9,7 @@ import {
   type AccessibleWindow,
   errorMessage,
   focusAccessibleWindow,
+  holdFailureForInspection,
   listAccessibleWindows,
   runCommand,
   sameAccessibleRef,
@@ -404,6 +405,10 @@ describe("deployed Ghostty keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "v"] },
         capabilities.ydotoolSocket,
+        {
+          watch:
+            "Ghostty raw fixture does not echo paste; watch its title gain the -paste suffix",
+        },
       );
       await waitFor(
         "Alt+V to deliver the clipboard text to the fixture PTY",
@@ -525,6 +530,9 @@ describe("deployed Ghostty keyboard behavior", () => {
       );
     } catch (error) {
       originalFailure = error;
+      await holdFailureForInspection(
+        "the Ghostty fixture remains visible for inspection",
+      );
     }
 
     if (monitor !== undefined) {

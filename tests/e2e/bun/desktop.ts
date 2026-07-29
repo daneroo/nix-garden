@@ -129,6 +129,28 @@ export async function step<T>(
   }
 }
 
+export function observationDelayMs(): number {
+  const value = Bun.env.NIX_GARDEN_E2E_SLOW_SECONDS ?? "0";
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    throw new Error(
+      `NIX_GARDEN_E2E_SLOW_SECONDS must be non-negative, got ${JSON.stringify(value)}`,
+    );
+  }
+  return seconds * 1_000;
+}
+
+export async function holdFailureForInspection(scope: string): Promise<void> {
+  const delayMs = observationDelayMs();
+  if (delayMs === 0) {
+    return;
+  }
+  console.error(
+    `    ! INSPECT FAILURE (${delayMs / 1_000}s): ${scope}; cleanup is paused`,
+  );
+  await Bun.sleep(delayMs);
+}
+
 export async function waitFor<T>(
   description: string,
   observe: () => Promise<T>,
@@ -142,7 +164,7 @@ export async function waitFor<T>(
   let lastError: unknown;
   let lastObserved: T | undefined;
 
-  console.log(`  … Waiting for ${description}`);
+  console.log(`    … Waiting for ${description}`);
 
   while (performance.now() - started < timeoutMs) {
     attempts += 1;

@@ -1,9 +1,15 @@
 import { afterAll, beforeAll, describe, test } from "bun:test";
 import {
+  type ClipboardBaseline,
+  captureClipboard,
+  restoreClipboard,
+} from "./clipboard.ts";
+import {
   accessibleSubtreeHasFocus,
   type AccessibleWindow,
   errorMessage,
   focusAccessibleWindow,
+  holdFailureForInspection,
   listAccessibleWindows,
   runCommand,
   sameAccessibleRef,
@@ -132,8 +138,13 @@ async function createFixture() {
     fetch(request) {
       const pathname = new URL(request.url).pathname;
       const pageName = pathname === "/" ? "initial" : pathname.slice(1);
+      const pageTitle = `${title}-${pageName}`;
+      const body =
+        pageName === "initial"
+          ? `<main style="font:24px sans-serif;padding:2rem"><h1>Brave clipboard E2E</h1><p>Expected after Alt+V: <strong>PASTE_PROBE</strong></p><label for="target">Current textarea value:</label><br><textarea id="target" autofocus style="font:28px monospace;margin-top:0.5rem;padding:1rem;width:32rem">COPY_PROBE</textarea><p id="status">Waiting for mapped Alt+V</p></main><script>const target=document.getElementById("target");const status=document.getElementById("status");target.focus();target.select();target.addEventListener("input",()=>{document.title=${JSON.stringify(`${pageTitle}-`)}+target.value;status.textContent=target.value==="PASTE_PROBE"?"PASS: textarea contains PASTE_PROBE":\`Observed: \${target.value}\`;});document.addEventListener("copy",()=>{window.__copyCount=(window.__copyCount||0)+1;window.__lastCopy=target.value.substring(target.selectionStart,target.selectionEnd);});</script>`
+          : `BRAVE_${pageName.toUpperCase()}_PROBE`;
       return new Response(
-        `<!doctype html><html><head><title>${title}-${pageName}</title></head><body>BRAVE_${pageName.toUpperCase()}_PROBE</body></html>`,
+        `<!doctype html><html><head><title>${pageTitle}</title></head><body>${body}</body></html>`,
         { headers: { "content-type": "text/html; charset=utf-8" } },
       );
     },
@@ -283,6 +294,7 @@ async function devToolsPort(fixture: BraveFixture): Promise<number> {
 
 interface DevToolsPage {
   readonly id: string;
+  readonly title: string;
   readonly url: string;
   readonly webSocketDebuggerUrl: string;
 }
@@ -313,6 +325,8 @@ async function pages(port: number): Promise<DevToolsPage[]> {
     if (
       !("id" in target) ||
       typeof target.id !== "string" ||
+      !("title" in target) ||
+      typeof target.title !== "string" ||
       !("url" in target) ||
       typeof target.url !== "string" ||
       !("webSocketDebuggerUrl" in target) ||
@@ -322,6 +336,7 @@ async function pages(port: number): Promise<DevToolsPage[]> {
     }
     pages.push({
       id: target.id,
+      title: target.title,
       url: target.url,
       webSocketDebuggerUrl: target.webSocketDebuggerUrl,
     });
@@ -360,25 +375,50 @@ async function waitForPageUrl(
   return page;
 }
 
-async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
-  return new Promise<boolean>((resolve, reject) => {
+async function waitForPageTitle(
+  port: number,
+  id: string,
+  title: string,
+): Promise<void> {
+  await waitFor(
+    `DevTools page ${id} to expose title ${JSON.stringify(title)}`,
+    async () => pages(port),
+    (pages) => pages.some((page) => page.id === id && page.title === title),
+  );
+}
+
+interface EvaluateOptions {
+  readonly awaitPromise?: boolean;
+  readonly userGesture?: boolean;
+}
+
+async function evaluateValue(
+  page: DevToolsPage,
+  expression: string,
+  options: EvaluateOptions = {},
+): Promise<unknown> {
+  return new Promise<unknown>((resolve, reject) => {
     const socket = new WebSocket(page.webSocketDebuggerUrl);
     let settled = false;
-    const finish = (result: boolean | Error): void => {
+    const finish = (result: unknown, error?: Error): void => {
       if (settled) {
         return;
       }
       settled = true;
       clearTimeout(timeout);
       socket.close();
-      if (result instanceof Error) {
-        reject(result);
+      if (error !== undefined) {
+        reject(error);
       } else {
         resolve(result);
       }
     };
     const timeout = setTimeout(
-      () => finish(new Error("CDP Runtime.evaluate timed out after 2000 ms")),
+      () =>
+        finish(
+          undefined,
+          new Error("CDP Runtime.evaluate timed out after 2000 ms"),
+        ),
       2_000,
     );
 
@@ -388,21 +428,26 @@ async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
           id: 1,
           method: "Runtime.evaluate",
           params: {
-            expression: "document.hasFocus()",
+            expression,
             returnByValue: true,
+            awaitPromise: options.awaitPromise ?? false,
+            userGesture: options.userGesture ?? false,
           },
         }),
       );
     });
     socket.addEventListener("error", () => {
-      finish(new Error("CDP Runtime.evaluate WebSocket failed"));
+      finish(undefined, new Error("CDP Runtime.evaluate WebSocket failed"));
     });
     socket.addEventListener("message", (event) => {
       let envelope: unknown;
       try {
         envelope = JSON.parse(String(event.data));
       } catch {
-        finish(new Error("CDP Runtime.evaluate returned invalid JSON"));
+        finish(
+          undefined,
+          new Error("CDP Runtime.evaluate returned invalid JSON"),
+        );
         return;
       }
       if (
@@ -414,7 +459,7 @@ async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
         return;
       }
       if ("error" in envelope) {
-        finish(new Error("CDP Runtime.evaluate returned an error"));
+        finish(undefined, new Error("CDP Runtime.evaluate returned an error"));
         return;
       }
       const value =
@@ -427,13 +472,47 @@ async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
         "value" in envelope.result.result
           ? envelope.result.result.value
           : undefined;
-      if (typeof value !== "boolean") {
-        finish(new Error("CDP Runtime.evaluate returned no boolean value"));
-        return;
-      }
       finish(value);
     });
   });
+}
+
+async function evaluateBoolean(
+  page: DevToolsPage,
+  expression: string,
+): Promise<boolean> {
+  const value = await evaluateValue(page, expression);
+  if (typeof value !== "boolean") {
+    throw new Error("CDP Runtime.evaluate returned no boolean value");
+  }
+  return value;
+}
+
+async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
+  return evaluateBoolean(page, "document.hasFocus()");
+}
+
+// Seed the clipboard from inside the already-focused Brave page. Unlike an
+// external wl-copy/wl-paste client, this never introduces a foreign window, so
+// the keyd application-mapper keeps its Brave context and Alt+V stays mapped.
+async function seedClipboard(page: DevToolsPage, text: string): Promise<void> {
+  const value = await evaluateValue(
+    page,
+    `navigator.clipboard.writeText(${JSON.stringify(text)}).then(() => true).catch((error) => String((error && error.message) || error))`,
+    { awaitPromise: true, userGesture: true },
+  );
+  if (value !== true) {
+    throw new Error(
+      `CDP clipboard seed failed: ${typeof value === "string" ? value : JSON.stringify(value)}`,
+    );
+  }
+}
+
+async function focusFixtureTextarea(page: DevToolsPage): Promise<boolean> {
+  return evaluateBoolean(
+    page,
+    '(() => { const target = document.getElementById("target"); if (!(target instanceof HTMLTextAreaElement)) return false; target.focus(); target.select(); return document.hasFocus() && document.activeElement === target; })()',
+  );
 }
 
 async function cleanupAction(
@@ -490,7 +569,7 @@ afterAll(() => {
 });
 
 describe("deployed Brave keyboard behavior", () => {
-  test("physical Brave lifecycle and navigation chords traverse keyd", async () => {
+  test("physical Brave lifecycle, navigation, and clipboard chords traverse keyd", async () => {
     const started = performance.now();
     let fixture: BraveFixture | undefined;
     let fixtureApplication: AccessibleWindow["app"] | undefined;
@@ -501,6 +580,8 @@ describe("deployed Brave keyboard behavior", () => {
     let accessibilityBaseline: ToolkitAccessibilityBaseline | undefined;
     let restoreToolkitAccessibility = false;
     let baseline: AccessibleWindow | undefined;
+    let clipboardBaseline: ClipboardBaseline | undefined;
+    let clipboardChanged = false;
     let monitor: KeydMonitor | undefined;
     let originalFailure: unknown;
     const cleanupErrors: Error[] = [];
@@ -518,6 +599,11 @@ describe("deployed Brave keyboard behavior", () => {
       if (baseline === undefined) {
         throw new Error("AT-SPI reported no active baseline window");
       }
+
+      clipboardBaseline = await step(
+        "Capture the restorable text clipboard baseline",
+        captureClipboard,
+      );
 
       accessibilityBaseline = await step(
         "Capture the GNOME toolkit-accessibility baseline",
@@ -581,6 +667,88 @@ describe("deployed Brave keyboard behavior", () => {
 
       monitor = await startKeydMonitor(capabilities.keydBinary);
       await waitFor(
+        "the initial Brave textarea to retain document focus before Alt+C",
+        async () => documentHasFocus(initialPage),
+        (focused) => focused,
+      );
+      clipboardChanged = true;
+      await step("Select the initial Brave textarea before Alt+C", async () => {
+        if (!(await focusFixtureTextarea(initialPage))) {
+          throw new Error(
+            "the fixture textarea could not be selected before Alt+C",
+          );
+        }
+      });
+      console.log(
+        "    • BRAVE COPY: COPY_PROBE is selected; the page will not visibly change",
+      );
+      const copyEvidence = monitor.evidence().length;
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "c"] },
+        capabilities.ydotoolSocket,
+      );
+      await step("Confirm keyd translated Brave Alt+C to Ctrl+C", async () =>
+        waitForKeydChordEvidence(
+          monitor!,
+          { keys: ["leftCtrl", "c"] },
+          copyEvidence,
+        ),
+      );
+      await step(
+        "Confirm Brave fired a copy event for COPY_PROBE (verified in-page, no external clipboard client)",
+        async () =>
+          waitFor(
+            "the fixture page to record a COPY_PROBE copy event",
+            async () =>
+              evaluateBoolean(
+                initialPage,
+                '(() => (window.__copyCount || 0) > 0 && window.__lastCopy === "COPY_PROBE")()',
+              ),
+            (observed) => observed,
+          ),
+      );
+
+      await step(
+        "Seed PASTE_PROBE into the Brave clipboard from the focused page",
+        async () => seedClipboard(initialPage, "PASTE_PROBE"),
+      );
+      await step(
+        "Reselect the Brave fixture textarea before Alt+V",
+        async () => {
+          if (!(await focusFixtureTextarea(initialPage))) {
+            throw new Error(
+              "the fixture textarea could not be selected before Alt+V",
+            );
+          }
+        },
+      );
+      console.log(
+        "    • BRAVE PASTE: the selected textarea should visibly change to PASTE_PROBE",
+      );
+      const expectedPasteTitle = `${fixture!.title}-initial-PASTE_PROBE`;
+      const pasteEvidence = monitor.evidence().length;
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "v"] },
+        capabilities.ydotoolSocket,
+        {
+          watch:
+            "Brave textarea should visibly change from COPY_PROBE to PASTE_PROBE",
+        },
+      );
+      await step("Confirm keyd translated Brave Alt+V to Ctrl+V", async () =>
+        waitForKeydChordEvidence(
+          monitor!,
+          { keys: ["leftCtrl", "v"] },
+          pasteEvidence,
+        ),
+      );
+      await step(
+        "Confirm Brave pasted PASTE_PROBE into the textarea",
+        async () =>
+          waitForPageTitle(fixturePort!, initialPage.id, expectedPasteTitle),
+      );
+
+      await waitFor(
         "the initial Brave page to retain document focus before Alt+N",
         async () => documentHasFocus(initialPage),
         (focused) => focused,
@@ -588,6 +756,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "n"] },
         capabilities.ydotoolSocket,
+        { watch: "a second isolated Brave window should appear" },
       );
       const pagesAfterNewWindow = await waitForPageCount(fixturePort, 2);
       const newPage = pagesAfterNewWindow.find(
@@ -630,6 +799,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "w"] },
         capabilities.ydotoolSocket,
+        { watch: "the second Brave window should close" },
       );
       const pagesAfterClose = await waitForPageCount(fixturePort, 1);
       if (pagesAfterClose[0]?.id !== initialPage.id) {
@@ -663,6 +833,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "t"] },
         capabilities.ydotoolSocket,
+        { watch: "a new Brave tab should appear in the remaining window" },
       );
       const pagesAfterNewTab = await waitForPageCount(fixturePort, 2);
       const newTab = pagesAfterNewTab.find(
@@ -716,6 +887,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "l"] },
         capabilities.ydotoolSocket,
+        { watch: "Brave should select the address bar" },
       );
       await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "l"] });
       await waitFor(
@@ -747,6 +919,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "leftShift", "leftBracket"] },
         capabilities.ydotoolSocket,
+        { watch: "Brave should select the initial COPY_PROBE tab" },
       );
       await waitFor(
         "Alt+Shift+[ to select the initial Brave tab",
@@ -765,6 +938,7 @@ describe("deployed Brave keyboard behavior", () => {
       await injectPhysicalChord(
         { keys: ["leftAlt", "leftShift", "rightBracket"] },
         capabilities.ydotoolSocket,
+        { watch: "Brave should return to the address-navigated tab" },
       );
       await waitFor(
         "Alt+Shift+] to select the address-navigated Brave tab",
@@ -780,6 +954,9 @@ describe("deployed Brave keyboard behavior", () => {
       );
     } catch (error) {
       originalFailure = error;
+      await holdFailureForInspection(
+        "the Brave fixture remains visible for inspection",
+      );
     }
 
     if (monitor !== undefined) {
@@ -821,6 +998,13 @@ describe("deployed Brave keyboard behavior", () => {
         async () => {
           await fixture!.server.stop(true);
         },
+        cleanupErrors,
+      );
+    }
+    if (clipboardChanged && clipboardBaseline !== undefined) {
+      await cleanupAction(
+        "Restore the captured clipboard baseline",
+        async () => restoreClipboard(clipboardBaseline!),
         cleanupErrors,
       );
     }
