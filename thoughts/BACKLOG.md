@@ -152,6 +152,9 @@ Shared direction and comparison criteria:
 
 ## Repository Workflow
 
+- [ ] agent-skills-workflow — evaluate a small, curated Agent Skills toolkit;
+      the first repo-local pilot, `grilling`, is already installed; ticket:
+      [agent-skills-workflow](tickets/agent-skills-workflow.md)
 - [ ] legacy-harvest — harvest useful legacy findings, then delete `legacy/`;
       Git retains the history.
 - [ ] shared-repo-workflow — settle the shared docs/thoughts convention with

@@ -1,2 +1,5 @@
 # Historical evidence; do not normalize with the live toolchain.
 legacy/
+
+# Third-party instructions; preserve the version pinned by skills-lock.json.
+.agents/skills/

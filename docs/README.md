@@ -8,6 +8,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
 - [file-layout.md](file-layout.md) — where repository material belongs.
 - [workflow.md](workflow.md) — how backlog items, tickets, designs, plans, and
   supporting notes move through the repo.
+- [skills.md](skills.md) — how optional repository-local Agent Skills relate to
+  authoritative project state and workflow.
 - [workspace.md](workspace.md) — quality gate and safe system-change commands.
 - [e2e-testing.md](e2e-testing.md) — VM workflows, assertions, and fidelity
   boundaries for desktop changes.
