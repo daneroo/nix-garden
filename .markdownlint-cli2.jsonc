@@ -1,7 +1,11 @@
 {
   // Prettier owns whitespace and wrapping; markdownlint checks structure.
   "gitignore": true,
-  "ignores": ["legacy/**"],
+  "ignores": [
+    "legacy/**",
+    ".agents/skills/grilling/**",
+    ".claude/skills/grilling/**",
+  ],
   "config": {
     "extends": "markdownlint/style/prettier",
   },
