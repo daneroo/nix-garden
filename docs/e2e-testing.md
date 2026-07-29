@@ -1,5 +1,45 @@
 # End-to-End (E2E) Testing
 
+## Live Desktop Suite
+
+Run the fast behavioral suite from a visible Ghostty terminal in the local GNOME
+session:
+
+```bash
+./scripts/e2e.sh
+./scripts/e2e.sh -y
+./scripts/e2e.sh -y --slow 2
+```
+
+The command takes control of the current workspace, overwrites the clipboard,
+and requests attended sudo access for bounded `keyd monitor` evidence. It
+captures and restores the focused window, plain-text or empty clipboard,
+temporary accessibility setting, fixture processes, and profiles. Rich clipboard
+formats cannot be restored. `--slow` pauses at labelled visual checkpoints and
+holds failures open briefly for inspection.
+
+Run it directly beneath the visible Ghostty process. The Brave scenario refuses
+a Herdr-rooted or otherwise detached lineage because GNOME will not grant a
+terminal-launched native Wayland window the same activation eligibility. Do not
+type, switch workspaces, or run a second copy while the suite controls the
+desktop.
+
+The Bun project root is `tests/e2e/bun/`; its private manifest owns the source
+test command. The suite injects physical chords through ydotool before keyd,
+retains keyd input or mapped-output evidence, and observes fixture behavior
+through terminal protocol, AT-SPI, and Brave DevTools. Brave clipboard setup
+stays inside the focused fixture page: launching `wl-copy` or `wl-paste` between
+application-mapped chords changes GNOME's reported active client and causes
+`keyd-application-mapper` to reset the Brave bindings.
+
+The live suite covers Ghostty lifecycle, tabs, selection, clipboard, native
+Control-C, and unbound Alt input, plus Brave lifecycle, tabs, address
+navigation, tab selection, and clipboard translation. It is intentionally not
+part of `just check`. Gauss passed the complete guarded suite on 2026-07-29;
+Hardy validation and VM consolidation remain follow-up work.
+
+## VM Workbench
+
 The desktop workbench boots a selected host's declared configuration in a VM.
 The same VM-only layer supports unattended regression, visible demonstration,
 and hands-on exploration without changing a real host.

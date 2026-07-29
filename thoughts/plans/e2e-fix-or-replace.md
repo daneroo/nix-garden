@@ -1,6 +1,6 @@
 # E2E Bun Replacement Spike
 
-Status: active
+Status: done
 
 Goal: extend the proven Bun harness across the highest-value desktop chords
 without changing its working input, observation, or cleanup foundation.
@@ -93,26 +93,20 @@ Do not cross group boundaries during a failure.
       the Group 2 fixture acknowledgements. Restoration must run on success or
       failure; do not proceed if the prior clipboard cannot be preserved.
       `[tier: med]`
-- [ ] **Group 4 — isolated Brave lifecycle:** add one Bun-served local page, one
+- [x] **Group 4 — isolated Brave lifecycle:** add one Bun-served local page, one
       disposable Brave profile, DevTools page counts, and existing AT-SPI frame
       observation. First prove focused-app translation with `Alt+N` open and
       `Alt+W` close. Only after that passes, extend the same fixture with
-      `Alt+T`, `Alt+L`, `Alt+Shift+[`/`]`, and `Alt+Shift+T`. Reuse Group 3's
-      clipboard boundary for `Alt+C`/`Alt+V`; do not create a second clipboard
-      mechanism. Commit lifecycle, navigation, and clipboard as separate
-      subgroups. `[tier: high]`
-- [ ] **Group 5 — GNOME globals, attended:** select only global chords with a
-      semantic D-Bus outcome and safe recovery. Start with `Alt+Shift+L` lock,
-      require Daniel to unlock normally, and inject no credential. Keep the
-      logout dialog, clear-screen, browser-find, screenshots, and any action
-      lacking a stable observer deferred rather than using pixels or delays.
-      `[tier: high]`
+      `Alt+T`, `Alt+L`, and `Alt+Shift+[`/`]`. Cover `Alt+C`/`Alt+V` without an
+      external clipboard client disturbing keyd's application context. Commit
+      lifecycle, navigation, and clipboard as separate subgroups. `[tier: high]`
 
 Deferred beyond these ordered groups: automatic PaperWM mode switching, a
 dedicated workspace, custom presentation, canonical Nix packaging of the Bun
 project, non-GNOME/macOS invocation, complete behavioral parity, a sibling Go
 implementation, VM invocation of the same suite, deletion of the Python
-behavioral implementation, and every guided action without a semantic observer.
+behavioral implementation, Brave `Alt+Shift+T`, attended GNOME globals, and
+every guided action without a semantic observer.
 
 No subagent assignment is planned: the risky work is one coupled live-session
 state transition, and parallel ownership would weaken the fixture and cleanup

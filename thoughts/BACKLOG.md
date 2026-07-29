@@ -8,10 +8,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
-- `e2e-fix-or-replace` — decide whether to repair, reduce, or replace the
-  desktop E2E harness; ticket:
-  [e2e-fix-or-replace](tickets/e2e-fix-or-replace.md)
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -68,9 +64,10 @@ Shared direction and comparison criteria:
 
 ## Virtualization
 
-- [ ] e2e-fix-or-replace — resolve the post-PaperWM `Super+N` expectation
-      failure as part of a broader maintainability decision; ticket:
-      [e2e-fix-or-replace](tickets/e2e-fix-or-replace.md)
+- [ ] e2e-replace-refactor — broaden the live Bun suite to the remaining GNOME
+      globals, simplify it, make its output readable, and reuse it in the VM to
+      retire duplicated Python behavior; ticket:
+      [e2e-replace-refactor](tickets/e2e-replace-refactor.md)
 - [ ] incus-host — evaluate Incus as the homelab VM and system-container layer,
       including storage, networking, backup, and upgrades.
 - [ ] nixos-guests — decide how NixOS VM/container guests share the flake,
@@ -174,6 +171,11 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-29 e2e-fix-or-replace — replaced the slow VM-only development loop
+  with a guarded Bun suite that exercises deployed Ghostty and Brave bindings
+  through physical pre-keyd input on the live Gauss desktop; reference:
+  [e2e-testing](../docs/e2e-testing.md); plan:
+  [e2e-fix-or-replace](plans/e2e-fix-or-replace.md)
 - 2026-07-28 paperwm-trial — adopted switchable PaperWM scrollable tiling on
   Hardy and Gauss, floated Vicinae by default, and exposed one system-owned
   toggle through the shell and Vicinae; reference:
