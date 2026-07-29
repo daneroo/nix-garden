@@ -35,6 +35,7 @@
         gh
         ghostty
         git
+        gum
         herdr.packages.${system}.default
         just
         jq
@@ -50,6 +51,7 @@
         name:
         [
           (./hosts + "/${name}")
+          ./modules/e2e.nix
           ./modules/paperwm.nix
           # Inert in a normal system/test build; used by `nixos-rebuild
           # build-vm`.

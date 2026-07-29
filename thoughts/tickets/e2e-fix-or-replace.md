@@ -33,11 +33,17 @@ work, not a general desktop-automation platform.
 ## Primary Execution Contract
 
 - The first execution target is Gauss's currently deployed desktop.
+- `tests/e2e/` is the language-neutral suite boundary. The Bun project root is
+  `tests/e2e/bun/`; its private manifest, lockfile, and strict project settings
+  live beside the test sources. This gives a later Nix derivation a narrow
+  source boundary and leaves room for a sibling implementation such as
+  `tests/e2e/go/` without relocating Bun.
 - `scripts/e2e.sh` is the public entry point.
 - The script warns that the suite will take control of the visible desktop and
   uses Gum to request confirmation.
 - The harness runs as Daniel from the active graphical user session.
-- The default path never uses `sudo`.
+- After explicit confirmation, the script obtains attended sudo authorization so
+  the test can run the deployed keyd binary's monitor command directly.
 - Tests run with concurrency fixed at one.
 - The rapid development loop is direct source execution through `bun test`; it
   never requires a Nix build or a VM.
@@ -57,8 +63,11 @@ the session returns. Do not store or inject live credentials.
 
 ## Dependency Boundary
 
-The Bun project carries no third-party package dependencies. Use `bun:test`,
-Bun's standard APIs, and small repository-owned TypeScript utilities.
+The Bun project carries no third-party runtime package dependencies. Use
+`bun:test`, Bun's standard APIs, and small repository-owned TypeScript
+utilities. The first-party `@types/bun` package is the only development
+dependency; pin it in the Bun lockfile and use nixpkgs's TypeScript compiler
+rather than maintaining local ambient declarations for Bun APIs.
 
 System executables are allowed and should be installed declaratively when they
 are the clearest mechanism. Add Gum to the shared system packages for invocation
@@ -72,9 +81,11 @@ UX; this may also include an input-injection tool. Global test setup must:
 - skip with an explicit reason when a test does not apply to the detected
   platform or desktop mode.
 
-Prefer narrow declarative permissions over runtime elevation. If a later test
-unavoidably requires elevation, it must be explicitly opted into and skipped
-under the default no-sudo invocation.
+Prefer narrow declarative permissions over runtime elevation. For this spike,
+Daniel explicitly selected attended sudo for direct keyd monitor evidence after
+the declarative monitor service proved disproportionate. The guarded entry point
+obtains authorization only after confirmation; ydotool injection remains
+unprivileged.
 
 ## Test Shape
 
@@ -89,11 +100,27 @@ scripts/
 
 tests/
 └── e2e/
-    ├── setup.ts
-    ├── desktop.ts
-    ├── keyboard.ts
-    └── ghostty.test.ts
+    └── bun/
+        ├── .gitignore
+        ├── bun.lock
+        ├── package.json
+        ├── tsconfig.json
+        ├── setup.ts
+        ├── desktop.ts
+        ├── keyboard.ts
+        └── ghostty.test.ts
 ```
+
+The project manifest owns the canonical source-test command. Its lockfile pins
+the first-party Bun type declarations; it has no runtime dependencies.
+`scripts/e2e.sh` enters the project explicitly. A later Nix package should be
+added to the repository's existing flake rather than making the Bun project a
+nested flake.
+
+If another implementation is justified, add it as a sibling beneath `tests/e2e/`
+and let the repository flake package each implementation independently. Keep
+`scripts/e2e.sh` as the stable guarded interface. Hoist fixtures to a
+language-neutral location only when demonstrated sharing warrants it.
 
 Split files or directories only as demonstrated reuse or readability demands.
 TypeScript should be strict, idiomatic, and explicit about capability, key, and
@@ -185,7 +212,7 @@ controlled Ghostty window has focus
 The spike is successful when:
 
 - `scripts/e2e.sh` provides the guarded public invocation;
-- the Bun source runs with concurrency one and no third-party package
+- the Bun source runs with concurrency one and no third-party runtime
   dependencies;
 - global setup validates commands, the graphical session, D-Bus, Wayland,
   permissions, and required desktop capabilities;
@@ -203,6 +230,196 @@ The spike is successful when:
 Stop at this gate long enough to assess speed, clarity, fidelity, and extension
 cost. Do not make complete behavioral parity a prerequisite for learning whether
 the approach works.
+
+## Spike Evidence
+
+### Final feasibility result
+
+On 2026-07-29 the direct source test passed twice consecutively on Gauss in
+PaperWM mode:
+
+- run one: scenario 0.91 seconds, one test passed;
+- run two: scenario 0.93 seconds, one test passed;
+- direct sudo `keyd monitor -t` attached to the ydotool virtual keyboard and
+  retained `leftalt down` and `n down`;
+- ydotool injected before keyd;
+- exactly one second fixture-owned Ghostty window appeared;
+- the new window held active focus;
+- both fixture windows were removed and the original baseline focus was restored
+  after each run.
+
+The spike therefore has a practical passing vertical slice. This does not
+override Daniel's assessment below about the excessive cost of reaching it or
+imply that the branch should land without review.
+
+### Owner assessment
+
+Daniel considers the current result unacceptable. The LLM switched to a direct
+sudo method only after spending excessive time and tokens on permission
+machinery without producing one passing behavioral assertion. Treat the direct
+method as a provisional expedient to review later with a more capable LLM that
+may find an obvious solution to the permission problem.
+
+Do not assume this ticket should land. Codex may exhaust the available token
+limits before completing the simplest part of the spike. Before resuming,
+evaluate another LLM and agent harness for this work.
+
+### Attempt ledger
+
+This ledger preserves receipts for the work and discarded approaches. None of
+the failed runs counts as a passing behavioral assertion.
+
+1. The Bun package was initially treated as if the repository root were its
+   project root. After Daniel objected, it moved to `tests/e2e/`, then to the
+   correct language-specific root at `tests/e2e/bun/`, leaving room for a future
+   `tests/e2e/go/`.
+2. A handwritten `tests/e2e/bun/runtime.d.ts` ambient shim was created to avoid
+   package dependencies. Daniel objected. It was deleted and replaced with a
+   pinned official `@types/bun` development dependency and `bun.lock`.
+3. Read-only investigation covered the graphical session, PaperWM, input-device
+   ownership, `/dev/uinput`, keyd, Ghostty, GNOME D-Bus, AT-SPI, ydotool,
+   dotool, and wtype. Direct AT-SPI calls were selected for window identity and
+   focus observation; ydotool was selected for pre-keyd injection.
+4. A declarative ydotool daemon and a bounded keyd-monitor system service were
+   designed. The first monitor design ran as root and contained an ownership
+   flaw discovered during generated-unit review. It was replaced before
+   deployment with a Daniel-owned service carrying service-only `input`
+   membership, a private evidence file, a polkit start/stop rule, and extensive
+   systemd hardening.
+5. Several `just check` and `just plan` cycles built and audited these designs.
+   Generated units were inspected with `systemd-analyze verify` and
+   `systemd-analyze security`. This work produced no key assertion.
+6. The first guarded `scripts/e2e.sh` attempt stalled while Gum queried terminal
+   capabilities through the remote PTY. Interrupting it produced a safe
+   cancellation before desktop control. It was rerun by sending confirmation
+   directly through the PTY.
+7. Live run one failed before launching Ghostty because `ghostty +list-keybinds`
+   does not accept `--config-file`. Cleanup also tried to restore focus even
+   though fixture focus had never changed, and Ghostty rejected AT-SPI
+   `GrabFocus`.
+8. The binding inspection was changed to read the deployed configuration, and
+   cleanup gained lifecycle guards. Live run two launched and removed the
+   fixture but failed because the test still called Ghostty's unsupported
+   `GrabFocus`.
+9. Focus setup changed to semantically observe the focus PaperWM already gives a
+   newly launched fixture. Cleanup first accepted GNOME's automatic return to
+   the baseline. Live run three reached the visible outcome: physical `Alt+N`
+   created exactly one second fixture window, the new window became active, and
+   cleanup removed both fixture windows and restored the baseline. The test
+   still failed because its separate keyd-monitor evidence file contained
+   device-open failures, so the outcome was not accepted as a passing assertion.
+10. The monitor service's device ACL was changed from read-only to read-write
+    after inspecting locked keyd source and finding that monitor mode opens
+    event devices with `O_RDWR`. The system was rebuilt and switched again.
+11. More live diagnostics followed instead of stopping: process credentials and
+    generated units were inspected; an already-exited process briefly produced a
+    misleading root/zombie reading; the locked keyd source was searched; and
+    disposable one-second systemd probes tested direct event-device open, keyd
+    under the base identity, `ProtectSystem`, the syscall filter, the full
+    hardening set, and an empty capability set. One probe first used the wrong
+    keyd path and was repeated. Another was interrupted by an accidental Escape
+    and repeated. These probes showed the hardened identity could open the
+    devices and exposed a stale preserved evidence-file race.
+12. A semantic readiness change was drafted to wait for keyd's fresh
+    `device added` line. Before proving it, Daniel challenged the uncontrolled
+    scope and the live work stopped. No fixture or monitor remained.
+13. When Daniel said to use sudo directly, Codex instead drafted another
+    overengineered design: an immutable timeout wrapper, a permanent sudoers
+    rule, and a streamed monitor abstraction. It was typechecked but never
+    applied. Daniel objected, and the wrapper and sudoers rule were removed.
+14. The practical direct design then made `scripts/e2e.sh` run `sudo -v` after
+    confirmation. Bun resolves the running keyd binary and directly launches
+    `sudo -n <keyd-binary> monitor -t`, capturing its output in memory. The old
+    monitor service, evidence file, device ACL, and polkit rule were removed
+    from the desired configuration, and Gauss was switched again.
+15. The first direct-sudo live run failed during preflight because Daniel cannot
+    read the root keyd process's `/proc/<pid>/exe` link under the host's process
+    visibility policy. Resolving that one link with the already-authorized sudo
+    was implemented and passed `just check`.
+16. Daniel explicitly directed completion. The corrected direct-sudo test then
+    passed twice consecutively, including pre-keyd monitor evidence, the Ghostty
+    window/focus outcome, and complete cleanup.
+
+Current state:
+
+- the Bun Alt+N behavioral test has passed twice consecutively;
+- no E2E fixture or monitor process remains;
+- Gauss currently has Gum, ydotool, and the rootless ydotoold configuration
+  activated;
+- the obsolete keyd-monitor service and polkit grant have been removed from the
+  running system;
+- the direct-sudo implementation exists in the uncommitted feature branch and is
+  behaviorally proven on the live Gauss PaperWM session;
+- the ticket's older pre-deployment evidence below is historical and partly
+  superseded by this ledger.
+
+### Live Gauss baseline
+
+Read-only inspection established the following before implementation:
+
+- Gauss runs Daniel's active local Wayland session. The invoking Herdr terminal
+  does not carry `XDG_SESSION_ID`, so the harness resolves the one active,
+  non-remote Daniel Wayland session through `loginctl` rather than trusting that
+  variable.
+- The deployed tools are Bun 1.3.13, Ghostty 1.3.1, and keyd 2.6.0. Gum and the
+  candidate injection tools are absent until the proposed system closure is
+  activated.
+- PaperWM is enabled and Daniel confirmed that the current desktop is in PaperWM
+  mode. `gnome-extensions list --active` is not a trustworthy runtime oracle in
+  this session, so the spike records the enabled PaperWM extension as its mode
+  and does not switch it.
+- `/dev/uinput` is writable by `uinput`; physical event devices are readable by
+  `input`; Daniel belongs to neither group. An ordinary `keyd monitor -t`
+  therefore cannot open the physical devices. The proposed configuration gives
+  those groups only to two fixed, sandboxed services, not to Daniel's login.
+- A direct AT-SPI connection obtained from `org.a11y.Bus.GetAddress` works with
+  `busctl`. Ghostty exposes its application ID, top-level window title,
+  identity, active state, and `Component.GrabFocus`. GNOME Shell's window
+  introspection interface denies this caller, so AT-SPI is the semantic
+  observer.
+- A fixture can use a separate Ghostty class, `org.nixgarden.e2e.Ghostty`, with
+  single-instance behavior disabled, a random title, and a transient user unit.
+  This isolates its windows without touching the existing personal Ghostty
+  process.
+
+The input candidates resolved as follows:
+
+| Candidate | keyd boundary                                                          | Permission and packaging result                                                                                                                                  |
+| --------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ydotool` | Before keyd: its persistent virtual uinput keyboard is matched by keyd | Chosen. nixpkgs provides the client, daemon, and NixOS module. A Daniel-owned mode-0600 socket exposes only injection, while the daemon alone receives `uinput`. |
+| `dotool`  | Before keyd through a uinput keyboard                                  | Rejected for the spike because the caller itself needs broad `/dev/uinput` access or another repository-owned broker.                                            |
+| `wtype`   | After keyd, through the Wayland virtual-keyboard protocol              | Rejected because it cannot prove the production keyd mapping.                                                                                                    |
+
+`keyd monitor -t` observes keyd's event stream while the daemon is running. A
+bounded monitor service with private evidence and an exact polkit grant was
+built and audited, then discarded in favor of the direct attended-sudo command
+recorded above.
+
+The initial pre-deployment source loop was 0.03 seconds. It stopped before
+fixture creation, focus, monitoring, or injection with the direct error
+`required executable is unavailable: gum`. Strict compilation against the locked
+official Bun declarations, `just check`, and the non-destructive `just plan`
+passed at that point. This historical pre-deployment result was superseded by
+the two live passing runs above.
+
+### Remaining Python behavioral inventory
+
+The configuration-health assertions are not migration targets: declared
+bindings, store-backed dotfiles, extension/process presence, and inspection of
+keyd application-map text remain ordinary configuration checks if they are worth
+keeping.
+
+| Existing behavior or mechanism                                      | Likely replacement                                                        | Constraint                                                                                                                                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Driver command, retry, exact-output, readiness, and failure helpers | `desktop.ts` command and bounded-wait helpers plus capability setup       | Implemented for the slice.                                                                                                                                                         |
+| QEMU physical keyboard injection                                    | ydotool virtual keyboard plus retained `keyd monitor` evidence            | Implemented but requires activation and the live proof. The VM can continue using its virtio keyboard through a thin bridge.                                                       |
+| Dogtail top-level frame names                                       | Direct AT-SPI calls through `busctl`                                      | Implemented for Ghostty window identity and focus; also suitable for Brave frames.                                                                                                 |
+| Ghostty PTY title fixture                                           | Bun terminal-protocol fixture using OSC titles and a fixture class        | The slice only needs fixed window titles. Tab selection, paste, Control-C, unbound Alt, and clear-screen cases need the richer monotonic surface protocol from the old fixture.    |
+| Clipboard copy/paste                                                | `wl-copy`/`wl-paste` plus fixture titles                                  | Must record and restore the user's clipboard before live use.                                                                                                                      |
+| Logical Alt/Ctrl/Super mask probe                                   | A small packaged semantic key-event observer                              | AT-SPI cannot expose raw modifier masks. Reusing Python GI would defeat the replacement boundary; a later language-neutral helper or sibling Go implementation is a plausible fit. |
+| Lock and unlock                                                     | ScreenSaver D-Bus state plus explicit attended recovery                   | Never inject a live credential.                                                                                                                                                    |
+| Brave local pages, tabs, and windows                                | Bun HTTP fixture, isolated profile, DevTools page list, and AT-SPI frames | Straightforward, but profile/process/clipboard cleanup must become independently repeatable.                                                                                       |
+| Clear-screen, browser find, and logout dialog guided checks         | Attended mode unless a stable semantic observer is found                  | GNOME exposes no stable public logout-modal property; do not replace these with pixel or timing assertions.                                                                        |
 
 ## VM Replacement and Python Deletion
 
@@ -259,13 +476,15 @@ actually help. Commit the ticket and plan on `main`, then create the exact branc
 `e2e-fix-or-replace` with no prefix.
 
 The spike target is the live Gauss desktop. Use `scripts/e2e.sh` as the guarded
-public entry point and ordinary `bun:test` sources under `tests/e2e/`. The rapid
-loop is direct `bun test`, never a Nix build or VM boot. Keep the code compact,
-strict, idiomatic TypeScript with no third-party Bun dependencies. System tools
-are allowed when declaratively installed and must be asserted by global test
-setup. Add Gum to the shared system packages and use it for the confirmation UX.
-Tests run with concurrency one and report every invisible desktop action before
-it occurs.
+public entry point and ordinary `bun:test` sources under `tests/e2e/bun/`. The
+rapid loop is direct `bun test`, never a Nix build or VM boot. Keep the code
+compact, strict, idiomatic TypeScript with no third-party runtime dependencies.
+Keep the Bun project root and its private manifest, lockfile, and strict settings
+under `tests/e2e/bun/`; pin the official Bun type declarations. System tools are
+allowed when declaratively installed and must be asserted by global test setup.
+Add Gum to the shared system packages and use it for the confirmation UX. Tests
+run with concurrency one and report every invisible desktop action before it
+occurs.
 
 First investigate Gauss read-only to establish facts instead of asking Daniel:
 
