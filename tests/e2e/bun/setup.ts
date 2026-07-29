@@ -15,6 +15,7 @@ export interface Capabilities {
 
 const requiredExecutables = [
   "bash",
+  "brave",
   "bun",
   "busctl",
   "dconf",

@@ -293,6 +293,18 @@ restoration. That verification exposed the baseline value in the generic
 exact-output progress message, so clipboard verification now reports only exit,
 timeout, and equality state; clipboard contents remain redacted.
 
+The first Brave lifecycle slice now passes on native Wayland without commanding
+window focus. A direct child launch from the visibly focused Ghostty gives the
+initial fixture document focus. Physical `Alt+N` creates exactly one additional
+isolated DevTools page and AT-SPI frame; a focused AT-SPI descendant proves
+keyboard focus remains inside that exact new frame even though Brave's omnibox,
+not its document, owns internal focus. Physical `Alt+W` then closes only the new
+window, the initial document regains focus, and keyd retains both chords. The
+Brave-only run passed in 1.70 seconds. The guarded public suite subsequently
+passed Brave in 1.81 seconds and the complete Ghostty regression in 2.22
+seconds, 2 tests total in 4.45 seconds, with complete cleanup and baseline
+restoration.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -394,6 +406,71 @@ the failed runs counts as a passing behavioral assertion.
     revealed that the generic exact-output reporter printed the clipboard
     payload; the clipboard helper was narrowed to retain only redacted
     match/exit/timeout diagnostics.
+19. The first Brave lifecycle run reached the Bun-served page and isolated
+    DevTools page-count assertion, but no Brave AT-SPI frame appeared. Read-only
+    comparison found that the old VM explicitly enables GNOME toolkit
+    accessibility while Gauss leaves it disabled. The fixture and profile were
+    removed without injecting a chord.
+20. Daniel approved a temporary toolkit-accessibility baseline/restore boundary.
+    The first public-entry run stopped before changing it because `dconf read`
+    represents Gauss's default setting as unset rather than explicit `false`.
+    The correction preserves unset, explicit false, and explicit true exactly,
+    restoring unset with `dconf reset`. The serial Ghostty regression passed.
+21. The corrected public run exposed the exact Brave frame through AT-SPI and
+    restored the accessibility baseline, but GNOME left the verified fixture
+    frame inactive. Daniel approved using the existing AT-SPI focus helper on
+    that fixture only. The next public run proved Brave returns `false` from
+    `Component.GrabFocus`; no chord was injected. Cleanup and the serial Ghostty
+    regression passed again. A different focus mechanism would cross the
+    approved Group 4 foundation, so lifecycle work stopped without a commit.
+22. Daniel selected DevTools target activation as the only efficient focus
+    option worth exploring. The Brave-only run successfully activated the exact
+    isolated page target through DevTools, but AT-SPI still reported its frame
+    inactive for the complete bounded wait. No keyd monitor or chord was
+    started, and fixture, profile, and toolkit-accessibility cleanup succeeded.
+    The disproven activation path was removed and Group 4 stopped for
+    reassessment.
+23. Ordered Phase 0 recon found native Wayland on GNOME Shell 50.2,
+    `focus-new-windows` already set to `smart`, Shell window introspection
+    access-denied, and no installed `xdotool`. A CDP `document.hasFocus()`
+    oracle was added alongside the AT-SPI active-state gate. An attempted direct
+    spawn waited until both the exact DevTools page and AT-SPI frame existed;
+    both focus oracles remained false, so no keyd monitor or chord started.
+    Brave ignored the parent's initial SIGTERM long enough for bounded cleanup
+    to report failure, then exited; after confirming no Brave process remained,
+    the exact retained profile was removed and toolkit accessibility was
+    restored.
+24. Daniel identified that the attempted Phase 1.2 spawn did not originate in
+    the focused GNOME terminal at all. Read-only ancestry confirmed the tool
+    shell was a no-TTY child of Codex in the Herdr session, unrelated to the
+    visible Ghostty process; Herdr also survives graphical logout. Therefore the
+    run did not test launch eligibility from a focused terminal, and Phase 1.2
+    remains open. The public test was prepared for Daniel to invoke manually
+    from the visibly focused terminal, with CDP page closure and bounded
+    TERM/KILL cleanup replacing the failed direct-parent teardown.
+25. After resuming Codex directly under the visible Ghostty process, host
+    ancestry showed `Ghostty -> bash -> codex -> tool shell`, with Herdr in a
+    separate tree. The first valid Phase 1.2 launch made the fixture page's
+    `document.hasFocus()` return true while Brave's AT-SPI frame still reported
+    inactive, proving AT-SPI active state is not a usable Brave focus oracle.
+    With CDP as the gate, the next run started keyd and physical `Alt+N` created
+    exactly two isolated DevTools pages and AT-SPI frames. The new page then
+    reported `document.hasFocus()` false for the bounded wait, so `Alt+W` was
+    not injected. Chromium opens a new window with browser chrome such as the
+    omnibox focused, making a false page result ambiguous rather than proof that
+    the OS window lacks focus. Direct-process, frame, server, focus,
+    toolkit-accessibility, and profile cleanup all passed.
+26. One Brave preflight overlapped a separately invoked public suite and found
+    no active AT-SPI baseline window. That contaminated result was discarded;
+    both runs cleaned up. A clean rerun confirmed that DevTools target
+    activation still could not give the new page document focus. Reviewing the
+    old Python scenario exposed its actual assumption: it counted the new page
+    and frame, then sent `Alt+W` without ever requiring page focus. The Bun
+    scenario replaced that missing safety assertion with a read-only
+    focused-descendant query scoped to the exact new AT-SPI frame. It did not
+    inject F6 or switch windows. The Brave-only run and the complete guarded
+    public suite both passed, retaining keyd evidence for `Alt+N` and `Alt+W`
+    and restoring every captured baseline.
 
 Current state:
 
@@ -402,13 +479,15 @@ Current state:
 - the bounded Alt+Q extension has passed twice consecutively on standard GNOME;
 - the grouped Ghostty tab and PTY extension passed within its two-run budget;
 - the grouped Ghostty clipboard extension passed within its two-run budget;
+- the first Brave lifecycle slice passes through the guarded public suite on
+  native Wayland;
 - no E2E fixture or monitor process remains;
 - Gauss currently has Gum, ydotool, wl-clipboard, and the rootless ydotoold
   configuration activated;
 - the obsolete keyd-monitor service and polkit grant have been removed from the
   running system;
-- the direct-sudo implementation exists in the uncommitted feature branch and is
-  behaviorally proven on the live Gauss PaperWM session;
+- the provisional direct-sudo implementation is committed on the feature branch
+  and behaviorally proven on the live Gauss session;
 - the ticket's older pre-deployment evidence below is historical and partly
   superseded by this ledger.
 

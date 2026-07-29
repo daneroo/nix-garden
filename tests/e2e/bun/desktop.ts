@@ -280,6 +280,41 @@ function hasState(words: readonly number[], state: number): boolean {
   return (word & (1 << (state % 32))) !== 0;
 }
 
+export async function accessibleSubtreeHasFocus(
+  address: string,
+  root: AccessibleRef,
+): Promise<boolean> {
+  const pending = [root];
+  const visited = new Set<string>();
+
+  while (pending.length > 0) {
+    const ref = pending.shift()!;
+    const key = `${ref.bus}\0${ref.path}`;
+    if (visited.has(key)) {
+      continue;
+    }
+    visited.add(key);
+
+    try {
+      const [states, children] = await Promise.all([
+        callAtSpi(address, ref, "org.a11y.atspi.Accessible", "GetState").then(
+          (envelope) =>
+            stateWords(envelope, `AT-SPI state for ${ref.bus}${ref.path}`),
+        ),
+        getChildren(address, ref),
+      ]);
+      if (hasState(states, 12)) {
+        return true;
+      }
+      pending.push(...children);
+    } catch {
+      // Descendants may disappear while Chromium rebuilds its accessibility tree.
+    }
+  }
+
+  return false;
+}
+
 async function callAtSpi(
   address: string,
   ref: AccessibleRef,
