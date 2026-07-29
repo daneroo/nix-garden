@@ -76,7 +76,7 @@ gets one targeted TypeScript check, at most two live runs, one final
 correction; any need for a new unplanned mechanism stops that group for review.
 Do not cross group boundaries during a failure.
 
-- [ ] **Group 1 — existing Ghostty lifecycle:** append physical `Alt+Q` to the
+- [x] **Group 1 — existing Ghostty lifecycle:** append physical `Alt+Q` to the
       existing fixture sequence, semantically observe that only the isolated
       fixture application exits, retain keyd evidence, and confirm baseline
       focus. Add no helper, permission, service, package, or observer.

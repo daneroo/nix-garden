@@ -1,16 +1,18 @@
 import { runCommand, step, waitFor } from "./desktop.ts";
 
-export type PhysicalKey = "leftAlt" | "n" | "w";
+export type PhysicalKey = "leftAlt" | "n" | "q" | "w";
 
 const keyCodes: Readonly<Record<PhysicalKey, number>> = {
   leftAlt: 56,
   n: 49,
+  q: 16,
   w: 17,
 };
 
 const displayNames: Readonly<Record<PhysicalKey, string>> = {
   leftAlt: "Alt",
   n: "N",
+  q: "Q",
   w: "W",
 };
 

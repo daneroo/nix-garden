@@ -167,7 +167,7 @@ afterAll(() => {
 });
 
 describe("deployed Ghostty keyboard behavior", () => {
-  test("physical Alt+N creates a focused window and Alt+W closes it through keyd", async () => {
+  test("physical Alt+N, Alt+W, and Alt+Q control fixture windows through keyd", async () => {
     const started = performance.now();
     let fixture: Fixture | undefined;
     let baseline: AccessibleWindow | undefined;
@@ -195,6 +195,7 @@ describe("deployed Ghostty keyboard behavior", () => {
       ).stdout;
       for (const binding of [
         "keybind = alt+n=new_window",
+        "keybind = alt+q=quit",
         "keybind = alt+w=close_tab:this",
       ]) {
         if (!loadedBindings.includes(binding)) {
@@ -307,6 +308,30 @@ describe("deployed Ghostty keyboard behavior", () => {
           .split("\n")
           .filter(
             (line) => line.includes("leftalt down") || line.includes("w down"),
+          )
+          .join(" | ")}`,
+      );
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "q"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+Q to quit only the isolated fixture application",
+        async () =>
+          fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+          ),
+        (windows) => windows.length === 0,
+      );
+
+      const quitEvidence = await waitForKeydChordEvidence(monitor, "q");
+      console.log(
+        `  • keyd evidence retained: ${quitEvidence
+          .split("\n")
+          .filter(
+            (line) => line.includes("leftalt down") || line.includes("q down"),
           )
           .join(" | ")}`,
       );

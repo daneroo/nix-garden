@@ -258,6 +258,12 @@ new fixture window closed, focus returned to the initial fixture window, and
 full cleanup succeeded. Scenario times were 1.15 and 1.18 seconds. No new
 permission, injection, observation, fixture, or cleanup mechanism was added.
 
+With PaperWM disabled, the existing fixture lifecycle then added physical
+`Alt+Q`. Two consecutive standard-GNOME runs retained `leftalt down` and
+`q down`, quit only the isolated fixture application, restored baseline focus,
+and completed cleanup in 1.07 seconds. This group added no helper, permission,
+service, package, or observer.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -350,6 +356,7 @@ Current state:
 
 - the Bun Alt+N behavioral test has passed twice consecutively;
 - the bounded Alt+W extension has also passed twice consecutively;
+- the bounded Alt+Q extension has passed twice consecutively on standard GNOME;
 - no E2E fixture or monitor process remains;
 - Gauss currently has Gum, ydotool, and the rootless ydotoold configuration
   activated;
