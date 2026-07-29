@@ -12,6 +12,7 @@ import {
 } from "./desktop.ts";
 import {
   injectPhysicalChord,
+  injectPhysicalText,
   type KeydMonitor,
   startKeydMonitor,
   stopKeydMonitor,
@@ -128,9 +129,11 @@ async function createFixture() {
   const server = Bun.serve({
     hostname: "127.0.0.1",
     port: 0,
-    fetch() {
+    fetch(request) {
+      const pathname = new URL(request.url).pathname;
+      const pageName = pathname === "/" ? "initial" : pathname.slice(1);
       return new Response(
-        `<!doctype html><html><head><title>${title}</title></head><body>BRAVE_LIFECYCLE_PROBE</body></html>`,
+        `<!doctype html><html><head><title>${title}-${pageName}</title></head><body>BRAVE_${pageName.toUpperCase()}_PROBE</body></html>`,
         { headers: { "content-type": "text/html; charset=utf-8" } },
       );
     },
@@ -142,6 +145,8 @@ async function createFixture() {
     server,
     title,
     url: `http://127.0.0.1:${server.port}/`,
+    navigationUrl: `http://127.0.0.1:${server.port}/navigation`,
+    addressUrl: `http://127.0.0.1:${server.port}/address`,
   };
 }
 
@@ -336,6 +341,25 @@ async function waitForPageCount(
   );
 }
 
+async function waitForPageUrl(
+  port: number,
+  id: string,
+  url: string,
+): Promise<DevToolsPage> {
+  const observed = await waitFor(
+    `DevTools page ${id} to load ${JSON.stringify(url)}`,
+    async () => pages(port),
+    (pages) => pages.some((page) => page.id === id && page.url === url),
+  );
+  const page = observed.find(
+    (candidate) => candidate.id === id && candidate.url === url,
+  );
+  if (page === undefined) {
+    throw new Error(`DevTools page ${id} disappeared after navigation`);
+  }
+  return page;
+}
+
 async function documentHasFocus(page: DevToolsPage): Promise<boolean> {
   return new Promise<boolean>((resolve, reject) => {
     const socket = new WebSocket(page.webSocketDebuggerUrl);
@@ -466,7 +490,7 @@ afterAll(() => {
 });
 
 describe("deployed Brave keyboard behavior", () => {
-  test("physical Brave window lifecycle chords traverse keyd", async () => {
+  test("physical Brave lifecycle and navigation chords traverse keyd", async () => {
     const started = performance.now();
     let fixture: BraveFixture | undefined;
     let fixtureApplication: AccessibleWindow["app"] | undefined;
@@ -635,6 +659,125 @@ describe("deployed Brave keyboard behavior", () => {
         (focused) => focused,
       );
       await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "w"] });
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "t"] },
+        capabilities.ydotoolSocket,
+      );
+      const pagesAfterNewTab = await waitForPageCount(fixturePort, 2);
+      const newTab = pagesAfterNewTab.find(
+        (page) => page.id !== initialPage.id,
+      );
+      if (newTab === undefined) {
+        throw new Error("Alt+T produced no new DevTools page identity");
+      }
+      await waitFor(
+        "Alt+T to retain one focused fixture-owned Brave frame",
+        async () => {
+          const windows = fixtureWindows(
+            await listAccessibleWindows(capabilities.atSpiAddress),
+            fixture!,
+            fixtureApplication,
+          );
+          return {
+            focused:
+              windows.length === 1 &&
+              sameAccessibleRef(windows[0]!.ref, initialWindow.ref) &&
+              (await accessibleSubtreeHasFocus(
+                capabilities.atSpiAddress,
+                windows[0]!.ref,
+              )),
+            windows,
+          };
+        },
+        (observed) => observed.focused,
+      );
+      await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "t"] });
+
+      await injectPhysicalText(
+        fixture.navigationUrl,
+        capabilities.ydotoolSocket,
+      );
+      await injectPhysicalChord(
+        { keys: ["enter"] },
+        capabilities.ydotoolSocket,
+      );
+      let selectedTab = await waitForPageUrl(
+        fixturePort,
+        newTab.id,
+        fixture.navigationUrl,
+      );
+      await waitFor(
+        "the navigated Brave tab to hold document focus",
+        async () => documentHasFocus(selectedTab),
+        (focused) => focused,
+      );
+
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "l"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitForKeydChordEvidence(monitor, { keys: ["leftAlt", "l"] });
+      await waitFor(
+        "Alt+L to retain keyboard focus inside the fixture-owned Brave frame",
+        async () =>
+          accessibleSubtreeHasFocus(
+            capabilities.atSpiAddress,
+            initialWindow.ref,
+          ),
+        (focused) => focused,
+      );
+      await injectPhysicalText(fixture.addressUrl, capabilities.ydotoolSocket);
+      await injectPhysicalChord(
+        { keys: ["enter"] },
+        capabilities.ydotoolSocket,
+      );
+      selectedTab = await waitForPageUrl(
+        fixturePort,
+        newTab.id,
+        fixture.addressUrl,
+      );
+      await waitFor(
+        "the address-navigated Brave tab to hold document focus",
+        async () => documentHasFocus(selectedTab),
+        (focused) => focused,
+      );
+
+      const previousTabEvidence = monitor.evidence().length;
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "leftShift", "leftBracket"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+Shift+[ to select the initial Brave tab",
+        async () => documentHasFocus(initialPage),
+        (focused) => focused,
+      );
+      await waitForKeydChordEvidence(
+        monitor,
+        {
+          keys: ["leftCtrl", "leftShift", "tab"],
+        },
+        previousTabEvidence,
+      );
+
+      const nextTabEvidence = monitor.evidence().length;
+      await injectPhysicalChord(
+        { keys: ["leftAlt", "leftShift", "rightBracket"] },
+        capabilities.ydotoolSocket,
+      );
+      await waitFor(
+        "Alt+Shift+] to select the address-navigated Brave tab",
+        async () => documentHasFocus(selectedTab),
+        (focused) => focused,
+      );
+      await waitForKeydChordEvidence(
+        monitor,
+        {
+          keys: ["leftCtrl", "tab"],
+        },
+        nextTabEvidence,
+      );
     } catch (error) {
       originalFailure = error;
     }

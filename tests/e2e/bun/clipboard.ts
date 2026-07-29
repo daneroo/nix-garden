@@ -5,13 +5,13 @@ export interface ClipboardBaseline {
   readonly types: readonly string[];
 }
 
-const supportedTypes = new Set([
+const plainTextTypes = [
+  "text/plain;charset=utf-8",
+  "text/plain",
+  "UTF8_STRING",
   "STRING",
   "TEXT",
-  "UTF8_STRING",
-  "text/plain",
-  "text/plain;charset=utf-8",
-]);
+] as const;
 
 export async function captureClipboard(): Promise<ClipboardBaseline> {
   const types = (await runCommand(["wl-paste", "--list-types"])).stdout
@@ -19,13 +19,27 @@ export async function captureClipboard(): Promise<ClipboardBaseline> {
     .split("\n")
     .filter((type) => type !== "");
 
-  if (types.length === 0 || types.some((type) => !supportedTypes.has(type))) {
+  const plainTextType = plainTextTypes.find((type) => types.includes(type));
+  if (plainTextType === undefined) {
     throw new Error(
-      `refusing to replace a clipboard that cannot be restored as plain text: ${JSON.stringify(types)}`,
+      `refusing to replace a clipboard with no restorable plain-text representation: ${JSON.stringify(types)}`,
+    );
+  }
+  if (
+    types.some(
+      (type) =>
+        !plainTextTypes.includes(type as (typeof plainTextTypes)[number]),
+    ) &&
+    Bun.env.NIX_GARDEN_E2E_OVERWRITE_CLIPBOARD !== "1"
+  ) {
+    throw new Error(
+      `refusing to discard rich clipboard types outside the guarded entry point: ${JSON.stringify(types)}`,
     );
   }
 
-  const text = (await runCommand(["wl-paste", "--no-newline"])).stdout;
+  const text = (
+    await runCommand(["wl-paste", "--type", plainTextType, "--no-newline"])
+  ).stdout;
   return { text, types };
 }
 

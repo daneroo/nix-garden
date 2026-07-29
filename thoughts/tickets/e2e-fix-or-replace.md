@@ -305,6 +305,25 @@ passed Brave in 1.81 seconds and the complete Ghostty regression in 2.22
 seconds, 2 tests total in 4.45 seconds, with complete cleanup and baseline
 restoration.
 
+The first Brave navigation extension reused that passing lifecycle. Physical
+`Alt+T` created a second tab, ydotool typed only local fixture URLs through the
+existing pre-keyd device, and physical `Alt+L` moved address entry from a
+document-focused tab. Exact DevTools target IDs and URLs proved both
+navigations. Physical `Alt+Shift+[` and `Alt+Shift+]` then selected the exact
+initial and address-navigated documents; keyd exposed the configured
+Ctrl+Shift+Tab and Ctrl+Tab output. The corrected bounded run passed in 4.88
+seconds with complete cleanup and baseline restoration.
+
+The guarded public entry now accepts `-y`/`--yes` and `--slow [SECONDS]`. Slow
+mode adds observation time only after physical chord injection, leaving semantic
+wait timeouts unchanged. The entry warns before desktop control that it
+overwrites the clipboard and restores only a plain-text representation when the
+original owner also offered rich formats. It detects existing non-interactive
+sudo authorization before explaining the password and Ctrl+C abort path. Daniel
+validated the flags from the direct Ghostty session and separately confirmed
+that the same test invoked from the old Herdr session fails the launch-lineage
+preflight.
+
 ### Owner assessment
 
 Daniel considers the current result unacceptable. The LLM switched to a direct
@@ -471,6 +490,23 @@ the failed runs counts as a passing behavioral assertion.
     inject F6 or switch windows. The Brave-only run and the complete guarded
     public suite both passed, retaining keyd evidence for `Alt+N` and `Alt+W`
     and restoring every captured baseline.
+27. The first bounded Brave navigation run behaviorally passed `Alt+T`, two
+    local address navigations including `Alt+L`, and `Alt+Shift+[` tab
+    selection. Its final evidence wait incorrectly expected the consumed
+    physical `[` from keyd's output stream instead of the configured
+    Ctrl+Shift+Tab result. The local correction checkpoints monitor output
+    before each tab chord and expects the mapped Ctrl/Shift/Tab keys. The second
+    and final bounded run passed all four navigation chords in 4.88 seconds with
+    exact target focus, mapped keyd output, and complete cleanup.
+28. Daniel requested the already-noted public-entry quality-of-life work while
+    validating the navigation group. `-y` now accepts the warning,
+    `--slow [SECONDS]` adds bounded post-chord observation pauses, and sudo
+    guidance distinguishes existing authorization from an attended password
+    prompt. The same warning and confirmation explicitly disclose clipboard
+    overwrite: a rich clipboard with a plain-text representation is restored as
+    plain text, losing its rich formats. Daniel then validated the direct
+    Ghostty invocation and proved that an invocation from the old persistent
+    Herdr session fails immediately at the lineage guard.
 
 Current state:
 
@@ -481,6 +517,9 @@ Current state:
 - the grouped Ghostty clipboard extension passed within its two-run budget;
 - the first Brave lifecycle slice passes through the guarded public suite on
   native Wayland;
+- the first Brave navigation extension passed within its two-run budget;
+- the guarded public entry supports confirmed, slow-observation, sudo-guidance,
+  and disclosed plain-text clipboard fallback paths;
 - no E2E fixture or monitor process remains;
 - Gauss currently has Gum, ydotool, wl-clipboard, and the rootless ydotoold
   configuration activated;

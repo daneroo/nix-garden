@@ -4,13 +4,16 @@ export type PhysicalKey =
   | "a"
   | "c"
   | "d"
+  | "enter"
   | "leftAlt"
   | "leftBracket"
   | "leftCtrl"
   | "leftShift"
+  | "l"
   | "n"
   | "q"
   | "rightBracket"
+  | "tab"
   | "t"
   | "v"
   | "w";
@@ -19,13 +22,16 @@ const keyCodes: Readonly<Record<PhysicalKey, number>> = {
   a: 30,
   c: 46,
   d: 32,
+  enter: 28,
   leftAlt: 56,
   leftBracket: 26,
   leftCtrl: 29,
   leftShift: 42,
+  l: 38,
   n: 49,
   q: 16,
   rightBracket: 27,
+  tab: 15,
   t: 20,
   v: 47,
   w: 17,
@@ -35,13 +41,16 @@ const displayNames: Readonly<Record<PhysicalKey, string>> = {
   a: "A",
   c: "C",
   d: "D",
+  enter: "Enter",
   leftAlt: "Alt",
   leftBracket: "[",
   leftCtrl: "Ctrl",
   leftShift: "Shift",
+  l: "L",
   n: "N",
   q: "Q",
   rightBracket: "]",
+  tab: "Tab",
   t: "T",
   v: "V",
   w: "W",
@@ -51,13 +60,16 @@ const evidenceNames: Readonly<Record<PhysicalKey, string>> = {
   a: "a",
   c: "c",
   d: "d",
+  enter: "enter",
   leftAlt: "leftalt",
   leftBracket: "[",
   leftCtrl: "leftcontrol",
   leftShift: "leftshift",
+  l: "l",
   n: "n",
   q: "q",
   rightBracket: "]",
+  tab: "tab",
   t: "t",
   v: "v",
   w: "w",
@@ -70,6 +82,17 @@ export interface KeydMonitor {
 
 export interface PhysicalChord {
   readonly keys: readonly [PhysicalKey, ...PhysicalKey[]];
+}
+
+function observationDelayMs(): number {
+  const value = Bun.env.NIX_GARDEN_E2E_SLOW_SECONDS ?? "0";
+  const seconds = Number(value);
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    throw new Error(
+      `NIX_GARDEN_E2E_SLOW_SECONDS must be non-negative, got ${JSON.stringify(value)}`,
+    );
+  }
+  return seconds * 1_000;
 }
 
 export async function startKeydMonitor(
@@ -146,18 +169,35 @@ export async function injectPhysicalChord(
     await runCommand(["ydotool", "key", ...presses, ...releases], {
       env: { YDOTOOL_SOCKET: ydotoolSocket },
     });
+    const delayMs = observationDelayMs();
+    if (delayMs > 0) {
+      console.log(`  • observing chord outcome for ${delayMs / 1_000}s`);
+      await Bun.sleep(delayMs);
+    }
+  });
+}
+
+export async function injectPhysicalText(
+  text: string,
+  ydotoolSocket: string,
+): Promise<void> {
+  await step("Type fixture text before keyd", async () => {
+    await runCommand(["ydotool", "type", text], {
+      env: { YDOTOOL_SOCKET: ydotoolSocket },
+    });
   });
 }
 
 export async function waitForKeydChordEvidence(
   monitor: KeydMonitor,
   chord: PhysicalChord,
+  since = 0,
 ): Promise<string> {
   const label = chord.keys.map((key) => displayNames[key]).join("+");
   const expected = chord.keys.map((key) => `${evidenceNames[key]} down`);
   return waitFor(
     `keyd monitor to report the injected physical ${label} output`,
-    async () => monitor.evidence(),
+    async () => monitor.evidence().slice(since),
     (evidence) => expected.every((event) => evidence.includes(event)),
     { timeoutMs: 5_000 },
   );

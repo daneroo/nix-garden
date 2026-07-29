@@ -7,9 +7,48 @@ fail() {
   exit 1
 }
 
-if [[ $# -ne 0 ]]; then
-  fail "this command takes no arguments"
-fi
+usage() {
+  cat <<'EOF'
+Usage: ./scripts/e2e.sh [-y|--yes] [--slow [SECONDS]]
+
+  -y, --yes        accept the guarded workspace and clipboard confirmation
+  --slow [SECONDS] pause after each injected chord (default: 1 second)
+  -h, --help       show this help
+EOF
+}
+
+assume_yes=false
+slow_seconds=0
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -y | --yes)
+      assume_yes=true
+      shift
+      ;;
+    --slow)
+      slow_seconds=1
+      if [[ $# -gt 1 && $2 != -* ]]; then
+        slow_seconds=$2
+        shift
+      fi
+      shift
+      ;;
+    --slow=*)
+      slow_seconds=${1#--slow=}
+      shift
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    *)
+      fail "unknown argument: $1"
+      ;;
+  esac
+done
+
+[[ $slow_seconds =~ ^[0-9]+([.][0-9]+)?$ ]] ||
+  fail "--slow requires a non-negative number of seconds"
 
 for executable in bun gum sudo; do
   command -v "$executable" >/dev/null 2>&1 ||
@@ -34,18 +73,30 @@ gum style \
 gum style \
   "This suite will take control of the visible desktop." \
   "It will focus fixture windows and inject physical keyboard chords." \
+  "It will overwrite the clipboard; rich formatting will not be restored." \
   "Do not type or change workspaces until the suite restores focus."
 
-gum confirm \
-  --default=false \
-  "Run the desktop E2E suite on the current workspace?" ||
-  fail "cancelled without changing the desktop"
+if [[ $assume_yes == false ]]; then
+  gum confirm \
+    --default=false \
+    "Run on this workspace and overwrite the clipboard?" ||
+    fail "cancelled without changing the desktop"
+fi
 
-gum style "keyd evidence requires sudo for this run."
-sudo -v || fail "sudo authorization failed"
+if sudo -n true 2>/dev/null; then
+  gum style "sudo authorization is already available for keyd evidence."
+else
+  gum style \
+    "sudo authorization is required for keyd evidence." \
+    "Enter your password when prompted, or press Ctrl+C to abort before desktop control."
+  sudo -v || fail "sudo authorization failed"
+fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd -- "$script_dir/../tests/e2e/bun" && pwd)"
+
+export NIX_GARDEN_E2E_OVERWRITE_CLIPBOARD=1
+export NIX_GARDEN_E2E_SLOW_SECONDS=$slow_seconds
 
 cd -- "$project_dir"
 exec bun run test
