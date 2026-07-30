@@ -22,7 +22,6 @@ const requiredExecutables = [
   "dconf",
   "ghostty",
   "gnome-extensions",
-  "gum",
   "id",
   "journalctl",
   "loginctl",
