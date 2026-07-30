@@ -94,3 +94,9 @@ keyboard (and thus real keybindings) still work. Fix: list ydotool's `2333:6666`
 in hardy's keyd ids so keyd manages the injection device. Still open: the
 preflight bundles ~a dozen checks and does not name the failing one — split it
 as part of the readability work.
+
+Resolved: after deploying the `2333:6666` addition, keyd logs
+`DEVICE: match 2333:6666 (ydotoold virtual device)` and the full guarded suite
+runs green on hardy from a visible Ghostty. The only stumble was the final
+clipboard-restore hitting the known Mutter wedge (unstuck by copying text) —
+which now confirms the clipboard-robustness item bites on both hosts.
