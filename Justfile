@@ -66,6 +66,11 @@ apply:
       exit 1
     fi
 
+# Run the live desktop E2E suite in this session (args: -y, --slow [SECONDS]).
+[script('bash')]
+e2e *args:
+    scripts/e2e.sh {{ args }}
+
 # Run desktop assertions headlessly, visibly, or open an exploratory VM.
 [script('bash')]
 e2e-vm *args:
