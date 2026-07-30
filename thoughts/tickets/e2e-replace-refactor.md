@@ -83,3 +83,14 @@ keyd↔ydotoold device match, AT-SPI, extensions), so the failure does not name
 which assumption breaks on Hardy. Making the check name the exact failing
 capability is both the fix and a simplification win. Likely needs a handoff to a
 Claude running on Hardy.
+
+Root cause (diagnosed over SSH): keyd
+`DEVICE: ignoring 2333:6666 (ydotoold virtual device)`. Hardy deliberately
+scopes keyd to the internal keyboard
+(`keyboards.internal.ids = [ "0001:0001:09b4e68d" ]`) for its Chromebook
+`Alt+F6/F7 → kbdillum` remap, whereas gauss uses `[ids] *`. So keyd ignores the
+ydotool injection device and synthetic chords never traverse keyd; the physical
+keyboard (and thus real keybindings) still work. Fix: list ydotool's `2333:6666`
+in hardy's keyd ids so keyd manages the injection device. Still open: the
+preflight bundles ~a dozen checks and does not name the failing one — split it
+as part of the readability work.

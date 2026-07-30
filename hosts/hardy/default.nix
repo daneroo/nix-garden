@@ -91,7 +91,15 @@ in
   services.keyd = {
     enable = true;
     keyboards.internal = {
-      ids = [ "0001:0001:09b4e68d" ];
+      # The desktop E2E harness injects physical chords through ydotool's
+      # virtual keyboard (2333:6666). keyd must manage that device so injected
+      # chords traverse the real keyd path; gauss gets this via `[ids] *`, but
+      # hardy deliberately scopes to the internal keyboard, so the injection
+      # device is listed explicitly. It harmlessly inherits the internal remaps.
+      ids = [
+        "0001:0001:09b4e68d"
+        "2333:6666"
+      ];
       settings = {
         alt = {
           f6 = "kbdillumdown";
