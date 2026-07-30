@@ -113,15 +113,9 @@ describe("deployed Brave keyboard behavior", () => {
         const initialDesktop = await listAccessibleWindows(
           capabilities.atSpiAddress,
         );
-        // A fresh session -- the VM's empty desktop, or a live session focused
-        // on nothing -- may have no active top-level window. That is a valid
-        // start state, not an error: baseline capture is only a courtesy so a
-        // live run returns focus to where the human left it, and
-        // restoreBaseline() no-ops when there is nothing to restore. (Matches
-        // the sibling ghostty.test.ts treatment.)
         baseline = initialDesktop.find((window) => window.active);
         if (baseline === undefined) {
-          note("• no active baseline window; focus will not be restored");
+          throw new Error("AT-SPI reported no active baseline window");
         }
 
         accessibilityBaseline = await step(
