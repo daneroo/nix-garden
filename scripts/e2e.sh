@@ -73,7 +73,7 @@ gum style \
 gum style \
   "This suite will take control of the visible desktop." \
   "It will focus fixture windows and inject physical keyboard chords." \
-  "It will overwrite the clipboard; rich formatting will not be restored." \
+  "It will overwrite the clipboard and will not restore it (cleared at the end)." \
   "Do not type or change workspaces until the suite restores focus."
 
 if [[ $assume_yes == false ]]; then
@@ -95,7 +95,6 @@ fi
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_dir="$(cd -- "$script_dir/../tests/e2e/bun" && pwd)"
 
-export NIX_GARDEN_E2E_OVERWRITE_CLIPBOARD=1
 export NIX_GARDEN_E2E_SLOW_SECONDS=$slow_seconds
 
 cd -- "$project_dir"

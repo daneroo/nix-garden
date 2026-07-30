@@ -1,9 +1,5 @@
 import { afterAll, beforeAll, describe, test } from "bun:test";
-import {
-  type ClipboardBaseline,
-  captureClipboard,
-  restoreClipboard,
-} from "./clipboard.ts";
+import { clearClipboard } from "./clipboard.ts";
 import {
   accessibleSubtreeHasFocus,
   type AccessibleWindow,
@@ -108,8 +104,6 @@ describe("deployed Brave keyboard behavior", () => {
       let accessibilityBaseline: ToolkitAccessibilityBaseline | undefined;
       let restoreToolkitAccessibility = false;
       let baseline: AccessibleWindow | undefined;
-      let clipboardBaseline: ClipboardBaseline | undefined;
-      let clipboardChanged = false;
       let monitor: KeydMonitor | undefined;
       let originalFailure: unknown;
       const cleanupErrors: Error[] = [];
@@ -122,11 +116,6 @@ describe("deployed Brave keyboard behavior", () => {
         if (baseline === undefined) {
           throw new Error("AT-SPI reported no active baseline window");
         }
-
-        clipboardBaseline = await step(
-          "Capture the restorable text clipboard baseline",
-          captureClipboard,
-        );
 
         accessibilityBaseline = await step(
           "Capture the GNOME toolkit-accessibility baseline",
@@ -200,7 +189,6 @@ describe("deployed Brave keyboard behavior", () => {
           async () => documentHasFocus(initialPage),
           (focused) => focused,
         );
-        clipboardChanged = true;
         await step(
           "Select the initial Brave textarea before Alt+C",
           async () => {
@@ -513,13 +501,11 @@ describe("deployed Brave keyboard behavior", () => {
           cleanupErrors,
         );
       }
-      if (clipboardChanged && clipboardBaseline !== undefined) {
-        await cleanupAction(
-          "Restore the captured clipboard baseline",
-          async () => restoreClipboard(clipboardBaseline!),
-          cleanupErrors,
-        );
-      }
+      await cleanupAction(
+        "Clear the clipboard (not restored)",
+        clearClipboard,
+        cleanupErrors,
+      );
       if (fixtureFocused) {
         await cleanupAction(
           "Restore the baseline focused window",

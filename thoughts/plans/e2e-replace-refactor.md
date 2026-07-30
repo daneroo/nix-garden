@@ -33,17 +33,17 @@ adding machinery to work around it.
 
 ## Committed core — the one investment worth making
 
-- [ ] **Simplify so authoring is fluid.** Reduce the Bun sources and tests until
-      adding a new mapped chord and its behavioral assertion is a small,
-      obvious, one-place change that does not touch the capability, monitor,
-      injection, or cleanup plumbing. Prove it by landing `Alt+W` → 1Password
-      (and at most one more low-hanging chord). Acceptance: a new chord +
-      assertion is a few lines in one place, and each scenario reads as a plain
-      behavioral description. `[tier: med]`
-- [ ] **Readable output.** Improve normal and slow output so the action / wait /
-      result sequence reads top to bottom without tool internals leaking.
-      Acceptance: a full run is followable without the source open.
-      `[tier: low]`
+- [x] **Simplify so authoring is fluid.** A `pressChord` helper collapses the
+      checkpoint/inject/assert idiom to one line per chord, and the Brave
+      plumbing moved to `brave.ts` (`brave.test.ts` 1062 → ~555 lines) so the
+      test reads as behavior. Clipboard capture/restore was also dropped for a
+      warning + end-of-run clear. Remaining as a cheap proof: land `Alt+W` →
+      1Password (needs a keyd deploy). `[tier: med]`
+- [ ] **Readable output.** _(Partial: dropped the raw keyd-evidence dumps and
+      now assert evidence before the behavioral outcome.)_ Improve normal and
+      slow output so the action / wait / result sequence reads top to bottom
+      without tool internals leaking. Acceptance: a full run is followable
+      without the source open. `[tier: low]`
 - [ ] **Rationalize the entry points.** Consolidate `just e2e*` and
       `scripts/e2e*.sh` behind a coherent `just e2e` with flags once we see how
       much the live and VM invocations really differ. `[tier: low]`
@@ -61,11 +61,11 @@ adding machinery to work around it.
       then delete the Python behavioral content. Otherwise the Python suite
       stays frozen (already unmaintained) and we deprecate it later when a cheap
       path appears. `[tier: high]`
-- [ ] **Fix the Hardy preflight**, last — likely via a handoff to a Claude
-      running on Hardy. Only the live e2e harness fails there; Hardy and its
-      keybindings are fine and the VM test still passes. Make the capability
-      check name the exact missing capability, then fix or drop that one
-      assumption. `[tier: med]`
+- [x] **Fix the Hardy preflight.** Hardy scoped keyd to the internal keyboard,
+      so it ignored ydotool's `2333:6666` device; adding that id to hardy's keyd
+      config lets synthetic chords traverse keyd, and the full guarded suite now
+      runs green on hardy. (The bundled preflight still does not name the
+      failing check — folded into Readable output.) `[tier: med]`
 
 ## Deferred unless a concrete need appears
 

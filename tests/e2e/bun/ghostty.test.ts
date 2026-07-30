@@ -1,10 +1,5 @@
 import { afterAll, beforeAll, describe, test } from "bun:test";
-import {
-  type ClipboardBaseline,
-  captureClipboard,
-  restoreClipboard,
-  writeClipboard,
-} from "./clipboard.ts";
+import { clearClipboard, writeClipboard } from "./clipboard.ts";
 import {
   type AccessibleWindow,
   errorMessage,
@@ -187,16 +182,10 @@ describe("deployed Ghostty keyboard behavior", () => {
     let fixtureFocused = false;
     let fixtureLaunched = false;
     let monitor: KeydMonitor | undefined;
-    let clipboardBaseline: ClipboardBaseline | undefined;
     let originalFailure: unknown;
     const cleanupErrors: Error[] = [];
 
     try {
-      clipboardBaseline = await step(
-        "Capture the restorable text clipboard baseline",
-        captureClipboard,
-      );
-
       const initialDesktop = await listAccessibleWindows(
         capabilities.atSpiAddress,
       );
@@ -489,13 +478,11 @@ describe("deployed Ghostty keyboard behavior", () => {
         cleanupErrors,
       );
     }
-    if (clipboardBaseline !== undefined) {
-      await cleanupAction(
-        "Restore the captured clipboard baseline",
-        async () => restoreClipboard(clipboardBaseline!),
-        cleanupErrors,
-      );
-    }
+    await cleanupAction(
+      "Clear the clipboard (not restored)",
+      clearClipboard,
+      cleanupErrors,
+    );
     if (fixtureFocused) {
       await cleanupAction(
         "Restore the baseline focused window",
