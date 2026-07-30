@@ -45,9 +45,10 @@ adding machinery to work around it.
       green run is a clean checklist; a failure shows the exact `✗` step plus
       the detail bun prints from the throw. Live `\r` animation was dropped as
       unneeded. `[tier: low]`
-- [ ] **Rationalize the entry points.** Consolidate `just e2e*` and
-      `scripts/e2e*.sh` behind a coherent `just e2e` with flags once we see how
-      much the live and VM invocations really differ. `[tier: low]`
+- [ ] **Rationalize the entry points** — _after_ the VM investigation, since the
+      VM invocation shape informs the unified interface. Consolidate `just e2e*`
+      and `scripts/e2e*.sh` behind a coherent `just e2e` with flags once we see
+      how much the live and VM invocations really differ. `[tier: low]`
 - [ ] **Record the goal in docs.** State the macOS-parity keybinding goal and
       the e2e's exemplar purpose in `docs/`. `[tier: low]`
 
@@ -55,10 +56,12 @@ adding machinery to work around it.
 
 - [ ] **The first GNOME global.** The suite covers none yet — every chord today
       is app-scoped and there is no Super/Meta key. Add exactly one to establish
-      the pattern: `Alt+Shift+Q` (Escape-cancelable, unlike the lock chord).
-      Prove keyd carries it, observe its GNOME outcome through a stable
-      observer, and cancel safely. Defer anything without a stable observer.
-      `[tier: med]`
+      the pattern: `Alt+Shift+Q`, which opens GNOME's end-session (log out)
+      dialog. Prove keyd carries the chord, observe the dialog through a stable
+      observer (AT-SPI), then **Escape-cancel it and assert it is dismissed** —
+      never confirm log out, and never the lock chord (harder to undo). The old
+      Python/VM suite ended with lock-then-exit; deliberately avoid that. Defer
+      anything without a stable observer. `[tier: med]`
 - [ ] **VM runs the Bun content.** Only if the port is cheap: run the same Bun
       suite inside the NixOS VM with Python reduced to boot / invoke / report,
       then delete the Python behavioral content. Otherwise the Python suite
