@@ -1,5 +1,6 @@
 import {
   getAtSpiAddress,
+  note,
   runCommand,
   step,
   waitForExactOutput,
@@ -224,8 +225,8 @@ export async function validateCapabilities(): Promise<Capabilities> {
       "GetChildren",
     ]);
 
-    console.log(
-      `  • session ${activeSessionId}; ${desktopMode}; AT-SPI ${atSpiAddress}`,
+    note(
+      `• session ${activeSessionId}; ${desktopMode}; AT-SPI ${atSpiAddress}`,
     );
 
     return {

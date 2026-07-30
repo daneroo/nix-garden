@@ -39,5 +39,8 @@ export async function waitForClipboardText(text: string): Promise<void> {
 // `wl-copy --clear` clears the selection and exits without leaving a persistent
 // owner, so it avoids the wl-copy-owner state that wedges Mutter's clipboard.
 export async function clearClipboard(): Promise<void> {
-  await runCommand(["wl-copy", "--clear"]);
+  // Best-effort and bounded: if Mutter's clipboard is wedged, `wl-copy --clear`
+  // can block, so cap it rather than hang cleanup. Leaving the clipboard as-is
+  // is acceptable — the suite already warned it would not be restored.
+  await runCommand(["wl-copy", "--clear"], { check: false, timeoutMs: 2_000 });
 }

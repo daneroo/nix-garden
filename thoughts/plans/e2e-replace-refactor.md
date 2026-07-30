@@ -39,11 +39,12 @@ adding machinery to work around it.
       test reads as behavior. Clipboard capture/restore was also dropped for a
       warning + end-of-run clear. Remaining as a cheap proof: land `Alt+W` →
       1Password (needs a keyd deploy). `[tier: med]`
-- [ ] **Readable output.** _(Partial: dropped the raw keyd-evidence dumps and
-      now assert evidence before the behavioral outcome.)_ Improve normal and
-      slow output so the action / wait / result sequence reads top to bottom
-      without tool internals leaking. Acceptance: a full run is followable
-      without the source open. `[tier: low]`
+- [x] **Readable output.** The reporter now runs entirely on stderr (meshing
+      with bun:test's own stream), indents by nesting depth, prints one `✓`/`✗`
+      line per step, and keeps waits silent on success but loud on failure. A
+      green run is a clean checklist; a failure shows the exact `✗` step plus
+      the detail bun prints from the throw. Live `\r` animation was dropped as
+      unneeded. `[tier: low]`
 - [ ] **Rationalize the entry points.** Consolidate `just e2e*` and
       `scripts/e2e*.sh` behind a coherent `just e2e` with flags once we see how
       much the live and VM invocations really differ. `[tier: low]`
@@ -52,10 +53,12 @@ adding machinery to work around it.
 
 ## Opportunistic — only if cheap, explicitly cancelable
 
-- [ ] **A few more GNOME globals**, only where a stable unattended observer and
-      safe recovery exist; attended `Alt+Shift+L` lock only if it stays trivial
-      (assert the transition, Daniel unlocks, never inject a credential). Defer
-      anything without a stable observer. `[tier: med]`
+- [ ] **The first GNOME global.** The suite covers none yet — every chord today
+      is app-scoped and there is no Super/Meta key. Add exactly one to establish
+      the pattern: `Alt+Shift+Q` (Escape-cancelable, unlike the lock chord).
+      Prove keyd carries it, observe its GNOME outcome through a stable
+      observer, and cancel safely. Defer anything without a stable observer.
+      `[tier: med]`
 - [ ] **VM runs the Bun content.** Only if the port is cheap: run the same Bun
       suite inside the NixOS VM with Python reduced to boot / invoke / report,
       then delete the Python behavioral content. Otherwise the Python suite

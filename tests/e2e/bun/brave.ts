@@ -7,6 +7,7 @@ import { readFileSync } from "node:fs";
 import {
   type AccessibleWindow,
   errorMessage,
+  note,
   runCommand,
   sameAccessibleRef,
   step,
@@ -527,6 +528,6 @@ export async function cleanupAction(
     const cleanupError =
       error instanceof Error ? error : new Error(errorMessage(error));
     errors.push(cleanupError);
-    console.error(`  ! cleanup may be incomplete: ${cleanupError.message}`);
+    note(`! cleanup may be incomplete: ${cleanupError.message}`);
   }
 }

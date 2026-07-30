@@ -108,23 +108,41 @@ export async function runCommand(
   return result;
 }
 
+// Reporter — everything the suite prints flows through here to stderr, the same
+// stream bun:test uses for its own structure, so the two mesh in one coherent,
+// depth-indented tree. Design: quiet on success (a checklist of ✓ steps), loud
+// on failure (the ✗ step plus the detailed error bun prints from the throw).
+const reportStream = process.stderr;
+let reportDepth = 0;
+
+function reportLine(text: string): void {
+  reportStream.write(`${"  ".repeat(reportDepth + 1)}${text}\n`);
+}
+
+function elapsedSeconds(startedAt: number): string {
+  return ((performance.now() - startedAt) / 1000).toFixed(2);
+}
+
+// A standalone annotation (checkpoint, watch hint, cleanup warning, summary) at
+// the current nesting depth.
+export function note(text: string): void {
+  reportLine(text);
+}
+
 export async function step<T>(
   description: string,
   action: () => Promise<T>,
 ): Promise<T> {
   const started = performance.now();
-  console.log(`  → ${description}`);
-
+  reportDepth += 1;
   try {
     const result = await action();
-    console.log(
-      `  ✓ ${description} (${((performance.now() - started) / 1000).toFixed(2)}s)`,
-    );
+    reportDepth -= 1;
+    reportLine(`✓ ${description} (${elapsedSeconds(started)}s)`);
     return result;
   } catch (error) {
-    console.error(
-      `  ✗ ${description} (${((performance.now() - started) / 1000).toFixed(2)}s)`,
-    );
+    reportDepth -= 1;
+    reportLine(`✗ ${description} (${elapsedSeconds(started)}s)`);
     throw error;
   }
 }
@@ -145,9 +163,7 @@ export async function holdFailureForInspection(scope: string): Promise<void> {
   if (delayMs === 0) {
     return;
   }
-  console.error(
-    `    ! INSPECT FAILURE (${delayMs / 1_000}s): ${scope}; cleanup is paused`,
-  );
+  note(`! INSPECT FAILURE (${delayMs / 1_000}s): ${scope}; cleanup is paused`);
   await Bun.sleep(delayMs);
 }
 
@@ -163,8 +179,6 @@ export async function waitFor<T>(
   let attempts = 0;
   let lastError: unknown;
   let lastObserved: T | undefined;
-
-  console.log(`    … Waiting for ${description}`);
 
   while (performance.now() - started < timeoutMs) {
     attempts += 1;

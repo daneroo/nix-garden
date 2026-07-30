@@ -6,6 +6,7 @@ import {
   focusAccessibleWindow,
   holdFailureForInspection,
   listAccessibleWindows,
+  note,
   runCommand,
   sameAccessibleRef,
   step,
@@ -129,7 +130,7 @@ async function cleanupAction(
     const cleanupError =
       error instanceof Error ? error : new Error(errorMessage(error));
     errors.push(cleanupError);
-    console.error(`  ! cleanup may be incomplete: ${cleanupError.message}`);
+    note(`! cleanup may be incomplete: ${cleanupError.message}`);
   }
 }
 
@@ -171,7 +172,7 @@ beforeAll(async () => {
 }, 20_000);
 
 afterAll(() => {
-  console.log("  • desktop E2E suite complete");
+  note("• desktop E2E suite complete");
 });
 
 describe("deployed Ghostty keyboard behavior", () => {
@@ -498,14 +499,14 @@ describe("deployed Ghostty keyboard behavior", () => {
       );
     }
 
-    console.log(
-      `  • scenario elapsed ${((performance.now() - started) / 1000).toFixed(2)}s`,
+    note(
+      `• scenario elapsed ${((performance.now() - started) / 1000).toFixed(2)}s`,
     );
 
     if (originalFailure !== undefined) {
       if (cleanupErrors.length > 0) {
-        console.error(
-          `  ! preserved the original failure; ${cleanupErrors.length} cleanup action(s) also failed`,
+        note(
+          `! preserved the original failure; ${cleanupErrors.length} cleanup action(s) also failed`,
         );
       }
       throw originalFailure;

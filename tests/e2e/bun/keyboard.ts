@@ -1,4 +1,10 @@
-import { observationDelayMs, runCommand, step, waitFor } from "./desktop.ts";
+import {
+  note,
+  observationDelayMs,
+  runCommand,
+  step,
+  waitFor,
+} from "./desktop.ts";
 
 export type PhysicalKey =
   | "a"
@@ -158,8 +164,8 @@ export async function injectPhysicalChord(
   await step(`Inject physical ${label} before keyd`, async () => {
     const delayMs = observationDelayMs();
     if (delayMs > 0 && options.watch !== undefined) {
-      console.log(
-        `    • WATCH NOW: ${options.watch} (${delayMs / 1_000}s after injection)`,
+      note(
+        `• WATCH NOW: ${options.watch} (${delayMs / 1_000}s after injection)`,
       );
     }
     const presses = chord.keys.map((key) => `${keyCodes[key]}:1`);

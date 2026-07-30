@@ -6,6 +6,7 @@ import {
   focusAccessibleWindow,
   holdFailureForInspection,
   listAccessibleWindows,
+  note,
   sameAccessibleRef,
   step,
   waitFor,
@@ -79,13 +80,13 @@ beforeAll(async () => {
 }, 20_000);
 
 afterAll(() => {
-  console.log("  • Brave desktop E2E suite complete");
+  note("• Brave desktop E2E suite complete");
 });
 
 const braveLineage = braveLaunchLineage();
 if (!braveLineage.ok) {
-  console.log(
-    `  • SKIP Brave scenario — ${braveLineage.reason}; Brave needs a visible Ghostty-rooted invoker`,
+  note(
+    `• SKIP Brave scenario — ${braveLineage.reason}; Brave needs a visible Ghostty-rooted invoker`,
   );
 }
 const braveTest = braveLineage.ok ? test : test.skip;
@@ -199,8 +200,8 @@ describe("deployed Brave keyboard behavior", () => {
             }
           },
         );
-        console.log(
-          "    • BRAVE COPY: COPY_PROBE is selected; the page will not visibly change",
+        note(
+          "• BRAVE COPY: COPY_PROBE is selected; the page will not visibly change",
         );
         await pressChord(
           monitor!,
@@ -236,8 +237,8 @@ describe("deployed Brave keyboard behavior", () => {
             }
           },
         );
-        console.log(
-          "    • BRAVE PASTE: the selected textarea should visibly change to PASTE_PROBE",
+        note(
+          "• BRAVE PASTE: the selected textarea should visibly change to PASTE_PROBE",
         );
         const expectedPasteTitle = `${fixture!.title}-initial-PASTE_PROBE`;
         await pressChord(
@@ -530,19 +531,19 @@ describe("deployed Brave keyboard behavior", () => {
           cleanupErrors,
         );
       } else if (fixture !== undefined) {
-        console.error(
-          `  ! retained the isolated Brave profile after incomplete process cleanup: ${fixture.directory}`,
+        note(
+          `! retained the isolated Brave profile after incomplete process cleanup: ${fixture.directory}`,
         );
       }
 
-      console.log(
-        `  • scenario elapsed ${((performance.now() - started) / 1000).toFixed(2)}s`,
+      note(
+        `• scenario elapsed ${((performance.now() - started) / 1000).toFixed(2)}s`,
       );
 
       if (originalFailure !== undefined) {
         if (cleanupErrors.length > 0) {
-          console.error(
-            `  ! preserved the original failure; ${cleanupErrors.length} cleanup action(s) also failed`,
+          note(
+            `! preserved the original failure; ${cleanupErrors.length} cleanup action(s) also failed`,
           );
         }
         throw originalFailure;
