@@ -86,6 +86,64 @@ Bun project has no runtime dependencies, and `@types/bun` / `tsc` are dev-only
 (typechecking never runs in the VM). VM invocation therefore needs only `bun`
 plus the sources — no runtime packaging to design.
 
+Finding (attempted, reverted). We tried replacing the Python behavioral
+testScript with a small launcher that boots the VM and runs the live Bun suite
+in daniel's session.
+
+What we observed:
+
+- The bridge ran and the Bun suite executed in the VM.
+- `validateCapabilities` passed there with no `vm-layer` changes: passwordless
+  sudo worked and keyd reported matching the ydotool device.
+- The Brave scenario skipped — its lineage guard wants a Ghostty-rooted invoker,
+  and the driver-launched `bun` has none.
+- The Ghostty scenario did not get past focusing its fixture window: the freshly
+  launched window never reached AT-SPI "active" state (10s timeout), and an
+  explicit `Component.GrabFocus` call failed (busctl exited non-zero). This held
+  both headless and headed (`--show`).
+
+What we did **not** establish: why the focus failed. We did not root-cause it.
+Candidates we noticed but did not confirm — software rendering (MESA/ZINK errors
+in the log), `vicinae` crash-looping, paperwm's handling of the first window in
+an empty workspace, window-realization timing, or an AT-SPI quirk. One
+prediction was wrong: we expected the headed `--show` run to behave differently
+and it failed identically, so our mental model was incomplete.
+
+Decision (not a claim of impossibility): rather than keep digging, we reverted
+and kept the Python VM suite. The Python suite reaches its results by a
+different route (QEMU `send_key` + the terminal title-echo protocol) that does
+not depend on the AT-SPI / WM-focus state the Bun suite asserts — a plausible
+but unverified reason it works headless where this did not. Per the plan's
+low-effort rule, further root-causing was not worth it now; revisit if a cheap
+path or a clear cause appears.
+
+Worth trying if revisited (two shapes, least to most promising):
+
+1. Invoke the existing entry point (`scripts/e2e.sh` or `bun run test`) from a
+   **single Python `subtest`** through the harness's proven `as_daniel` session
+   handoff, rather than replacing the whole testScript. This is close to what we
+   tried, so it may hit the same fixture-window focus wall for the behavioral
+   scenarios — but at minimum it gives a cheap, faithful VM smoke check of the
+   parts that already passed there (capability validation) while Python keeps
+   the behavioral coverage.
+2. **Launch the Bun run inside a real Ghostty terminal in the VM** — the Python
+   harness already spawns Ghostty, so a subtest could open one and send it the
+   `bun run test` command, so `bun` runs as a child of a focused terminal. This
+   is the same shape Fable's analysis recommended, and it targets two of the
+   three frictions at once: it satisfies the Brave lineage guard for real (a
+   genuine Ghostty ancestor, not a bypass), and it may supply the
+   focused-terminal / activation context that the bare `sudo … bash -lc`
+   launcher never gave the fixture windows — the one thing none of our four runs
+   provided, and the most plausible reason the focus grabs failed. Untested, but
+   the most promising lead.
+
+We did not test either shape.
+
+(Aside: the boot-log noise on the driver's stderr is pre-existing and unrelated
+to this attempt — `e2e-vm.sh` sends only the driver's stdout to `/dev/null` and
+`--log-level warning` does not gate the serial console. Likely a QEMU
+serial/console toggle; folded into the entry-point / readable-output work.)
+
 ### Hardy capability preflight fails
 
 After deploying the merged configuration to Hardy, `./scripts/e2e.sh` fails at

@@ -62,11 +62,28 @@ adding machinery to work around it.
       never confirm log out, and never the lock chord (harder to undo). The old
       Python/VM suite ended with lock-then-exit; deliberately avoid that. Defer
       anything without a stable observer. `[tier: med]`
-- [ ] **VM runs the Bun content.** Only if the port is cheap: run the same Bun
-      suite inside the NixOS VM with Python reduced to boot / invoke / report,
-      then delete the Python behavioral content. Otherwise the Python suite
-      stays frozen (already unmaintained) and we deprecate it later when a cheap
-      path appears. `[tier: high]`
+- [x] **VM runs the Bun content — attempted, reverted; root cause not
+      established.** We tried a launcher that boots the VM and runs the live Bun
+      suite in daniel's session. Observed: the bridge runs, and
+      `validateCapabilities` passes in the VM with no `vm-layer` changes
+      (passwordless sudo worked and keyd reported matching the ydotool device).
+      The Brave scenario skipped (its lineage guard wants a Ghostty-rooted
+      invoker; the driver-launched `bun` has none). The Ghostty scenario stalled
+      at focusing its fixture window — the freshly launched window never reached
+      AT-SPI "active" (10s timeout), and an explicit `Component.GrabFocus` call
+      failed (busctl exited non-zero) — both headless and headed (`--show`). We
+      did **not** root-cause that failure; candidates we noticed but did not
+      confirm include software rendering, `vicinae` crash-looping, paperwm's
+      handling of the first window in an empty workspace, window-realization
+      timing, and AT-SPI quirks. One prediction was wrong (we expected `--show`
+      to differ; it failed identically), so our model was incomplete. The Python
+      VM suite reaches results without depending on WM/AT-SPI focus (QEMU
+      `send_key` + the terminal title-echo protocol) — a plausible but
+      unverified reason it works where this did not. Decision (not a proof of
+      impossibility): rather than keep digging, we reverted and kept the Python
+      VM suite; per the plan's low-effort rule further root-causing was not
+      worth it now. Revisit if a cheap path or a clear cause appears.
+      `[tier: high]`
 - [x] **Fix the Hardy preflight.** Hardy scoped keyd to the internal keyboard,
       so it ignored ydotool's `2333:6666` device; adding that id to hardy's keyd
       config lets synthetic chords traverse keyd, and the full guarded suite now
