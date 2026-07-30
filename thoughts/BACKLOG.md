@@ -64,10 +64,6 @@ Shared direction and comparison criteria:
 
 ## Virtualization
 
-- [ ] e2e-replace-refactor — broaden the live Bun suite to the remaining GNOME
-      globals, simplify it, make its output readable, and reuse it in the VM to
-      retire duplicated Python behavior; ticket:
-      [e2e-replace-refactor](tickets/e2e-replace-refactor.md)
 - [ ] incus-host — evaluate Incus as the homelab VM and system-container layer,
       including storage, networking, backup, and upgrades.
 - [ ] nixos-guests — decide how NixOS VM/container guests share the flake,

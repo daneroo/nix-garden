@@ -12,11 +12,21 @@ loud-on-failure on stderr), Hardy runs green, and the first GNOME global exists
 Deliberately dropped or deferred rather than pursued — per this plan's own
 low-impact / low-effort rule, now that the exemplar exists:
 
-- **Running the Bun suite in the VM** — attempted and reverted. The VM's window
-  focus behaviour blocks the Bun suite's assertions and we did **not**
-  root-cause it. The Python VM suite stays as the VM behavioural path; see the
-  ticket finding for what to try if revisited (most promising: launch the Bun
-  run inside a real Ghostty terminal).
+- **Running the Bun suite in the VM** — attempted and reverted. The bridge and
+  capability validation worked in the VM (no `vm-layer` changes needed), but the
+  Ghostty scenario never got its fixture window focused — AT-SPI never reported
+  it "active" and `Component.GrabFocus` failed, both headless and headed
+  (`--show`). We did **not** root-cause it (candidates, unconfirmed: software
+  rendering, `vicinae` crash-looping, paperwm's empty-workspace focus,
+  realization timing, AT-SPI quirks; one prediction — that `--show` would differ
+  — was wrong). The Python VM suite reaches its results without WM/AT-SPI focus
+  (QEMU `send_key` + terminal title-echo) and stays as the VM behavioural path.
+  Most promising revisit lead: **launch the Bun run inside a real Ghostty
+  terminal in the VM** (the harness already spawns Ghostty), so `bun` inherits a
+  genuine focused-terminal ancestor — this would satisfy the Brave lineage guard
+  for real and may supply the activation/focus context the bare launcher lacked.
+  A lighter alternative is to run only the capability validation as a single
+  Python subtest. Both untested.
 - **Clipboard robustness, recording the goal in `docs/`, boot-log stderr
   quieting, and deeper entry-point consolidation** — left undone; low value
   against the effort. `Alt+W` → 1Password still needs a keyd deploy.
