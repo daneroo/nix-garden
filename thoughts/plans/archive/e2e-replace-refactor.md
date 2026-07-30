@@ -1,6 +1,27 @@
 # E2E Replace / Refactor
 
-Status: planned
+Status: done
+
+## Outcome
+
+Concluded. The exemplar landed: the live Bun suite is simple to extend
+(`pressChord`, `brave.ts`), its output is readable (quiet-on-success /
+loud-on-failure on stderr), Hardy runs green, and the first GNOME global exists
+(gated, opt-in). `just e2e` and `just e2e-vm` now share one calling convention.
+
+Deliberately dropped or deferred rather than pursued — per this plan's own
+low-impact / low-effort rule, now that the exemplar exists:
+
+- **Running the Bun suite in the VM** — attempted and reverted. The VM's window
+  focus behaviour blocks the Bun suite's assertions and we did **not**
+  root-cause it. The Python VM suite stays as the VM behavioural path; see the
+  ticket finding for what to try if revisited (most promising: launch the Bun
+  run inside a real Ghostty terminal).
+- **Clipboard robustness, recording the goal in `docs/`, boot-log stderr
+  quieting, and deeper entry-point consolidation** — left undone; low value
+  against the effort. `Alt+W` → 1Password still needs a keyd deploy.
+
+Nothing here is a blocker; the suite is useful as-is.
 
 ## Why this exists
 

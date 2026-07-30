@@ -12,8 +12,9 @@ so from here: low impact implies low effort. Prefer dropping a requirement over
 adding machinery, and do not reopen the solved focus or permission
 investigations without new evidence. Neither Gauss nor Hardy is production.
 
-The executable shape lives in [the plan](../plans/e2e-replace-refactor.md),
-split into a small committed core and an opportunistic, cancelable bucket.
+The executable shape lives in
+[the plan](../plans/archive/e2e-replace-refactor.md), split into a small
+committed core and an opportunistic, cancelable bucket.
 
 ## Committed core
 
