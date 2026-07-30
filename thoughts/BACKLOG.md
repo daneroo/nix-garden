@@ -167,6 +167,13 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-07-30 e2e-replace-refactor — simplified the live Bun suite (`pressChord`,
+  extracted `brave.ts`), made its output readable (quiet-on-success /
+  loud-on-failure), added the first gated GNOME global (`Alt+Shift+Q`
+  logout-cancel), and unified the entry points (`just e2e` / `just e2e-vm`).
+  Running the Bun suite in the VM was attempted and reverted — the VM's window
+  focus blocks its assertions; Python stays the VM behavioural path. Plan:
+  [e2e-replace-refactor](plans/archive/e2e-replace-refactor.md)
 - 2026-07-29 e2e-fix-or-replace — replaced the slow VM-only development loop
   with a guarded Bun suite that exercises deployed Ghostty and Brave bindings
   through physical pre-keyd input on the live Gauss desktop; reference:
