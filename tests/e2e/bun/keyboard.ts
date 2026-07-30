@@ -11,6 +11,7 @@ export type PhysicalKey =
   | "c"
   | "d"
   | "enter"
+  | "escape"
   | "leftAlt"
   | "leftBracket"
   | "leftCtrl"
@@ -29,6 +30,7 @@ const keyCodes: Readonly<Record<PhysicalKey, number>> = {
   c: 46,
   d: 32,
   enter: 28,
+  escape: 1,
   leftAlt: 56,
   leftBracket: 26,
   leftCtrl: 29,
@@ -48,6 +50,7 @@ const displayNames: Readonly<Record<PhysicalKey, string>> = {
   c: "C",
   d: "D",
   enter: "Enter",
+  escape: "Esc",
   leftAlt: "Alt",
   leftBracket: "[",
   leftCtrl: "Ctrl",
@@ -67,6 +70,7 @@ const evidenceNames: Readonly<Record<PhysicalKey, string>> = {
   c: "c",
   d: "d",
   enter: "enter",
+  escape: "esc",
   leftAlt: "leftalt",
   leftBracket: "[",
   leftCtrl: "leftcontrol",
