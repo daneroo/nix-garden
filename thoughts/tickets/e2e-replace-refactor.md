@@ -39,6 +39,16 @@ and slow modes so the action / wait / result sequence reads clearly.
 State the macOS-parity keybinding goal and the e2e's exemplar purpose in
 `docs/`.
 
+### Clipboard robustness
+
+Repeated runs wedge Mutter's clipboard: the `wl-copy` owner a run leaves behind
+in cleanup eventually dies, and the compositor then hangs both `wl-copy` and
+`wl-paste` until a real app re-copies. Two fixes belong here: make
+`captureClipboard` treat a no-owner clipboard ("Nothing is copied") as the empty
+baseline instead of crashing, and stop leaving a fragile external owner — e.g.
+extend the Brave "no external clipboard client" approach to cleanup and to the
+Ghostty copy/paste checks, or restore without a lingering `wl-copy`.
+
 ## Opportunistic (only if cheap)
 
 ### Remaining GNOME global bindings
