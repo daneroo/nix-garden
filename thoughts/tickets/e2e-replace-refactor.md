@@ -59,6 +59,21 @@ normally, never inject a credential) and Brave `Alt+Shift+T` are candidates.
 Keep deferred any action without a stable observer (logout dialog, clear-screen,
 browser-find, screenshots) rather than asserting on pixels or timing.
 
+Finding (live): `Alt+Shift+Q` is a GNOME custom keybinding →
+`gnome-session-quit --logout`. keyd carries the chord and the end-session dialog
+opens. On the first run the dialog was **not** auto-cancelled — but synthetic
+Escape was never cleanly tested: bun killed the test at its default 5s timeout
+_during_ the observe step, before the Escape block ran, and the emergency manual
+`ydotool` Escape returned a tool error (fate unknown). A physical Escape
+cancelled it. So synthetic-Escape efficacy on this gnome-shell modal is
+**unproven, not disproven**. The test now sets a 20s timeout so its in-body
+Escape will actually run, but it stays gated behind
+`NIX_GARDEN_E2E_DESTRUCTIVE_GLOBALS=1` and must first be exercised from a
+logout-safe context (herdr survives logout, or a VM) where a failed cancel costs
+nothing. If synthetic Escape does turn out to miss the modal, cancel via
+`org.gnome.SessionManager` D-Bus. This is exactly why destructive globals belong
+in the VM or an attended mode.
+
 ### VM reuse and Python deletion
 
 Run the same Bun behavioral suite inside the NixOS VM only if the port is cheap,
