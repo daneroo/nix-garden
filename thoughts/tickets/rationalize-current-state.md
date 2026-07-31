@@ -40,8 +40,8 @@ Three consequences for any reformat:
 - A `galois` row and a host row are different claims. One reports a running
   system; the other reports only what the checkout would build. Rendering them
   identically invites misreading them as comparable.
-- Every dirty build yields a different stamp and therefore a different
-  toplevel, so dirty applies churn the closure for no other reason.
+- Every dirty build yields a different stamp and therefore a different toplevel,
+  so dirty applies churn the closure for no other reason.
 
 ## Decisions
 
