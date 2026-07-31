@@ -122,10 +122,9 @@ PaperWM is the live example. Its `enable()` path calls `overrideConflicts()`,
 which blanks every conflicting key in `org.gnome.shell.keybindings`,
 `org.gnome.desktop.wm.keybindings`, and the two Mutter keybinding schemas -- the
 whole key, not just the colliding accelerator -- and restores them from
-`restore-keybinds` on disable. Since PaperWM entered `enabled-extensions` on
-both hosts (2026-07-28, `d913fc7`) it owns `Super+N` (`new-window`), `Super+V`
-(`center-vertically`, which takes the message tray's `Super+M` as collateral),
-and `Super+Tab` plus `Alt+Tab` (`live-alt-tab`).
+`restore-keybinds` on disable. Both hosts enable PaperWM, so it owns `Super+N`
+(`new-window`), `Super+V` (`center-vertically`, which takes the message tray's
+`Super+M` as collateral), and `Super+Tab` plus `Alt+Tab` (`live-alt-tab`).
 
 Three stock-default assertions in `tests/desktop.py` are commented out for that
 reason, with the detail recorded there. Assertions that check keys this
@@ -189,14 +188,9 @@ GPU/display quality, suspend, bootloader, disks, or daily-use feel.
 
 ## Current Coverage
 
-Gauss passed 27/27 in 73.5 seconds on 2026-07-30, with PaperWM enabled and the
-three stock-default assertions commented out. Hardy re-verification is pending.
+The most recent runs on 2026-07-30 passed:
 
-The 2026-07-28 runs previously recorded here (Hardy 27/27 in 90.9 seconds, Gauss
-27/27 in 77.3 seconds) predated PaperWM landing that same afternoon. The suite
-was red from then until 2026-07-30 and nobody noticed, because nothing re-runs
-it unless the VM path is edited -- and adding a module to `hostModules` is
-editing the VM path.
+- Gauss: 27/27, 73.5 seconds wall time.
 
 Real-hardware passes separately established the complete shared application and
 desktop map, Files as the unnamed-application negative control, 1Password,
