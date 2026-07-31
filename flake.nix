@@ -64,6 +64,13 @@
             # `nixos-rebuild list-generations` shows "Unknown". A dirty tree
             # stamps as such, which is itself useful signal.
             system.configurationRevision = self.rev or self.dirtyRev or "dirty";
+            # Bound the boot menu and let a failed generation fall back on its
+            # own; see docs/workspace.md. Retention is by recency, not by
+            # known-good -- the generation-gc ticket owns that and store space.
+            boot.loader.systemd-boot = {
+              configurationLimit = 20;
+              bootCounting.enable = true;
+            };
             programs.nh = {
               enable = true;
               flake = "/home/daniel/nix-garden";

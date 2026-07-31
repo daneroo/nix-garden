@@ -20,3 +20,8 @@ CI should run the same gate rather than maintain a separate definition.
 Agents may run the non-destructive gates (`check`, `plan`) as verification.
 Switching the live system, or updating locked inputs, requires an explicit user
 request.
+
+## Boot Generations
+
+Bootloader entry retention and Nix store garbage collection are separate
+mechanisms with separate limits: pruning boot entries reclaims no store space.

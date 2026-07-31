@@ -125,9 +125,10 @@ Shared direction and comparison criteria:
       into concrete conventions and reusable checks as dynamic systems appear.
 - [ ] clan-reference — study Clan's solutions for fleet management, secrets,
       backups, networking, and installation before designing equivalents.
-- [ ] generation-retention — configure automatic cleanup of old NixOS and
-      profile generations while preserving a deliberate rollback window; ticket:
-      [generation-retention](tickets/generation-retention.md)
+- [ ] generation-gc — configure automatic cleanup of old NixOS and profile
+      generations to reclaim store space, while preserving a deliberate rollback
+      window; bootloader entry retention is a separate, settled concern; ticket:
+      [generation-gc](tickets/generation-gc.md)
 - [ ] nh-iteration — evaluate `nh` for planned diffs, activation, rollback, and
       generation management in the normal host workflow.
 - [ ] related-reconcilers — inventory reusable lessons and boundaries from the
@@ -170,6 +171,11 @@ Shared direction and comparison criteria:
 
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
+
+- 2026-07-30 boot-generations — capped `systemd-boot` entries and enabled
+  automatic boot assessment on both hosts; the known-bootable retention gap
+  moved to `generation-gc`. Reference:
+  [workspace](../docs/workspace.md#boot-generations)
 
 - 2026-07-30 e2e-replace-refactor — simplified the live Bun suite (`pressChord`,
   extracted `brave.ts`), made its output readable (quiet-on-success /
