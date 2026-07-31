@@ -17,7 +17,7 @@ fmt:
 
 # Show the running NixOS revision beside this repository's working state.
 current-state:
-    scripts/current-state.sh
+    @scripts/current-state.sh
 
 # Check, build, and compare desired with running; never touches inputs (see `update`).
 plan:

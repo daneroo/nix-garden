@@ -13,6 +13,10 @@ Scheduled items go here (leave this comment)
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
       roles, criticality, and current state; ticket:
       [host-inventory](tickets/host-inventory.md)
+- [ ] rationalize-current-state — reformat the redundant per-host row, gather
+      from every reachable host, and report drift rather than leaving the
+      comparison to the reader; ticket:
+      [rationalize-current-state](tickets/rationalize-current-state.md)
 - [ ] recovery-contract — define and exercise the minimum-fuss wipe, rebuild,
       restore, and verify path while `hardy` is non-load-bearing.
 
