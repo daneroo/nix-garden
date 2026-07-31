@@ -131,9 +131,8 @@ _lint-md:
 _typecheck-e2e-bun:
     set -euo pipefail
     echo "== TypeScript: strict Bun E2E project =="
-    (cd tests/e2e/bun && bun install --frozen-lockfile)
-    typescript_store="$(nix build --no-link --print-out-paths .#nixosConfigurations.gauss.pkgs.typescript)"
-    "$typescript_store/bin/tsc" --noEmit --project tests/e2e/bun/tsconfig.json
+    # invoke bun's typecheck (requires bun install --frozen-lockfile)
+    (cd tests/e2e/bun && bun install --frozen-lockfile && bun run typecheck)
 
 [private]
 _flake-check:
