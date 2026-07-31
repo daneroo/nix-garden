@@ -24,6 +24,25 @@ symmetry is an ACL and key question owned by the `tailscale-reconciliation` and
 `remote-access` backlog items. The design must not assume `galois` is the
 controller -- that assumption breaks the day the daily driver changes.
 
+## Where the row comes from
+
+The `nix:` field is not one kind of fact. On NixOS it joins
+`nixos-version --json` to `system.configurationRevision`, which `flake.nix`
+stamps as `self.rev or self.dirtyRev or "dirty"`. Off NixOS there is no running
+system, so `scripts/current-state.sh` substitutes the root nixpkgs pin from
+`flake.lock` and renders `lock/REV` instead.
+
+Three consequences for any reformat:
+
+- The stamp has three shapes: a clean revision, `<rev>-dirty`, or the literal
+  `dirty`. A generation built from a dirty tree is not reproducible from any
+  commit -- drift worth stating outright rather than a suffix to squint at.
+- A `galois` row and a host row are different claims. One reports a running
+  system; the other reports only what the checkout would build. Rendering them
+  identically invites misreading them as comparable.
+- Every dirty build yields a different stamp and therefore a different
+  toplevel, so dirty applies churn the closure for no other reason.
+
 ## Decisions
 
 - Name it for the question it answers. `just state` reads better than
