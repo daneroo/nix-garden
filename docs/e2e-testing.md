@@ -190,7 +190,8 @@ GPU/display quality, suspend, bootloader, disks, or daily-use feel.
 
 The most recent runs on 2026-07-30 passed:
 
-- Gauss: 27/27, 73.5 seconds wall time.
+- Hardy: 27/27, 96.3 seconds wall time.
+- Gauss: 27/27, 73.8 seconds wall time.
 
 Real-hardware passes separately established the complete shared application and
 desktop map, Files as the unnamed-application negative control, 1Password,
