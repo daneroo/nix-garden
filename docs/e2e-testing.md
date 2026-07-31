@@ -112,6 +112,26 @@ not record per-subtest durations.
 The VM layer autologs in and assigns `daniel` the published fixture password
 `secret`. It never enters a real host configuration.
 
+## Third-Party Keybinding Overrides
+
+The suite asserts what this repository declares, not GNOME's upstream defaults.
+A binding a GNOME extension legitimately claims is out of scope, and asserting a
+stock value makes the suite fail on any extension or GNOME bump.
+
+PaperWM is the live example. Its `enable()` path calls `overrideConflicts()`,
+which blanks every conflicting key in `org.gnome.shell.keybindings`,
+`org.gnome.desktop.wm.keybindings`, and the two Mutter keybinding schemas -- the
+whole key, not just the colliding accelerator -- and restores them from
+`restore-keybinds` on disable. Since PaperWM entered `enabled-extensions` on
+both hosts (2026-07-28, `d913fc7`) it owns `Super+N` (`new-window`), `Super+V`
+(`center-vertically`, which takes the message tray's `Super+M` as collateral),
+and `Super+Tab` plus `Alt+Tab` (`live-alt-tab`).
+
+Three stock-default assertions in `tests/desktop.py` are commented out for that
+reason, with the detail recorded there. Assertions that check keys this
+repository sets (Alt+Space, the three custom keybindings, the screenshot pair)
+are unaffected and stay.
+
 ## Evidence Classes
 
 The 27-case suite deliberately distinguishes three kinds of evidence.
@@ -169,10 +189,14 @@ GPU/display quality, suspend, bootloader, disks, or daily-use feel.
 
 ## Current Coverage
 
-The final feature-head runs on 2026-07-28 passed:
+Gauss passed 27/27 in 73.5 seconds on 2026-07-30, with PaperWM enabled and the
+three stock-default assertions commented out. Hardy re-verification is pending.
 
-- Hardy: 27/27, 90.9 seconds wall time.
-- Gauss: 27/27, 77.3 seconds wall time.
+The 2026-07-28 runs previously recorded here (Hardy 27/27 in 90.9 seconds, Gauss
+27/27 in 77.3 seconds) predated PaperWM landing that same afternoon. The suite
+was red from then until 2026-07-30 and nobody noticed, because nothing re-runs
+it unless the VM path is edited -- and adding a module to `hostModules` is
+editing the VM path.
 
 Real-hardware passes separately established the complete shared application and
 desktop map, Files as the unnamed-application negative control, 1Password,

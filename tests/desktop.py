@@ -135,24 +135,39 @@ with subtest("production Ghostty and GNOME bindings are loaded"):
             f"production Ghostty config omitted {binding!r}"
         )
 
-    notification = guest_succeeds(
-        as_daniel(
-            "gsettings get org.gnome.shell.keybindings "
-            "focus-active-notification"
-        )
-    ).strip()
-    assert notification == "['<Super>n']", (
-        f"GNOME did not restore its stock Super+N binding: {notification}"
-    )
-
-    message_tray = guest_succeeds(
-        as_daniel(
-            "gsettings get org.gnome.shell.keybindings toggle-message-tray"
-        )
-    ).strip()
-    assert message_tray == "['<Super>v', '<Super>m']", (
-        f"GNOME did not restore its stock message-tray bindings: {message_tray}"
-    )
+    # Disabled 2026-07-30, kept commented so the assertions stay legible beside
+    # the reason they stopped holding. Both asserted GNOME's own upstream
+    # defaults rather than anything this repository declares, so any extension
+    # or GNOME bump invalidates them. PaperWM -- in enabled-extensions on both
+    # hosts since 2026-07-28 (d913fc7) -- blanks every conflicting key from its
+    # enable() path: new-window claims Super+N, and center-vertically claims
+    # Super+V, which costs Super+M too because overrideConflicts() blanks the
+    # whole gsettings key rather than the one colliding accelerator.
+    #
+    # The retired Alt-to-Super carrier these originally guarded is asserted
+    # directly by the modifier probe and the /etc/keyd grep above, so nothing
+    # is left uncovered. Do not restore them after toggling PaperWM off:
+    # restoreConflicts() makes them pass again without making them any less
+    # brittle. See docs/e2e-testing.md.
+    #
+    # notification = guest_succeeds(
+    #     as_daniel(
+    #         "gsettings get org.gnome.shell.keybindings "
+    #         "focus-active-notification"
+    #     )
+    # ).strip()
+    # assert notification == "['<Super>n']", (
+    #     f"GNOME did not restore its stock Super+N binding: {notification}"
+    # )
+    #
+    # message_tray = guest_succeeds(
+    #     as_daniel(
+    #         "gsettings get org.gnome.shell.keybindings toggle-message-tray"
+    #     )
+    # ).strip()
+    # assert message_tray == "['<Super>v', '<Super>m']", (
+    #     f"GNOME did not restore its stock message-tray bindings: {message_tray}"
+    # )
 
     window_menu = guest_succeeds(
         as_daniel(
@@ -175,15 +190,19 @@ with subtest("production Ghostty and GNOME bindings are loaded"):
             f"GNOME custom{index} omitted direct binding {binding}"
         )
 
-    switch_apps = guest_succeeds(
-        as_daniel(
-            "gsettings get org.gnome.desktop.wm.keybindings "
-            "switch-applications"
-        )
-    ).strip()
-    assert switch_apps == "['<Super>Tab', '<Alt>Tab']", (
-        f"GNOME did not retain native Alt+Tab and Super+Tab: {switch_apps}"
-    )
+    # Disabled 2026-07-30 for the reason recorded above: PaperWM's live-alt-tab
+    # claims both of switch-applications' stock accelerators, Super+Tab and
+    # Alt+Tab, so the key is blanked whenever the extension is enabled.
+    #
+    # switch_apps = guest_succeeds(
+    #     as_daniel(
+    #         "gsettings get org.gnome.desktop.wm.keybindings "
+    #         "switch-applications"
+    #     )
+    # ).strip()
+    # assert switch_apps == "['<Super>Tab', '<Alt>Tab']", (
+    #     f"GNOME did not retain native Alt+Tab and Super+Tab: {switch_apps}"
+    # )
 
     input_source = guest_succeeds(
         as_daniel(
