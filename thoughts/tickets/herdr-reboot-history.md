@@ -6,8 +6,8 @@ retain their prior screen contents or useful interactive shell history.
 
 ## Evidence
 
-Gauss currently runs Herdr 0.7.5. Its `~/.config/herdr/config.toml` contains
-only `onboarding = false`; `experimental.pane_history` is unset and
+Both hosts run Herdr 0.8.2 as of 2026-08-23. Its `~/.config/herdr/config.toml`
+contains only `onboarding = false`; `experimental.pane_history` is unset and
 `~/.config/herdr/session-history.json` does not exist.
 
 The restored panes start new Bash processes. Current interactive Bash state has:
@@ -27,8 +27,10 @@ separates these concerns:
 - pane screen history does not restore the old process or its in-memory readline
   history.
 
-Herdr added pane screen history in 0.6.3, so the pinned 0.7.5 supports the
-proposed experiment.
+Herdr added pane screen history in 0.6.3, so the pinned 0.8.2 supports the
+proposed experiment. Note that 0.8.0 removed experimental options from the
+Settings TUI -- they remain available, but only through `config.toml`, so the
+steps below must edit the file directly rather than toggle anything in the UI.
 
 ## Proposed Solution
 

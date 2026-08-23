@@ -172,6 +172,15 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-08-23 fleet-update — moved nixpkgs from 2026-07-23 to 2026-08-22
+  (`e2587ca` -> `2c423e0`) and pinned Herdr to v0.8.2 for parity with `galois`,
+  which carries it through Homebrew; nixpkgs itself lags roughly one to two
+  Herdr releases, so the flake input stays. Repointed that input at the
+  canonical `herdrdev/herdr` after the GitHub organization migration left the
+  old path a redirect. `hardy` and `gauss` both applied and rebooted onto kernel
+  6.18.45 with no failed units. `_verify` now reports when a switch leaves a
+  reboot pending; the matching reporting gap in `current-state` is recorded on
+  [rationalize-current-state](tickets/rationalize-current-state.md)
 - 2026-07-30 boot-generations — capped `systemd-boot` entries and enabled
   automatic boot assessment on both hosts; the known-bootable retention gap
   moved to `generation-gc`. Reference:

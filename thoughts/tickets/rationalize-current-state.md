@@ -60,8 +60,12 @@ Three consequences for any reformat:
   any machine and needs no change if the topology opens up later.
 - Decide what counts as drift and how loudly to say it: running generation
   behind the checkout, checkout behind `origin/main`, dirty working tree, hosts
-  on differing nixpkgs revisions. A converged fleet should collapse to roughly
-  one line.
+  on differing nixpkgs revisions, and a booted system behind the activated one.
+  That last dimension hides best: a host that switched but has not rebooted
+  reports as converged on every other measure while still running the old
+  kernel. `just apply` now reports it via `_verify`, but `current-state` does
+  not, so a host can look clean here and not be. A converged fleet should
+  collapse to roughly one line.
 - Decide what the row still needs to carry once a verdict line exists, and
   whether the `--verbose` diagram survives the reformat or moves to `--help`.
 - Keep `scripts/current-state.sh` as the single-host row producer if the
