@@ -2,7 +2,7 @@
   description = "Reproducible system config for the homelab fleet";
 
   inputs = {
-    herdr.url = "github:ogulcancelik/herdr/v0.7.5";
+    herdr.url = "github:ogulcancelik/herdr/v0.8.2";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
