@@ -150,7 +150,27 @@ _diff:
     nix store diff-closures /run/current-system ./result
 
 [private]
+[script('bash')]
 _verify:
-    @echo "== verify: running system matches ./result =="
+    set -euo pipefail
+    echo "== verify: running system matches ./result =="
     test "$(readlink -f /run/current-system)" = "$(readlink -f ./result)"
     sudo -n true
+    # Activation is not convergence: the kernel, its modules, the initrd, and
+    # systemd only take effect at boot, so a host can match ./result while
+    # still running last month's kernel. Report that rather than failing --
+    # every kernel bump would otherwise exit non-zero and train the warning
+    # away. See docs/reconciliation.md on verification.
+    pending=()
+    for component in kernel kernel-modules initrd systemd; do
+      booted="$(readlink -f "/run/booted-system/${component}" 2>/dev/null || true)"
+      activated="$(readlink -f "/run/current-system/${component}" 2>/dev/null || true)"
+      if [[ "$booted" != "$activated" ]]; then
+        pending+=("$component")
+      fi
+    done
+    if ((${#pending[@]} > 0)); then
+      echo "== verify: REBOOT REQUIRED -- changed since boot: ${pending[*]} =="
+    else
+      echo "== verify: booted system matches the activated one =="
+    fi
