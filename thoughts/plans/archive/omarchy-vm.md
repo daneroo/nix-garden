@@ -1,26 +1,24 @@
 # Install the OS in a VM window on hardy
 
-Status: complete — harvested into [omarchy-vm](../../docs/omarchy-vm.md)
+Status: done
 
 ## Closed out
 
 The prototype succeeded and has been turned into a checked-in tool. Nothing
 further should be added to this file.
 
-- **The durable document is [docs/omarchy-vm.md](../../docs/omarchy-vm.md).**
+- **The durable document is [docs/omarchy-vm.md](../../../docs/omarchy-vm.md).**
   Read that, not this.
 - The tool is `scripts/omarchy-vm.sh`, run as `just omarchy-vm`.
-- Proven on `hardy` on 2026-09-17: Omarchy 4.0.4 downloaded, hash-verified,
-  installed in 2m15s, and booted from its own disk, accelerated with virgl and
-  with the keyboard captured.
+- Proven on both hosts on 2026-09-17: Omarchy 4.0.4 downloaded, hash-verified,
+  installed in 2m15s on `hardy` and 1m10s on `gauss`, booting from its own disk
+  with virgl acceleration and the keyboard captured.
 
 What this file still offers is the reasoning behind the answers — why Incus and
 then libvirt were rejected, why `hardy` is not made non-graphical, and why the
 criterion turned out to be input fidelity rather than rendering speed. It is a
-log of that search, which is why it is too verbose to work from.
-
-Its disposition is Daniel's to choose: it can stay as the record of how the
-conclusions were reached, or be archived under `plans/archive/`.
+log of that search, which is why it is too verbose to work from, and why it is
+archived rather than kept alongside live plans.
 
 ## The actual end state
 

@@ -70,12 +70,6 @@ Shared direction and comparison criteria:
 
 - [ ] incus-host — evaluate Incus as the homelab VM and system-container layer,
       including storage, networking, backup, and upgrades.
-- [x] omarchy-vm — Omarchy runs as a guest in a plain QEMU window on `hardy`,
-      accelerated with virgl and with the keyboard captured from keyd's virtual
-      device so host bindings stop swallowing guest keys. Operated by
-      `just omarchy-vm`; see [omarchy-vm](../docs/omarchy-vm.md). GPU
-      passthrough now looks unnecessary, and `hardy` stays graphical; plan:
-      [omarchy-vm](plans/omarchy-vm.md)
 - [ ] nixos-guests — decide how NixOS VM/container guests share the flake,
       inventory, roles, and reconciliation model with physical hosts.
 - [ ] virtualization-test-lab — use Incus and the two available Proxmox hosts to
@@ -178,6 +172,15 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-09-17 omarchy-vm — Omarchy 4.0.4 runs as a guest in a plain QEMU window,
+  operated by `just omarchy-vm`; installed in 2m15s on `hardy` and 1m10s on
+  `gauss`. virgl gives accelerated graphics, and `-object input-linux` capturing
+  keyd's virtual keyboard stops host bindings swallowing guest keys — which
+  turned out to be the whole point: the desktop was usable before acceleration
+  was enabled at all. GPU passthrough therefore looks unnecessary, and `hardy`
+  stays graphical rather than becoming a non-graphical base layer. Durable
+  document: [omarchy-vm](../docs/omarchy-vm.md); plan:
+  [omarchy-vm](plans/archive/omarchy-vm.md).
 - 2026-08-23 fleet-update — moved nixpkgs from 2026-07-23 to 2026-08-22
   (`e2587ca` -> `2c423e0`) and pinned Herdr to v0.8.2 for parity with `galois`,
   which carries it through Homebrew; nixpkgs itself lags roughly one to two
