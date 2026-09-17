@@ -70,6 +70,12 @@ Shared direction and comparison criteria:
 
 - [ ] incus-host — evaluate Incus as the homelab VM and system-container layer,
       including storage, networking, backup, and upgrades.
+- [x] omarchy-vm — Omarchy runs as a guest in a plain QEMU window on `hardy`,
+      accelerated with virgl and with the keyboard captured from keyd's virtual
+      device so host bindings stop swallowing guest keys. Operated by
+      `just omarchy-vm`; see [omarchy-vm](../docs/omarchy-vm.md). GPU
+      passthrough now looks unnecessary, and `hardy` stays graphical; plan:
+      [omarchy-vm](plans/omarchy-vm.md)
 - [ ] nixos-guests — decide how NixOS VM/container guests share the flake,
       inventory, roles, and reconciliation model with physical hosts.
 - [ ] virtualization-test-lab — use Incus and the two available Proxmox hosts to

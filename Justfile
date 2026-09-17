@@ -76,6 +76,11 @@ e2e *args:
 e2e-vm *args:
     scripts/e2e-vm.sh {{ args }}
 
+# Operate the Omarchy guest VM (prepare, install, run, status, stop, force-stop).
+[script('bash')]
+omarchy-vm *args:
+    scripts/omarchy-vm.sh {{ args }}
+
 [private]
 [script('bash')]
 _host-check:

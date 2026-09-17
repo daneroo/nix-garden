@@ -23,6 +23,8 @@ one home. Work-in-progress material belongs in `thoughts/`.
   state, Vicinae integration, and recovery.
 - [reconciliation.md](reconciliation.md) — desired-versus-actual convergence for
   stateful systems.
+- [omarchy-vm.md](omarchy-vm.md) — running Omarchy as a guest VM, keyboard
+  capture, and the operational gotchas.
 
 ## Hardware
 
