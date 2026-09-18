@@ -61,10 +61,10 @@ leaving an artifact in Daniel's home.
 
 ## Configuration and Recovery
 
-[`modules/gnome/paperwm.nix`](../modules/gnome/paperwm.nix) owns the shared extension and
-toggle package. Each host declares the same fresh-profile enabled default and
-Vicinae scratch rule alongside its existing GNOME settings. This focused shared
-module is useful precedent, but it does not complete the broader
+[`modules/gnome/paperwm.nix`](../modules/gnome/paperwm.nix) owns the shared
+extension and toggle package. Each host declares the same fresh-profile enabled
+default and Vicinae scratch rule alongside its existing GNOME settings. This
+focused shared module is useful precedent, but it does not complete the broader
 `module-architecture` backlog item.
 
 Both hosts passed real-session installation, enable/disable, tiling, floating,

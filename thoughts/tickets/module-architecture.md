@@ -284,3 +284,29 @@ rather than the newer harness; the model Daniel wanted was available in it.
 - `just plan` on `hardy` is pending: SSH from `gauss` to `hardy` was refused
   (publickey) when execution started. The hardy-side gates are run once the key
   is installed.
+
+### Stage 1 (2026-09-18)
+
+- `flake.lock` gained exactly two nodes: `flake-parts` `31729ca` and
+  `import-tree` `eb1b52e`; `nixpkgs-lib` follows `nixpkgs`.
+- flake-parts adds no empty standard attributes: `nix flake show` lists
+  `modules`, `nixosConfigurations`, and `packages` only. Nix 2.34 reports the
+  new output as `warning: unknown flake output 'modules'` in both
+  `nix flake show` and `nix flake check`, where Nix 2.35 on `galois` says
+  "unchecked: modules". Both are cosmetic.
+- Fingerprint against the baseline: the six outputs are present, both toplevels
+  and all four packages evaluate, and the only `semantic` lines that changed are
+  `environment.etc` entries whose values are store paths built from
+  `system-path` (`dbus-1`, `pam/environment`, `profile`, `set-environment`,
+  `systemd/system`, `systemd/user`, `terminfo`). The sorted `systemPackages`
+  list is identical. `nix-diff` on the two gauss toplevels confirms the package
+  set is the same 540 paths and only the position of the two PaperWM packages
+  moved, because the flake-parts wrapper changes module order. The `etc` entries
+  in the semantic section are therefore order-sensitive through those store
+  paths; that is noted rather than fixed.
+- The bootstrap packages now come from the NixOS configuration's own `pkgs`
+  instead of a flake-level `pkgs`; both allow unfree and produced the same
+  derivations.
+- `scripts/output-fingerprint.sh WORKTREE` needed a second fix on the NixOS
+  hosts: GNU tar treats `-C` as positional, so the export produced an empty tree
+  until `-C` moved before `-T` (`WORKTREE` was only ever run on `galois`).

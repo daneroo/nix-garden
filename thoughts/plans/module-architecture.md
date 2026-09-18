@@ -232,26 +232,26 @@ Scope: `flake.nix`, `flake.lock`, new `hosts/default.nix`,
 `modules/e2e/vm-layer.nix`, `modules/paperwm.nix` to
 `modules/gnome/paperwm.nix`. Depends on: stage 0. One or two commits.
 
-- [ ] Add inputs `flake-parts` (with `inputs.nixpkgs-lib.follows = "nixpkgs"`)
+- [x] Add inputs `flake-parts` (with `inputs.nixpkgs-lib.follows = "nixpkgs"`)
       and `import-tree` (`github:denful/import-tree`); `nix flake lock` adds two
       lock nodes.
-- [ ] `flake.nix` becomes inputs plus
+- [x] `flake.nix` becomes inputs plus
       `flake-parts.lib.mkFlake { inherit     inputs; } { systems = [ "x86_64-linux" ]; imports = [     inputs.flake-parts.flakeModules.modules (inputs.import-tree ./modules)     ./hosts ]; }`.
       No `let` block, no package names.
-- [ ] Each moved file becomes a flake-parts module wrapping its previous body as
+- [x] Each moved file becomes a flake-parts module wrapping its previous body as
       `flake.modules.nixos.<name>`; no aspect registration yet. `vm-variant`
       imports `config.flake.modules.nixos.vm-layer`.
-- [ ] `hosts/default.nix` defines the host list,
+- [x] `hosts/default.nix` defines the host list,
       `flake.modules.nixos."host-${name}"` as
       `{ imports = [ ./${name}     e2e-injection paperwm vm-variant inlineShared ]; }`,
       where `inlineShared` is the former inline block moved verbatim into a
       `let`, and `flake.nixosConfigurations`. The host bodies
       `hosts/*/default.nix` stay plain NixOS modules in this stage.
-- [ ] `desktop-tests.nix` defines the four packages in `perSystem` per the
+- [x] `desktop-tests.nix` defines the four packages in `perSystem` per the
       conventions.
-- [ ] Update the moved-path references in `docs/e2e-testing.md`,
+- [x] Update the moved-path references in `docs/e2e-testing.md`,
       `tests/desktop.py`, and `docs/tiling-windows.md`.
-- [ ] `nix flake show --all-systems` lists the six original outputs;
+- [x] `nix flake show --all-systems` lists the six original outputs;
       `nix     eval .#modules.nixos --apply builtins.attrNames` lists
       `e2e-injection`, `paperwm`, `vm-layer`, `vm-variant`, `host-hardy`,
       `host-gauss`. Note in the ticket which empty standard attributes
