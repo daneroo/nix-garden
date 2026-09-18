@@ -8,6 +8,12 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
+- [ ] module-architecture — recompose the flake with flake-parts and
+      feature-owned NixOS modules shared by `hardy` and `gauss`; public outputs
+      kept, both hosts working as before, executed on a NixOS host on its own
+      branch; ticket: [module-architecture](tickets/module-architecture.md);
+      plan: [module-architecture](plans/module-architecture.md)
+
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -115,10 +121,6 @@ Shared direction and comparison criteria:
       recoverable.
 - [ ] nix-formatting — choose and integrate the repository's Nix formatter and
       formatting check; ticket: [nix-formatting](tickets/nix-formatting.md)
-- [ ] module-architecture — learn and choose a clearer flake/module structure
-      with explicit reuse between `hardy` and `gauss`; keep the migration
-      behavior-preserving and separate from keybinding and PaperWM experiments;
-      research: [module-architecture](research/module-architecture.md)
 - [ ] development-environments — harvest useful nixvana lessons into development
       shells exercised by real projects, CI, and agent workflows.
 - [ ] reconciliation-pattern — turn [reconciliation](../docs/reconciliation.md)
