@@ -268,7 +268,7 @@ Scope: every file under `modules/base`, `modules/desktop`, `modules/gnome`;
 `inlineShared`; the host bodies shrink as lines move out. Depends on: stage 1.
 Three commits, one per aspect, in this order:
 
-- [ ] `base`: the eight features with their registrations; `inlineShared`
+- [x] `base`: the eight features with their registrations; `inlineShared`
       dissolves (packages, revision, boot retention, `nh`, Tailscale go to their
       features; MIME defaults wait for `brave`). Host composition becomes
       `[ ./${name} e2e-injection paperwm vm-variant base ]` with the MIME block

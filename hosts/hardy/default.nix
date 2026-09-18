@@ -61,15 +61,7 @@ in
     ./hardware-configuration.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
   networking.hostName = "hardy";
-  networking.domain = "imetrical.com";
-  networking.networkmanager.enable = true;
-
-  time.timeZone = "America/Toronto";
-  i18n.defaultLocale = "en_CA.UTF-8";
 
   services.xserver.enable = true;
   services.displayManager.gdm.enable = true;
@@ -204,20 +196,11 @@ in
     }
   ];
 
-  # Stopgap, like gauss's: `home-config-ownership` in the backlog replaces this
-  # block wholesale with a user-owned mechanism.
-  #
-  # Parent directories are declared explicitly for the reason documented in
-  # hosts/gauss/default.nix: systemd-tmpfiles will not descend a daniel -> root
-  # ownership transition, and an implicitly materialised parent is root-owned,
-  # so on a fresh home every L+ below is skipped without the unit failing.
-  # Keep the two hosts in step; the failure is silent on a reinstall.
+  # Stopgap; the XDG parents are owned by the user-daniel feature, which also
+  # explains why every parent must be declared explicitly.
   systemd.tmpfiles.rules = [
-    "d /home/daniel/.config 0700 daniel users -"
     "d /home/daniel/.config/ghostty 0755 daniel users -"
     "d /home/daniel/.config/keyd 0755 daniel users -"
-    "d /home/daniel/.local 0755 daniel users -"
-    "d /home/daniel/.local/share 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
     "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
@@ -247,49 +230,16 @@ in
   };
 
   users.users.daniel = {
-    isNormalUser = true;
-    description = "Daniel Lauzon";
-    extraGroups = [
-      "keyd"
-      "networkmanager"
-      "wheel"
-    ];
+    # Socket access to keyd via the dedicated group declared above.
+    extraGroups = [ "keyd" ];
     packages = [ pkgs.keyd ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
-    ];
   };
-
-  services.openssh = {
-    enable = true;
-    openFirewall = true;
-    settings = {
-      KbdInteractiveAuthentication = false;
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
-
-  # Temporary for agent-driven work on non-production hardy. Require passwords
-  # again before this host carries important workloads.
-  security.sudo.wheelNeedsPassword = false;
-
-  nix = {
-    settings.experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-  };
-
-  nixpkgs.config.allowUnfree = true;
 
   programs._1password-gui = {
     enable = true;
     polkitPolicyOwners = [ "daniel" ];
   };
   programs._1password.enable = true;
-
-  programs.git.enable = true;
 
   system.stateVersion = "26.05";
 }

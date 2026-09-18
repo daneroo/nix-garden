@@ -63,15 +63,7 @@ in
     ./hardware-configuration.nix
   ];
 
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
-
   networking.hostName = "gauss";
-  networking.domain = "imetrical.com";
-  networking.networkmanager.enable = true;
-
-  time.timeZone = "America/Toronto";
-  i18n.defaultLocale = "en_CA.UTF-8";
 
   services.xserver.enable = true;
   services.displayManager.gdm.enable = true;
@@ -184,29 +176,11 @@ in
     }
   ];
 
-  # Stopgap. This whole block is what `home-config-ownership` in the backlog
-  # exists to delete, and the fix below grew it rather than shrinking it —
-  # keep that trade deliberate rather than letting the list creep further.
-  #
-  # Every parent directory below is declared explicitly, and must stay that way.
-  # systemd-tmpfiles refuses to descend a path whose ownership changes -- a
-  # symlink-attack guard -- and materialising a parent implicitly creates it as
-  # root. On a home that already contains daniel-owned .config and .local the
-  # rules work by luck; on a fresh one tmpfiles creates a root-owned .config,
-  # then its own guard makes it skip every L+ beneath, silently and without
-  # failing the unit. Found 2026-07-25 in the test-harness VM, where none of
-  # these three dotfiles existed: "Detected unsafe path transition
-  # /home/daniel (owned by daniel) -> /home/daniel/.config (owned by root)".
-  # A reinstall of this host would have hit the same thing.
-  #
-  # Modes match what the running system already had, so applying this changes
-  # no existing permissions: XDG wants 0700 on .config and .local/share.
+  # Stopgap; the XDG parents are owned by the user-daniel feature, which also
+  # explains why every parent must be declared explicitly.
   systemd.tmpfiles.rules = [
-    "d /home/daniel/.config 0700 daniel users -"
     "d /home/daniel/.config/ghostty 0755 daniel users -"
     "d /home/daniel/.config/keyd 0755 daniel users -"
-    "d /home/daniel/.local 0755 daniel users -"
-    "d /home/daniel/.local/share 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
     "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
@@ -274,15 +248,6 @@ in
   };
 
   users.users.daniel = {
-    isNormalUser = true;
-    description = "Daniel Lauzon";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-    ];
-    openssh.authorizedKeys.keys = [
-      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBrUdJY3Aj0Xi2zdlGrEHFv3FNnlMz6ASLclhhl9cj1p daniel@galois"
-    ];
     # Keeps user services (e.g. Herdr's server) running independent of an
     # active login session -- set imperatively via `loginctl enable-linger`
     # during keybinding-model work to survive a GNOME logout/login cycle
@@ -304,31 +269,6 @@ in
     polkitPolicyOwners = [ "daniel" ];
   };
   programs._1password.enable = true;
-
-  services.openssh = {
-    enable = true;
-    openFirewall = true;
-    settings = {
-      KbdInteractiveAuthentication = false;
-      PasswordAuthentication = false;
-      PermitRootLogin = "no";
-    };
-  };
-
-  # Temporary for agent-driven work on non-production gauss. Require passwords
-  # again before this host carries important workloads.
-  security.sudo.wheelNeedsPassword = false;
-
-  nix = {
-    settings.experimental-features = [
-      "nix-command"
-      "flakes"
-    ];
-  };
-
-  nixpkgs.config.allowUnfree = true;
-
-  programs.git.enable = true;
 
   system.stateVersion = "26.05";
 }
