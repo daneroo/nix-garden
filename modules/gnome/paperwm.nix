@@ -1,5 +1,6 @@
 # PaperWM scrollable tiling inside the GNOME session, with the system-owned
 # toggle exposed to both the shell and Vicinae. See docs/tiling-windows.md.
+{ config, ... }:
 {
   flake.modules.nixos.paperwm =
     { pkgs, ... }:
@@ -57,5 +58,23 @@
         pkgs.gnomeExtensions.paperwm
         paperwmToggle
       ];
+
+      # gnome-session enables the extension by UUID. Vicinae floats on the
+      # scratch layer instead of consuming a tiled column.
+      programs.dconf.profiles.user.databases = [
+        {
+          settings = {
+            "org/gnome/shell/extensions/paperwm" = {
+              winprops = [
+                (builtins.toJSON {
+                  wm_class = "vicinae";
+                  scratch_layer = true;
+                })
+              ];
+            };
+          };
+        }
+      ];
     };
+  flake.modules.nixos.gnome.imports = [ config.flake.modules.nixos.paperwm ];
 }

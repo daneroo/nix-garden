@@ -20,9 +20,9 @@ in
     value = {
       imports = [
         (./. + "/${name}")
-        nixos.paperwm
         nixos.base
         nixos.desktop
+        nixos.gnome
       ];
     };
   });

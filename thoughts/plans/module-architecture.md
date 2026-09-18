@@ -278,7 +278,7 @@ Three commits, one per aspect, in this order:
       `e2e-injection` and `vm-variant` register into `desktop`. Host composition
       becomes `[ ./${name} paperwm base desktop ]`. Hardy and gauss keyboard,
       group, and capability declarations remain in the host bodies.
-- [ ] `gnome`: `gnome-session` with the disjoint-keys assertion (written against
+- [x] `gnome`: `gnome-session` with the disjoint-keys assertion (written against
       `config.programs.dconf.profiles.user.databases`; prove it fires once by
       temporarily duplicating a key locally, not committed),
       `gnome-keybindings`, `keyd-gnome-extension`; `paperwm` registers into
