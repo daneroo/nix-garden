@@ -14,6 +14,14 @@
         description = "Vicinae launcher server";
         wantedBy = [ "graphical-session.target" ];
         partOf = [ "graphical-session.target" ];
+        # WantedBy/PartOf couple enablement and lifecycle to the session but
+        # do not order startup: without After, systemd may start vicinae
+        # before the compositor's Wayland socket exists. It then aborts
+        # immediately ("Failed to create wl_display"), and with the default
+        # restart limit (5 attempts within 10s) it exhausts that budget
+        # before the socket appears, landing in a permanently failed state
+        # until manually reset. Found 2026-09-18 on a fresh hardy boot.
+        after = [ "graphical-session.target" ];
         # Vicinae 0.28 launches an app's desktop-file Exec= command by
         # spawning it directly (execve on the bare command name) rather than
         # going through GNOME's desktop-file activation, so it depends on its
