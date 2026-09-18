@@ -89,11 +89,13 @@ export_tree() {
 }
 
 # Every attribute path `nix flake show` recognizes as an output, one per line.
+# Nix 2.35 nests outputs under `inventory`/`output`/`children` with a `what`
+# leaf; Nix 2.34 emits the plain tree with a `type` leaf. Accept both.
 list_outputs() {
   local flake="$1"
   nix flake show --json --all-systems "$flake" 2>/dev/null |
     jq -r '
-      [ paths(type == "object" and has("what"))
+      [ paths(type == "object" and (has("what") or (has("type") and (.type | type) == "string")))
         | map(select(. != "inventory" and . != "output" and . != "children"))
         | join(".") ]
       | sort[]'
