@@ -36,28 +36,27 @@ Scheduled items go here (leave this comment)
 - [ ] desktop-baseline — build a daily-usable Linux desktop, tuned on `gauss`'s
       standard keyboard and backported to `hardy`, before optimizing or
       generalizing it.
-- [ ] home-config-ownership — replace both hosts' system-tmpfiles writes beneath
-      `/home/daniel` with a fresh-home-safe, user-owned mechanism and validate
-      it from an empty home; deferred while bringing both machines online. The
-      predicted failure was confirmed on 2026-07-25: on an empty home
-      systemd-tmpfiles creates a root-owned `.config`, then its own unsafe
-      path-transition guard skips every `L+` below it, silently and without
-      failing the unit — losing the Ghostty keybindings, the keyd application
-      map, and the GNOME extension on any reinstall. Patched in place for now by
-      declaring each parent directory explicitly, which grew the very block this
-      item exists to delete. `just e2e-vm --no-test --host HOST` is now the
-      empty-home validation instrument this item calls for.
+- [ ] dotfile-management — choose one user-owned, fresh-home-safe process for
+      application and agent-harness settings across `galois`, `hardy`, and
+      `gauss`; settle nix-garden versus a dotfiles repository or Home Manager,
+      then replace the NixOS system-tmpfiles stopgap beneath `/home/daniel` and
+      validate from an empty home. Do not put Claude Code or Codex settings in
+      the Nix store until this ownership boundary is settled.
+- [ ] agent-status-lines — after `dotfile-management`, configure concise,
+      comparable status lines for Claude Code and Codex; harvest the local
+      `ccstatusline-hardy` prototype, accounting for Claude's command-based
+      ccstatusline and Codex's native `status_line` configuration.
 - [ ] visible-vm-session-actions — diagnose why the guided Alt+Shift+L and
       Alt+Shift+Q cases do not visibly lock or open the logout dialog in the
       `--show` VM even though real Gauss handles both; ticket:
       [visible-vm-session-actions](tickets/visible-vm-session-actions.md)
+- [ ] hardy-vm-modifier-delivery — diagnose why hardy's desktop VM fails the
+      first modifier-delivery assertion after the 2026-09-16 nixpkgs bump while
+      gauss's VM and real hardy hardware pass with the same configuration.
 - [ ] hardy-external-keyboard-validation — complete the deferred real-hardware
       pass for native Alt/Ctrl/Super identity, the covered application and
       workspace chords, right Alt/AltGr, and isolation of the internal-only
       Alt+F6/F7 illumination adapter.
-- [ ] vicinae-files-launch — fix the pre-existing Hardy Vicinae service PATH so
-      the Files desktop entry's bare `nautilus` command resolves; keep this
-      separate from keybinding behavior.
 - [ ] niri-desktop — separately evaluate and, only if justified, assemble a
       complete standalone Niri desktop after PaperWM establishes which
       scrollable-workspace behavior matters; ticket:
@@ -132,8 +131,6 @@ Shared direction and comparison criteria:
 
 ## Self-Hosting Development
 
-- [ ] hardy-current-state — verify whether the committed configuration is
-      currently applied and record the running generation and drift.
 - [ ] hardy-dev-loop — make `hardy` the primary editor and executor of this
       repo: clone, authenticate, edit, check, preview, apply, verify, commit,
       and push.
@@ -149,6 +146,9 @@ Shared direction and comparison criteria:
 - [ ] agent-skills-workflow — evaluate a small, curated Agent Skills toolkit;
       the first repo-local pilot, `grilling`, is already installed; ticket:
       [agent-skills-workflow](tickets/agent-skills-workflow.md)
+- [ ] matt-skills-migration — complete the migration to Matt Pocock's skills,
+      including the repository workflow and cross-harness installation and
+      update path.
 - [ ] legacy-harvest — harvest useful legacy findings, then delete `legacy/`;
       Git retains the history.
 - [ ] shared-repo-workflow — settle the shared docs/thoughts convention with
@@ -172,12 +172,20 @@ Prune old lines freely; Git keeps everything.
   import-tree, and Dendritic feature modules: 21 features under `modules/` in
   `base`, `desktop`, and `gnome` aspects, thin per-host files holding only
   hardware, identity, and documented exceptions, and one inventory file defining
-  `nixosConfigurations`. The outcome is clarity and a working system, not
-  runtime improvement: public outputs kept, both VM suites 27/27, no package
-  changes on `just plan`. Executed on the `module-architecture` branch from
-  `gauss`; hardy and galois gates, merge, and apply are Daniel's. Reference:
+  `nixosConfigurations`. The branch also updated nixpkgs to 2026-09-16 and Herdr
+  to v0.9.0, and fixed Vicinae's application PATH and graphical-session startup
+  ordering. Merged as `b4a7098`; `hardy` and `gauss` are applied,
+  boot-converged, clean on `main`, and have zero failed system or user units.
+  The post-bump hardy VM modifier-delivery failure remains open; real hardware
+  did not reproduce it. Reference:
   [module-architecture](../docs/module-architecture.md); plan:
   [module-architecture](plans/module-architecture.md)
+- 2026-09-18 vicinae-files-launch — added the system profile to Vicinae's user
+  service PATH, restoring desktop-file commands such as bare `nautilus`; the
+  same closeout also ordered startup after `graphical-session.target`.
+- 2026-09-18 hardy-current-state — confirmed `hardy` and `gauss` run and track
+  merged `main@b4a7098` with nixpkgs `b1b8759`, booted matching activated, and
+  no failed system or user units.
 - 2026-09-17 omarchy-vm — Omarchy 4.0.4 runs as a guest in a plain QEMU window,
   operated by `just omarchy-vm`; installed in 2m15s on `hardy` and 1m10s on
   `gauss`. virgl gives accelerated graphics, and `-object input-linux` capturing
