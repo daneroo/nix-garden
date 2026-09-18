@@ -325,3 +325,16 @@ rather than the newer harness; the model Daniel wanted was available in it.
   with the feature's message; a fresh key path evaluates to a toplevel.
 - `just e2e-vm --host hardy`: 27/27, 82.6 s wall. `just e2e-vm --host gauss`:
   27/27, 83.9 s wall. Both match stage 0.
+
+### Stage 3 (2026-09-18)
+
+- `68548f8`: host files are flake-parts modules; the semantic fingerprint is
+  identical to the gnome commit.
+- `just plan` on `gauss` built the new toplevel and `nix store diff-closures`
+  printed nothing: the same package set, reordered, as the fingerprint
+  predicted. `hardy` is still pending SSH access.
+- `just e2e-vm --host hardy`: 27/27, 81.2 s wall. `just e2e-vm --host gauss`:
+  27/27, 81.5 s wall.
+- `just e2e-vm --no-test --host gauss` built and booted `run-gauss-vm` (bounded
+  to two minutes); `just omarchy-vm --help` prints usage; `just current-state`
+  reports `module-architecture/68548f8` beside the running `aac611b`.

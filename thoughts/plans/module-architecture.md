@@ -309,9 +309,9 @@ Scope: `hosts/hardy/default.nix`, `hosts/gauss/default.nix`,
 - [x] `AGENTS.md` layout: `hosts/default.nix` is the inventory and every other
       entry is one machine; `modules/` is auto-imported by import-tree, one
       feature per file, grouped by aspect directory.
-- [ ] `just plan` on both NixOS hosts builds and shows the closure diff (no
-      apply); `just e2e-vm --host hardy`, `--host gauss`,
-      `--no-test --host     gauss`, `just omarchy-vm --help`, and
+- [x] `just plan` on `gauss` (hardy pending SSH) builds and shows the closure
+      diff (no apply); `just e2e-vm --host hardy`, `--host gauss`,
+      `--no-test --host gauss`, `just omarchy-vm --help`, and
       `just current-state` behave as in stage 0.
 
 Acceptance: VM suites match baseline, gates pass, fingerprint `semantic` diff
