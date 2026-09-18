@@ -11,6 +11,9 @@ one home. Work-in-progress material belongs in `thoughts/`.
 - [skills.md](skills.md) — how optional repository-local Agent Skills relate to
   authoritative project state and workflow.
 - [workspace.md](workspace.md) — quality gate and safe system-change commands.
+- [module-architecture.md](module-architecture.md) — how flake-parts,
+  import-tree, features, aspects, and hosts compose the flake, and how to add to
+  them.
 - [e2e-testing.md](e2e-testing.md) — VM workflows, assertions, and fidelity
   boundaries for desktop changes.
 - [coding-style.md](coding-style.md) — top-down code order and command-wrapper

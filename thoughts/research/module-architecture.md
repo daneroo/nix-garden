@@ -4,6 +4,14 @@ Research note, 2026-07-12, supporting `module-architecture` and informing
 `nix-formatting` and `development-environments`. What the newer refactor/reuse
 patterns buy, what they cost, and when this repo should adopt each.
 
+## 2026-09-18 Checkpoint
+
+The flake-parts and import-tree sections below are superseded: both were adopted
+by the `module-architecture` item, with the reasoning and tradeoffs recorded in
+[docs/module-architecture.md](../../docs/module-architecture.md). The
+wrapped-programs section still informs the Home Manager decision. Daniel decides
+whether the rest of this note stays.
+
 ## 2026-07-27 Checkpoint
 
 The original note described a 44-line, effectively single-host flake. That

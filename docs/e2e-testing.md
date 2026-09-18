@@ -79,10 +79,11 @@ export that session's `XDG_RUNTIME_DIR` and `WAYLAND_DISPLAY` first.
 
 ## Approach
 
-Each test output imports the selected real host modules plus
-`modules/e2e/vm-layer.nix` and test-only instrumentation. QEMU injects physical
-keys at the guest's Virtio keyboard. The guest's real keyd, compositor, focused
-application mapper, and applications then handle them.
+Each test output imports the selected host's own `modules.nixos.host-<name>`
+module, the `vm-layer` feature (`modules/e2e/vm-layer.nix`), and test-only
+instrumentation. QEMU injects physical keys at the guest's Virtio keyboard. The
+guest's real keyd, compositor, focused application mapper, and applications then
+handle them.
 
 There is no universal desktop assertion API. The harness keeps a small common
 core—VM lifecycle, physical input injection, waiting, and reporting—and uses

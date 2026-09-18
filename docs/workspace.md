@@ -8,6 +8,11 @@ commits.
 Grow this one command as formatting, linting, and tests are adopted. Automated
 CI should run the same gate rather than maintain a separate definition.
 
+`scripts/output-fingerprint.sh` is the diagnostic beside the gate for refactors:
+it prints what each flake output contains, revision-neutrally, so two revisions
+can be diffed; see
+[module-architecture.md](module-architecture.md#checking-output-compatibility).
+
 ## System Changes
 
 - `just plan` checks, builds, and diffs against the running system, without

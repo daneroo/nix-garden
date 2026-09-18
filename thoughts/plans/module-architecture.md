@@ -324,7 +324,7 @@ Scope: new `docs/module-architecture.md`; edits to `docs/README.md`,
 `docs/tiling-windows.md`; a checkpoint in the research note. Depends on:
 stage 3.
 
-- [ ] `docs/module-architecture.md` covers: the topology; how flake-parts and
+- [x] `docs/module-architecture.md` covers: the topology; how flake-parts and
       import-tree compose the flake (`mkFlake`, `systems`, `perSystem`, the
       `modules` extras, the underscore ignore rule); how a feature file is
       written and registered into an aspect; how hosts select aspects or
@@ -332,10 +332,10 @@ stage 3.
       adding a second desktop as a sibling of `gnome`; the import-tree decision
       and its tradeoff; the dconf and tmpfiles ownership rules; how output
       compatibility is checked with the fingerprint script.
-- [ ] `docs/README.md` indexes it under Working Here; `docs/file-layout.md`
+- [x] `docs/README.md` indexes it under Working Here; `docs/file-layout.md`
       shows `hosts/` and `modules/`; `docs/workspace.md` names the fingerprint
       script beside the quality gate.
-- [ ] `thoughts/research/module-architecture.md` gets a dated checkpoint
+- [x] `thoughts/research/module-architecture.md` gets a dated checkpoint
       pointing at the doc; Daniel decides whether the rest stays.
 
 Acceptance: `just check` passes; every link resolves. Rollback: revert.

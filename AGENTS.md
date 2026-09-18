@@ -31,7 +31,8 @@ first managed host.
   selection, and its exceptions.
 - `modules/` — auto-imported by import-tree: one feature per file, grouped by
   the aspect directory it registers into (`base`, `desktop`, `gnome`; `e2e` is
-  the harness). A file here is live the moment it exists.
+  the harness). A file here is live the moment it exists; see
+  [docs/module-architecture.md](docs/module-architecture.md).
 - `tests/` — VM checks run by `just e2e-vm`, never by `just check`.
 
 Do not run `just apply` unless the user asks to switch the running system; it
