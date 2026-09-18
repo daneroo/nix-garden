@@ -26,9 +26,12 @@ first managed host.
 - `scripts/` — reviewed bootstrap, operational, and quality-check helpers. A
   script earns a file when it is run outside `just`, or is long enough that
   reading it inline obscures the recipe; otherwise it stays in the `Justfile`.
-- `hosts/` — one entry per machine, keyed by hostname; `mkHost` resolves
-  `./hosts + "/${name}"`, so nothing here may be anything but a host.
-- `modules/` — configuration shared across hosts or drive modes.
+- `hosts/` — `hosts/default.nix` is the machine inventory; every other entry is
+  one machine, keyed by hostname, holding its hardware file, its aspect
+  selection, and its exceptions.
+- `modules/` — auto-imported by import-tree: one feature per file, grouped by
+  the aspect directory it registers into (`base`, `desktop`, `gnome`; `e2e` is
+  the harness). A file here is live the moment it exists.
 - `tests/` — VM checks run by `just e2e-vm`, never by `just check`.
 
 Do not run `just apply` unless the user asks to switch the running system; it

@@ -1,5 +1,7 @@
-# The machine inventory: which hosts exist and how each one is composed.
-# `nixosConfigurations` is defined here and nowhere else.
+# The machine inventory: which hosts exist, each defined by its own directory
+# as modules.nixos.host-<name>. `nixosConfigurations` is defined here and
+# nowhere else. Hosts are listed explicitly because the generated
+# hardware-configuration.nix files must not be auto-imported.
 {
   config,
   inputs,
@@ -11,27 +13,15 @@ let
     "hardy"
     "gauss"
   ];
-
-  nixos = config.flake.modules.nixos;
 in
 {
-  flake.modules.nixos = lib.genAttrs' hosts (name: {
-    name = "host-${name}";
-    value = {
-      imports = [
-        (./. + "/${name}")
-        nixos.base
-        nixos.desktop
-        nixos.gnome
-      ];
-    };
-  });
+  imports = map (name: ./. + "/${name}") hosts;
 
   flake.nixosConfigurations = lib.genAttrs hosts (
     name:
     inputs.nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
-      modules = [ nixos."host-${name}" ];
+      modules = [ config.flake.modules.nixos."host-${name}" ];
     }
   );
 }

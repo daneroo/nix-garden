@@ -297,16 +297,16 @@ match baseline. Rollback: revert the offending commit.
 Scope: `hosts/hardy/default.nix`, `hosts/gauss/default.nix`,
 `hosts/default.nix`, `AGENTS.md`. Depends on: stage 2.
 
-- [ ] Rewrite each host body as a flake-parts module defining
+- [x] Rewrite each host body as a flake-parts module defining
       `flake.modules.nixos.host-<name>` with
       `imports = [     ./hardware-configuration.nix ]` plus `base`, `desktop`,
       `gnome` from `config.flake.modules.nixos`, then `networking.hostName`,
       `system.stateVersion`, and the exceptions with their comments.
       `hosts/default.nix` keeps only the host list, the directory imports, and
       `flake.nixosConfigurations`.
-- [ ] Every remaining line in a host file is identity, hardware, or an exception
+- [x] Every remaining line in a host file is identity, hardware, or an exception
       listed in the ticket. Anything else goes back to stage 2.
-- [ ] `AGENTS.md` layout: `hosts/default.nix` is the inventory and every other
+- [x] `AGENTS.md` layout: `hosts/default.nix` is the inventory and every other
       entry is one machine; `modules/` is auto-imported by import-tree, one
       feature per file, grouped by aspect directory.
 - [ ] `just plan` on both NixOS hosts builds and shows the closure diff (no
