@@ -398,3 +398,15 @@ users, groups, services, targets, sshd, and the VM variant, is byte-identical.
   difference was the Ghostty config path).
 - `galois`'s `nix flake show --all-systems` and `nix flake check` remain the
   only pending gate.
+
+### Hardy applied, confirmed by Daniel (2026-09-18)
+
+Daniel ran `just apply` on `hardy` directly from the `module-architecture`
+branch, ahead of any merge. `nixos-rebuild switch` activated
+`nixos-system-hardy-26.11.20260822.2c423e0` with no failed units; the only
+started units were routine reactivation ones
+(`NetworkManager-dispatcher.service`, `sysinit-reactivation.target`,
+`systemd-tmpfiles-resetup.service`). `_verify` reported the booted system
+matches the activated one: no reboot pending. This is real-hardware
+confirmation, beyond the VM suites, that the refactored hardy configuration is
+behaviorally identical to `main`.
