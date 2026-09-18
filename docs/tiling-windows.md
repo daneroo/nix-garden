@@ -61,7 +61,7 @@ leaving an artifact in Daniel's home.
 
 ## Configuration and Recovery
 
-[`modules/paperwm.nix`](../modules/paperwm.nix) owns the shared extension and
+[`modules/gnome/paperwm.nix`](../modules/gnome/paperwm.nix) owns the shared extension and
 toggle package. Each host declares the same fresh-profile enabled default and
 Vicinae scratch rule alongside its existing GNOME settings. This focused shared
 module is useful precedent, but it does not complete the broader

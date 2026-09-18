@@ -2,128 +2,26 @@
   description = "Reproducible system config for the homelab fleet";
 
   inputs = {
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
     herdr.url = "github:herdrdev/herdr/v0.8.2";
+    import-tree.url = "github:denful/import-tree";
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
+  # Everything else is a flake-parts module: every file under modules/ is
+  # imported by import-tree, and hosts/ is the explicit machine inventory.
+  # See docs/module-architecture.md.
   outputs =
-    {
-      self,
-      herdr,
-      nixpkgs,
-      ...
-    }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      # 1Password lives in each host's programs._1password-gui module because
-      # browser integration needs a per-host polkitPolicyOwners override; a
-      # plain package in this shared list would not build the required wrapper.
-      bootstrapPackages = with pkgs; [
-        btop
-        brave
-        bun
-        claude-code
-        codex
-        curl
-        doggo
-        dnsutils # dig
-        fresh-editor
-        gh
-        ghostty
-        git
-        gum
-        herdr.packages.${system}.default
-        just
-        jq
-        lazygit
-        ripgrep
-        vim
-        wl-clipboard
+    inputs:
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = [ "x86_64-linux" ];
+      imports = [
+        inputs.flake-parts.flakeModules.modules
+        (inputs.import-tree ./modules)
+        ./hosts
       ];
-      hosts = [
-        "hardy"
-        "gauss"
-      ];
-      hostModules =
-        name:
-        [
-          (./hosts + "/${name}")
-          ./modules/e2e.nix
-          ./modules/paperwm.nix
-          # Inert in a normal system/test build; used by `nixos-rebuild
-          # build-vm`.
-          ./modules/vm-variant.nix
-          {
-            environment.systemPackages = bootstrapPackages;
-            system.configurationRevision = self.rev or self.dirtyRev or "dirty";
-            # Bound the boot menu and let a failed generation fall back on its
-            # own; see docs/workspace.md. Retention is by recency, not by
-            # known-good -- the generation-gc ticket owns that and store space.
-            boot.loader.systemd-boot = {
-              configurationLimit = 20;
-              bootCounting.enable = true;
-            };
-            programs.nh = {
-              enable = true;
-              flake = "/home/daniel/nix-garden";
-            };
-            services.tailscale.enable = true;
-            xdg.mime.defaultApplications = {
-              "text/html" = "brave-browser.desktop";
-              "x-scheme-handler/http" = "brave-browser.desktop";
-              "x-scheme-handler/https" = "brave-browser.desktop";
-              "x-scheme-handler/about" = "brave-browser.desktop";
-              "x-scheme-handler/unknown" = "brave-browser.desktop";
-            };
-          }
-        ];
-      mkHost =
-        name:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = hostModules name;
-        };
-    in
-    {
-      nixosConfigurations = nixpkgs.lib.genAttrs hosts mkHost;
-
-      # Deliberately not under `checks`. `nix flake check` -- and so
-      # `just check` -- BUILDS everything under `checks` but only EVALUATES
-      # `packages`. Living here means each test is type-checked and evaluated on
-      # every commit, catching a broken test expression early, without booting a
-      # GNOME session in the pre-commit gate. Run them with `just e2e-vm`.
-      packages.${system} =
-        let
-          testLib = pkgs.callPackage ./tests/lib.nix { inherit pkgs; };
-
-          desktopTests = nixpkgs.lib.genAttrs hosts (
-            hostName:
-            testLib {
-              inherit hostName;
-              hostModules = hostModules hostName;
-              vmLayer = ./modules/vm-layer.nix;
-            }
-          );
-        in
-        {
-          # Keep the original output as a compatibility alias while the public
-          # recipe selects a host-specific instance.
-          test-desktop = desktopTests.gauss;
-          test-desktop-hardy = desktopTests.hardy;
-          test-desktop-gauss = desktopTests.gauss;
-
-          # Renders the JUnit artifacts a run leaves behind. Provided by the
-          # flake rather than installed on the hosts: this is a repository tool,
-          # and gauss has no python3 on PATH.
-          test-report = pkgs.writeShellApplication {
-            name = "test-report";
-            runtimeInputs = [ pkgs.python3 ];
-            text = ''python3 ${./scripts/e2e-test-report.py} "$@"'';
-          };
-        };
     };
 }

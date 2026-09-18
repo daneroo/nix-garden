@@ -79,7 +79,7 @@ export_tree() {
 
   if [[ "$selector" == "WORKTREE" ]]; then
     git -C "$repo_root" ls-files -z |
-      tar --null -T - -cf - -C "$repo_root" |
+      tar -cf - -C "$repo_root" --null -T - |
       tar -xf - -C "$tree"
   else
     git -C "$repo_root" rev-parse --verify --quiet "$selector^{commit}" >/dev/null ||

@@ -290,7 +290,7 @@ with subtest("Alt+Shift+L lock is injected and guided for four seconds"):
         )
 
     # This plaintext is intentionally public and must match `password` in
-    # modules/vm-layer.nix. It exists only in VM configurations.
+    # modules/e2e/vm-layer.nix. It exists only in VM configurations.
     # Send the same cleanup in both modes. In visible mode it unlocks after the
     # guided lock observation; headless GNOME ignores the accelerator, so Escape
     # dismisses any text surface opened by the harmless credential keystrokes.

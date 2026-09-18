@@ -80,7 +80,7 @@ export that session's `XDG_RUNTIME_DIR` and `WAYLAND_DISPLAY` first.
 ## Approach
 
 Each test output imports the selected real host modules plus
-`modules/vm-layer.nix` and test-only instrumentation. QEMU injects physical keys
+`modules/e2e/vm-layer.nix` and test-only instrumentation. QEMU injects physical keys
 at the guest's Virtio keyboard. The guest's real keyd, compositor, focused
 application mapper, and applications then handle them.
 
