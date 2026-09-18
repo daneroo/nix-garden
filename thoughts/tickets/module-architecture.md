@@ -387,3 +387,14 @@ users, groups, services, targets, sshd, and the VM variant, is byte-identical.
 - Merge and apply. The first `just apply` after merging will rebuild the
   reordered `system-path` and re-link gauss's Ghostty config; no user-visible
   change is expected.
+
+### Hardy gate, confirmed by Daniel (2026-09-18)
+
+- `just check` on `hardy` passes (the same cosmetic
+  `warning: unknown flake output 'modules'` from `nix flake check`).
+- `just plan` on `hardy` built `.#hardy` and `nix store diff-closures` printed
+  no lines: the closure is unchanged, matching the fingerprint's prediction that
+  hardy has zero semantic difference from `main` (unlike gauss, whose only
+  difference was the Ghostty config path).
+- `galois`'s `nix flake show --all-systems` and `nix flake check` remain the
+  only pending gate.
