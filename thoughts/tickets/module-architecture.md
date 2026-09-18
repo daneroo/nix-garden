@@ -310,3 +310,18 @@ rather than the newer harness; the model Daniel wanted was available in it.
 - `scripts/output-fingerprint.sh WORKTREE` needed a second fix on the NixOS
   hosts: GNU tar treats `-C` as positional, so the export produced an empty tree
   until `-C` moved before `-T` (`WORKTREE` was only ever run on `galois`).
+
+### Stage 2 (2026-09-18)
+
+- Three commits, one per aspect (`d8fe4ae` base, `4f82924` desktop, `ebe1d29`
+  gnome). Each commit message names what moved and what the fingerprint showed.
+- Semantic fingerprint after the gnome commit, with the per-host dconf databases
+  merged into one attrset for comparison and the store-path `etc` entries
+  filtered: hardy identical to the baseline; gauss differs only in the Ghostty
+  `L+` target, which now equals hardy's. The single dconf database per host
+  became three on gauss and four on hardy, with disjoint key paths.
+- The disjoint-key assertion was probed without editing the tree, through
+  `extendModules`: a second database defining `org/gnome/shell` fails evaluation
+  with the feature's message; a fresh key path evaluates to a toplevel.
+- `just e2e-vm --host hardy`: 27/27, 82.6 s wall. `just e2e-vm --host gauss`:
+  27/27, 83.9 s wall. Both match stage 0.

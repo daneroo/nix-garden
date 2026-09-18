@@ -284,7 +284,7 @@ Three commits, one per aspect, in this order:
       `gnome-keybindings`, `keyd-gnome-extension`; `paperwm` registers into
       `gnome` and gains the winprops database. Host composition becomes
       `[ ./${name} base desktop gnome ]`.
-- [ ] After the last commit: `just e2e-vm --host hardy` and `--host gauss` match
+- [x] After the last commit: `just e2e-vm --host hardy` and `--host gauss` match
       the stage 0 results.
 
 Acceptance per commit: `just check`; fingerprint `semantic` diff against the
