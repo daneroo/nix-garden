@@ -1,6 +1,6 @@
 # module-architecture
 
-Status: planned
+Status: active
 
 Goal: recompose the flake with flake-parts, import-tree, and Dendritic feature
 modules grouped into `base`, `desktop`, and `gnome` aspects, so that ownership,
@@ -204,9 +204,9 @@ in the ticket, each with its existing comment.
 
 Scope: no configuration edits. Depends on: nothing.
 
-- [ ] On `gauss` confirm `~/nix-garden` is clean on `main` at `331be9f` or
+- [x] On `gauss` confirm `~/nix-garden` is clean on `main` at `331be9f` or
       later, then `git switch -c module-architecture`.
-- [ ] Set this plan to `Status: active`; commit.
+- [x] Set this plan to `Status: active`; commit.
 - [ ] `mkdir -p /tmp/module-architecture` and save
       `scripts/output-fingerprint.sh main > /tmp/module-architecture/00-baseline.txt`.
 - [ ] `just check` passes.
