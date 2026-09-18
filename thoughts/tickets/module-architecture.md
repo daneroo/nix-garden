@@ -410,3 +410,45 @@ started units were routine reactivation ones
 matches the activated one: no reboot pending. This is real-hardware
 confirmation, beyond the VM suites, that the refactored hardy configuration is
 behaviorally identical to `main`.
+
+### Post-closeout: nixpkgs, herdr, and two vicinae fixes (2026-09-18)
+
+After stage 5 closed, Daniel chose to also update locked inputs on this branch
+rather than as separate follow-up work (`nix flake update`, nixpkgs `2026-08-22`
+-> `2026-09-16`; herdr `v0.8.2` -> `v0.9.0`, restoring parity with galois's
+Homebrew install). Both hosts are now fully applied, rebooted, and converged on
+`de37352`: booted matches activated for kernel, kernel-modules, initrd, and
+systemd; zero failed system or user units on either host.
+
+The herdr bump was committed but not pushed on the first pass; caught when
+hardy's `git pull` came back "up to date" at the wrong commit.
+
+The nixpkgs bump's VM signal on hardy was bad -- the desktop suite failed
+reproducibly (twice) on the very first modifier-delivery subtest, while gauss
+passed clean with the identical bump. Daniel chose to apply on real hardware
+instead of continuing to debug in the VM, given rollback is available via the
+boot menu. Real hardware showed no modifier-delivery regression; the VM failure
+was not reproduced outside the VM and remains unexplained.
+
+Two real, unrelated bugs surfaced from the Vicinae version jump the nixpkgs bump
+carried (`0.23.2` -> `0.28.1`), both fixed in `modules/desktop/vicinae.nix`:
+
+- Launching an app crashed with `execve: No such file or directory`. Vicinae
+  0.28 spawns a desktop file's `Exec=` command directly rather than through
+  GNOME's desktop-file activation, so it depends on its own process PATH, which
+  the systemd user-service module leaves at a minimal
+  coreutils/findutils/gnugrep/gnused/systemd default. Fixed by adding
+  `path = [ "/run/current-system/sw" ];` (`9effa6e`).
+- On a fresh boot, the service could start before the Wayland compositor's
+  socket existed, abort immediately, and exhaust systemd's restart-limit budget
+  before the socket appeared -- landing in a permanently failed state needing a
+  manual `systemctl --user reset-failed`. `wantedBy`/`partOf` couple enablement
+  and lifecycle to `graphical-session.target` but do not order startup against
+  it; fixed by adding `after = [ "graphical-session.target" ];` (`de37352`).
+  Observed twice on hardy's fresh boots; gauss's boot did not hit it, consistent
+  with a race rather than a deterministic bug.
+
+Neither Vicinae bug is caused by anything this branch's module-architecture
+refactor touched -- the service definition was semantically unchanged by the
+refactor itself; both are pre-existing latent bugs the newer Vicinae version
+exposed.
