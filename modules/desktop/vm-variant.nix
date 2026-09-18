@@ -17,4 +17,5 @@
       imports = [ config.flake.modules.nixos.vm-layer ];
     };
   };
+  flake.modules.nixos.desktop.imports = [ config.flake.modules.nixos.vm-variant ];
 }

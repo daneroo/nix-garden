@@ -1,23 +1,6 @@
 { pkgs, lib, ... }:
 
 let
-  ghosttyConfig = pkgs.writeText "ghostty-config" ''
-    keybind = alt+c=copy_to_clipboard:mixed
-    keybind = alt+v=paste_from_clipboard
-    keybind = alt+t=new_tab
-    keybind = alt+w=close_tab:this
-    keybind = alt+shift+]=next_tab
-    keybind = alt+shift+[=previous_tab
-    keybind = alt+k=clear_screen
-    keybind = alt+n=new_window
-    keybind = alt+q=quit
-
-    # Pre-existing issue (not caused by keybinding-model), fixed alongside it:
-    # default multiplier for "precision" scroll devices is 1, producing an
-    # unreadable one-line-at-a-time jump; bumped both categories up.
-    mouse-scroll-multiplier = precision:3,discrete:5
-  '';
-
   # keyd ships a GNOME extension only for Shell 45-49. Gauss runs Shell 50.2;
   # the extension uses stable APIs, so extend only its declared compatibility.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
@@ -37,25 +20,6 @@ let
     ${pkgs.python3}/bin/python3 ${keydGnomeExtensionPatcher} \
       ${pkgs.keyd}/share/keyd/gnome-extension-45/metadata.json \
       $out/metadata.json
-  '';
-
-  # Brave uses Ctrl for these actions. Translate native Alt only while Brave
-  # has focus, preserving native Alt and Ctrl everywhere else.
-  keydAppConf = pkgs.writeText "keyd-app.conf" ''
-    [brave-browser]
-
-    alt.c = C-c
-    alt.v = C-v
-    alt.t = C-t
-    alt.w = C-w
-    alt+shift.t = C-S-t
-    alt.n = C-n
-    alt.l = C-l
-    alt.f = C-f
-    alt+shift.rightbrace = C-tab
-    alt+shift.leftbrace = C-S-tab
-    # Alt+L is translated above, so preserve GNOME's overlapping lock chord.
-    alt+shift.l = A-S-l
   '';
 in
 {
@@ -179,17 +143,12 @@ in
   # Stopgap; the XDG parents are owned by the user-daniel feature, which also
   # explains why every parent must be declared explicitly.
   systemd.tmpfiles.rules = [
-    "d /home/daniel/.config/ghostty 0755 daniel users -"
-    "d /home/daniel/.config/keyd 0755 daniel users -"
     "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
-    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
     "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
-    "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
 
   services.keyd = {
-    enable = true;
     keyboards.default = {
       ids = [ "*" ];
       # keyd-application-mapper cannot dynamically bind a composite layer
@@ -199,37 +158,12 @@ in
     };
   };
 
-  # keyd-application-mapper needs to be resolvable via PATH by whatever
-  # spawns it (the GNOME Shell extension); adding it here (rather than only
-  # via the keyd systemd service's own ExecStart) makes it findable through
-  # the per-user profile, which existing long-running processes' PATH
-  # entries already include -- unlike a brand-new PATH entry, this doesn't
-  # require a fresh login to take effect.
-  users.users.daniel.packages = [ pkgs.keyd ];
-
   systemd.services.keyd.serviceConfig = {
     # Upstream's docs assume a dedicated "keyd" group (usermod -aG keyd);
     # the NixOS module doesn't create one. Using "users" instead -- daniel's
     # existing primary group -- means socket access works without daniel
     # needing a fresh login to pick up new group membership.
     Group = lib.mkForce "users";
-    UMask = lib.mkForce "0007";
-  };
-
-  environment.systemPackages = [ pkgs.vicinae ];
-
-  # No NixOS module ships for Vicinae (only a Home Manager one, which this
-  # repo isn't adopting -- see feedback_defer_home_manager). "vicinae toggle"
-  # (bound to Alt+Space above) needs the server already running to have
-  # anything to toggle.
-  systemd.user.services.vicinae = {
-    description = "Vicinae launcher server";
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.vicinae}/bin/vicinae server";
-      Restart = "on-failure";
-    };
   };
 
   # gauss is an always-on homelab box, not a laptop; never suspend.
@@ -255,20 +189,6 @@ in
     # isn't lost on a future reinstall.
     linger = true;
   };
-
-  # Proper NixOS module instead of the plain package (which was in the
-  # shared flake.nix bootstrapPackages until now) -- needed for the
-  # 1Password-BrowserSupport setgid wrapper that native-messaging-based
-  # browser extension integration actually requires. Confirmed missing
-  # (/run/wrappers/bin/1Password-BrowserSupport didn't exist) after joining
-  # Daniel's Brave sync chain, which installed the extension itself but had
-  # no working way to talk to the desktop app. See docs/keybindings.md and
-  # https://wiki.nixos.org/wiki/1Password.
-  programs._1password-gui = {
-    enable = true;
-    polkitPolicyOwners = [ "daniel" ];
-  };
-  programs._1password.enable = true;
 
   system.stateVersion = "26.05";
 }

@@ -1,20 +1,6 @@
 { pkgs, lib, ... }:
 
 let
-  ghosttyConfig = pkgs.writeText "ghostty-config" ''
-    keybind = alt+c=copy_to_clipboard:mixed
-    keybind = alt+v=paste_from_clipboard
-    keybind = alt+t=new_tab
-    keybind = alt+w=close_tab:this
-    keybind = alt+shift+]=next_tab
-    keybind = alt+shift+[=previous_tab
-    keybind = alt+k=clear_screen
-    keybind = alt+n=new_window
-    keybind = alt+q=quit
-
-    mouse-scroll-multiplier = precision:3,discrete:5
-  '';
-
   # keyd ships a GNOME extension only for Shell 45-49. Hardy runs Shell 50.2;
   # the extension uses stable APIs, so extend only its declared compatibility.
   keydGnomeExtensionPatcher = pkgs.writeText "patch-keyd-metadata.py" ''
@@ -34,25 +20,6 @@ let
     ${pkgs.python3}/bin/python3 ${keydGnomeExtensionPatcher} \
       ${pkgs.keyd}/share/keyd/gnome-extension-45/metadata.json \
       $out/metadata.json
-  '';
-
-  # Brave uses Ctrl for these actions. Translate native Alt only while Brave
-  # has focus, preserving native Alt and Ctrl everywhere else.
-  keydAppConf = pkgs.writeText "keyd-app.conf" ''
-    [brave-browser]
-
-    alt.c = C-c
-    alt.v = C-v
-    alt.t = C-t
-    alt.w = C-w
-    alt+shift.t = C-S-t
-    alt.n = C-n
-    alt.l = C-l
-    alt.f = C-f
-    alt+shift.rightbrace = C-tab
-    alt+shift.leftbrace = C-S-tab
-    # Alt+L is translated above, so preserve GNOME's overlapping lock chord.
-    alt+shift.l = A-S-l
   '';
 
 in
@@ -81,7 +48,6 @@ in
   # keyboard-illumination convention is physical Alt+F6/F7. Emit the standard
   # Linux illumination events only for the observed internal keyboard.
   services.keyd = {
-    enable = true;
     keyboards.internal = {
       # The desktop E2E harness injects physical chords through ydotool's
       # virtual keyboard (2333:6666). keyd must manage that device so injected
@@ -112,7 +78,6 @@ in
   users.groups.keyd = { };
   systemd.services.keyd.serviceConfig = {
     CapabilityBoundingSet = lib.mkAfter [ "CAP_SETGID" ];
-    UMask = lib.mkForce "0007";
   };
 
   # Never suspend while charging; normal battery suspend behavior is
@@ -199,26 +164,10 @@ in
   # Stopgap; the XDG parents are owned by the user-daniel feature, which also
   # explains why every parent must be declared explicitly.
   systemd.tmpfiles.rules = [
-    "d /home/daniel/.config/ghostty 0755 daniel users -"
-    "d /home/daniel/.config/keyd 0755 daniel users -"
     "d /home/daniel/.local/share/gnome-shell 0700 daniel users -"
     "d /home/daniel/.local/share/gnome-shell/extensions 0755 daniel users -"
-    "L+ /home/daniel/.config/ghostty/config - - - - ${ghosttyConfig}"
     "L+ /home/daniel/.local/share/gnome-shell/extensions/keyd@keyd.rvaiya.github.com - - - - ${keydGnomeExtension}"
-    "L+ /home/daniel/.config/keyd/app.conf - - - - ${keydAppConf}"
   ];
-
-  environment.systemPackages = [ pkgs.vicinae ];
-
-  systemd.user.services.vicinae = {
-    description = "Vicinae launcher server";
-    wantedBy = [ "graphical-session.target" ];
-    partOf = [ "graphical-session.target" ];
-    serviceConfig = {
-      ExecStart = "${pkgs.vicinae}/bin/vicinae server";
-      Restart = "on-failure";
-    };
-  };
 
   services.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -232,14 +181,7 @@ in
   users.users.daniel = {
     # Socket access to keyd via the dedicated group declared above.
     extraGroups = [ "keyd" ];
-    packages = [ pkgs.keyd ];
   };
-
-  programs._1password-gui = {
-    enable = true;
-    polkitPolicyOwners = [ "daniel" ];
-  };
-  programs._1password.enable = true;
 
   system.stateVersion = "26.05";
 }

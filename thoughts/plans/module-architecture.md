@@ -274,7 +274,7 @@ Three commits, one per aspect, in this order:
       `[ ./${name} e2e-injection paperwm vm-variant base ]` with the MIME block
       kept inline until the next commit. Herdr resolves through `inputs.herdr`
       inside the flake-parts module.
-- [ ] `desktop`: `keyd`, `ghostty`, `brave`, `vicinae`, `onepassword`;
+- [x] `desktop`: `keyd`, `ghostty`, `brave`, `vicinae`, `onepassword`;
       `e2e-injection` and `vm-variant` register into `desktop`. Host composition
       becomes `[ ./${name} paperwm base desktop ]`. Hardy and gauss keyboard,
       group, and capability declarations remain in the host bodies.
