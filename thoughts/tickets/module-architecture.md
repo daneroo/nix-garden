@@ -258,3 +258,29 @@ Settled with Daniel in a grilling session on 2026-09-18.
 - Disposition of `thoughts/research/module-architecture.md` at closeout: the
   flake-parts and import-tree sections are superseded by the docs this plan
   writes; the wrapped-programs section still informs the Home Manager decision.
+
+## Execution log
+
+Executed on `gauss` from 2026-09-18 on branch `module-architecture`, created
+from `main` at `405e2e4`. Claude Code 2.1.238 from the locked nixpkgs was used
+rather than the newer harness; the model Daniel wanted was available in it.
+
+### Stage 0 baseline (2026-09-18)
+
+- `just plan` on `gauss` built `.#gauss` and `nix store diff-closures` printed
+  nothing: the running system already matches `main`.
+- `scripts/output-fingerprint.sh main` saved to
+  `/tmp/module-architecture/00-baseline.txt` (30 s on `gauss`). Its derivation
+  paths match the ones recorded above from `galois` exactly. The script's jq
+  filter needed a fix first: Nix 2.34 on the NixOS hosts emits the older
+  `nix flake show --json` shape, so the outputs and package lines were empty
+  until `list_outputs` accepted both shapes (`640d5ad`).
+- `just e2e-vm --host hardy`: 27/27, 83.6 s wall (103 s including the driver
+  build). `just e2e-vm --host gauss`: 27/27, 82.1 s wall. No pre-existing
+  failures.
+- `just e2e-vm --no-test --host gauss` built `run-gauss-vm` and Daniel saw the
+  QEMU window reach the GNOME session; the VM was closed after two minutes.
+  `just omarchy-vm --help` prints usage.
+- `just plan` on `hardy` is pending: SSH from `gauss` to `hardy` was refused
+  (publickey) when execution started. The hardy-side gates are run once the key
+  is installed.

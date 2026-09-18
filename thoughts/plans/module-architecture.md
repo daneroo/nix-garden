@@ -207,16 +207,17 @@ Scope: no configuration edits. Depends on: nothing.
 - [x] On `gauss` confirm `~/nix-garden` is clean on `main` at `331be9f` or
       later, then `git switch -c module-architecture`.
 - [x] Set this plan to `Status: active`; commit.
-- [ ] `mkdir -p /tmp/module-architecture` and save
+- [x] `mkdir -p /tmp/module-architecture` and save
       `scripts/output-fingerprint.sh main > /tmp/module-architecture/00-baseline.txt`.
-- [ ] `just check` passes.
-- [ ] `just plan` on `gauss`, and over SSH on `hardy`, builds and reports no
-      package changes against the running system. Do not apply.
-- [ ] `just e2e-vm --host hardy` and `just e2e-vm --host gauss`; record pass
+- [x] `just check` passes.
+- [ ] `just plan` on `gauss` (done), and over SSH on `hardy` (pending SSH
+      access), builds and reports no package changes against the running system.
+      Do not apply.
+- [x] `just e2e-vm --host hardy` and `just e2e-vm --host gauss`; record pass
       counts and wall time in the ticket. A pre-existing failure is recorded
       before any refactor edit and does not block; later runs are compared
       against it.
-- [ ] `just e2e-vm --no-test --host gauss` reaches the GNOME session; close the
+- [x] `just e2e-vm --no-test --host gauss` reaches the GNOME session; close the
       VM. `just omarchy-vm --help` prints usage.
 
 Acceptance: baseline saved, gates pass or their failures are recorded. Rollback:
