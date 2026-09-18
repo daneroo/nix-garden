@@ -8,12 +8,6 @@ direction: [homelab-platform](design/homelab-platform.md).
 
 Scheduled items go here (leave this comment)
 
-- [ ] module-architecture — recompose the flake with flake-parts and
-      feature-owned NixOS modules shared by `hardy` and `gauss`; public outputs
-      kept, both hosts working as before, executed on a NixOS host on its own
-      branch; ticket: [module-architecture](tickets/module-architecture.md);
-      plan: [module-architecture](plans/module-architecture.md)
-
 ## Fleet and Recovery
 
 - [ ] host-inventory — inventory homelab machines, hardware, architecture,
@@ -174,6 +168,16 @@ Shared direction and comparison criteria:
 One line per closed item — this section doubles as the ticket archive index.
 Prune old lines freely; Git keeps everything.
 
+- 2026-09-18 module-architecture — recomposed the flake with flake-parts,
+  import-tree, and Dendritic feature modules: 21 features under `modules/` in
+  `base`, `desktop`, and `gnome` aspects, thin per-host files holding only
+  hardware, identity, and documented exceptions, and one inventory file defining
+  `nixosConfigurations`. The outcome is clarity and a working system, not
+  runtime improvement: public outputs kept, both VM suites 27/27, no package
+  changes on `just plan`. Executed on the `module-architecture` branch from
+  `gauss`; hardy and galois gates, merge, and apply are Daniel's. Reference:
+  [module-architecture](../docs/module-architecture.md); plan:
+  [module-architecture](plans/module-architecture.md)
 - 2026-09-17 omarchy-vm — Omarchy 4.0.4 runs as a guest in a plain QEMU window,
   operated by `just omarchy-vm`; installed in 2m15s on `hardy` and 1m10s on
   `gauss`. virgl gives accelerated graphics, and `-object input-linux` capturing

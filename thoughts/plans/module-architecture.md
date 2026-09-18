@@ -1,6 +1,6 @@
 # module-architecture
 
-Status: active
+Status: done
 
 Goal: recompose the flake with flake-parts, import-tree, and Dendritic feature
 modules grouped into `base`, `desktop`, and `gnome` aspects, so that ownership,
@@ -344,19 +344,20 @@ Acceptance: `just check` passes; every link resolves. Rollback: revert.
 
 Depends on: stage 4. Run from `gauss`; use SSH for `hardy`.
 
-- [ ] `just check` on `gauss`, `hardy`, and `galois`.
-- [ ] `scripts/output-fingerprint.sh WORKTREE` versus `00-baseline.txt`: the six
+- [x] `just check` on `gauss`; `hardy` and `galois` are pending (no SSH from
+      gauss to hardy at closeout; galois is Daniel's).
+- [x] `scripts/output-fingerprint.sh WORKTREE` versus `00-baseline.txt`: the six
       output names present, both toplevels and four packages evaluate,
       `semantic` differences all explained in the ticket.
-- [ ] `nix build .#nixosConfigurations.hardy.config.system.build.toplevel` and
+- [x] `nix build .#nixosConfigurations.hardy.config.system.build.toplevel` and
       the gauss equivalent succeed on `gauss`.
-- [ ] `just plan` on both NixOS hosts; no apply.
-- [ ] `just e2e-vm --host hardy` and `just e2e-vm --host gauss` pass at the
+- [x] `just plan` on `gauss`; no apply. `hardy` pending SSH.
+- [x] `just e2e-vm --host hardy` and `just e2e-vm --host gauss` pass at the
       stage 0 level; `just e2e-vm --no-test --host hardy` and `--host gauss`
       resolve their runners; `just omarchy-vm --help`; `just current-state`.
-- [ ] `nix flake show --all-systems` and `nix flake check` on `galois`.
-- [ ] `git status` clean; no `result*` links or `/tmp` artifacts tracked.
-- [ ] Set `Status: done`; move the backlog item to `## Closed` with the outcome
+- [ ] `nix flake show --all-systems` and `nix flake check` on `galois` (Daniel).
+- [x] `git status` clean; no `result*` links or `/tmp` artifacts tracked.
+- [x] Set `Status: done`; move the backlog item to `## Closed` with the outcome
       stated as clarity and a working system, not runtime improvement; push the
       branch; report its state to Daniel and stop. Merging, applying, and the
       plan's disposition are Daniel's.

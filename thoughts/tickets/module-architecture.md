@@ -338,3 +338,52 @@ rather than the newer harness; the model Daniel wanted was available in it.
 - `just e2e-vm --no-test --host gauss` built and booted `run-gauss-vm` (bounded
   to two minutes); `just omarchy-vm --help` prints usage; `just current-state`
   reports `module-architecture/68548f8` beside the running `aac611b`.
+
+### Stage 5 (2026-09-18)
+
+- `just check` on `gauss` passes at `HEAD`. `hardy` and `galois` are pending:
+  SSH from `gauss` to `hardy` was still refused at closeout, and `galois` is
+  Daniel's machine. Both hosts' checks, `just plan` on `hardy`, and
+  `nix flake show --all-systems` plus `nix flake check` on `galois` are the
+  remaining gates before merge.
+- `scripts/output-fingerprint.sh WORKTREE` at `HEAD` versus `00-baseline.txt`:
+  the six original output names are present plus `modules`; both toplevels and
+  all four packages evaluate.
+- `nix build` of both toplevels succeeds on `gauss`; both `system.build.vm`
+  runners resolve (`run-hardy-vm`, `run-gauss-vm`).
+- `just plan` on `gauss`: no package changes. `just e2e-vm --host hardy` and
+  `--host gauss`: 27/27 each, at the stage 0 wall time. `just omarchy-vm --help`
+  prints usage; `just current-state` works.
+- `git status` clean; the `result*` links are untracked and ignored.
+
+### Semantic differences from the baseline, all explained
+
+The order-independent `semantic` section of the fingerprint differs from `main`
+in exactly these ways:
+
+- gauss's Ghostty config `L+` target is now the same store path as hardy's: the
+  two texts differed only in a comment, which moved into the `ghostty` feature.
+  The effective configuration is identical.
+- The one dconf database per host became three (gauss) and four (hardy)
+  databases with disjoint key paths, one per owning feature plus hardy's power
+  exception. Merged, they equal the baseline key for key; the `gnome-session`
+  assertion enforces the disjointness.
+- `environment.etc` entries whose values are store paths built from
+  `system-path`, `tmpfiles.d`, or `dconf-system-config` changed, because list
+  order changed under the flake-parts wrapper. The sorted `systemPackages` and
+  `tmpfiles` lists are identical, `nix-diff` showed the same 540 `system-path`
+  entries with only the two PaperWM packages moved, and `just plan` reports no
+  package changes.
+
+Everything else, including every option value the section covers for keyd,
+users, groups, services, targets, sshd, and the VM variant, is byte-identical.
+
+### Left for Daniel
+
+- Run the pending hardy and galois gates listed under Stage 5.
+- Decide the disposition of `thoughts/plans/module-architecture.md` and
+  `thoughts/research/module-architecture.md` (its flake-parts and import-tree
+  sections are superseded by `docs/module-architecture.md`).
+- Merge and apply. The first `just apply` after merging will rebuild the
+  reordered `system-path` and re-link gauss's Ghostty config; no user-visible
+  change is expected.
